@@ -516,8 +516,32 @@
             .glass-card {
                 padding: 16px;
                 border-radius: 12px;
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: rgba(30, 41, 59, 0.96) !important;
+            }
+
+            header {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: rgba(15, 23, 42, 0.96) !important;
+            }
+
+            .modal-overlay {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: rgba(15, 23, 42, 0.92) !important;
+            }
+
+            .modal-content {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: rgba(30, 41, 59, 0.98) !important;
+            }
+
+            input:focus, select:focus, textarea:focus {
+                transform: none !important;
+                box-shadow: 0 0 0 2px var(--accent-blue) !important;
             }
 
             .nav-tabs {

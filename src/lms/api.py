@@ -46,7 +46,7 @@ app.add_middleware(
 # Static files directory
 _STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 
-# Root route → serve index.html
+# Root route â†’ serve index.html
 @app.get("/", include_in_schema=False)
 def serve_root():
     index_path = os.path.join(_STATIC_DIR, "index.html")
@@ -99,7 +99,7 @@ def check_login_rate_limit(key: str, limit: int = 5, window_sec: int = 60):
     if len(attempts) >= limit:
         raise HTTPException(
             status_code=429,
-            detail="تم تجاوز عدد محاولات الدخول المسموحة. يرجى الانتظار 60 ثانية لحماية حسابك من التخمين."
+            detail="طھظ… طھط¬ط§ظˆط² ط¹ط¯ط¯ ظ…ط­ط§ظˆظ„ط§طھ ط§ظ„ط¯ط®ظˆظ„ ط§ظ„ظ…ط³ظ…ظˆط­ط©. ظٹط±ط¬ظ‰ ط§ظ„ط§ظ†طھط¸ط§ط± 60 ط«ط§ظ†ظٹط© ظ„ط­ظ…ط§ظٹط© ط­ط³ط§ط¨ظƒ ظ…ظ† ط§ظ„طھط®ظ…ظٹظ†."
         )
     attempts.append(now)
     _LOGIN_ATTEMPTS[key] = attempts
@@ -119,13 +119,13 @@ def startup_event():
 # --- Helper Dependencies ---
 def get_current_user(x_session_token: Optional[str] = Header(None), db: Session = Depends(get_db)) -> User:
     if not x_session_token:
-        raise HTTPException(status_code=401, detail="غير مصرح: يلزم تسجيل الدخول")
+        raise HTTPException(status_code=401, detail="ط؛ظٹط± ظ…طµط±ط­: ظٹظ„ط²ظ… طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„")
     session = get_session_user(x_session_token)
     if not session:
-        raise HTTPException(status_code=401, detail="الجلسة منتهية أو غير صالحة")
+        raise HTTPException(status_code=401, detail="ط§ظ„ط¬ظ„ط³ط© ظ…ظ†طھظ‡ظٹط© ط£ظˆ ط؛ظٹط± طµط§ظ„ط­ط©")
     user = db.query(User).filter(User.id == session["user_id"]).first()
     if not user:
-        raise HTTPException(status_code=401, detail="المستخدم غير موجود")
+        raise HTTPException(status_code=401, detail="ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     return user
 
 def get_user_roles(user: User) -> List[str]:
@@ -142,7 +142,7 @@ def require_role(roles: List[RoleEnum]):
             return user
         req_role_strs = [r.value for r in roles]
         if not any(r in user_roles for r in req_role_strs):
-            raise HTTPException(status_code=403, detail="غير مصرح لك بالوصول إلى هذه الخاصية")
+            raise HTTPException(status_code=403, detail="ط؛ظٹط± ظ…طµط±ط­ ظ„ظƒ ط¨ط§ظ„ظˆطµظˆظ„ ط¥ظ„ظ‰ ظ‡ط°ظ‡ ط§ظ„ط®ط§طµظٹط©")
         return user
     return role_checker
 
@@ -263,10 +263,10 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         user = db.query(User).filter(User.id.ilike(uid)).first()
 
     if not user:
-        raise HTTPException(status_code=401, detail="الرقم التعريفي (ID) غير مسجل في النظام")
+        raise HTTPException(status_code=401, detail="ط§ظ„ط±ظ‚ظ… ط§ظ„طھط¹ط±ظٹظپظٹ (ID) ط؛ظٹط± ظ…ط³ط¬ظ„ ظپظٹ ط§ظ„ظ†ط¸ط§ظ…")
 
     if not verify_password(pwd, user.password_hash):
-        raise HTTPException(status_code=401, detail="كلمة المرور غير صحيحة")
+        raise HTTPException(status_code=401, detail="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط؛ظٹط± طµط­ظٹط­ط©")
 
     user_roles = get_user_roles(user)
     token = create_session_token(user.id, user_roles[0])
@@ -281,16 +281,16 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 @app.post("/api/auth/change-password")
 def change_password(req: ChangePasswordRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not verify_password(req.current_password, user.password_hash):
-        raise HTTPException(status_code=400, detail="كلمة المرور الحالية غير صحيحة")
+        raise HTTPException(status_code=400, detail="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط­ط§ظ„ظٹط© ط؛ظٹط± طµط­ظٹط­ط©")
 
     if len(req.new_password) < 4:
-        raise HTTPException(status_code=400, detail="كلمة المرور الجديدة يجب أن تكون 4 خانات على الأقل")
+        raise HTTPException(status_code=400, detail="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط§ظ„ط¬ط¯ظٹط¯ط© ظٹط¬ط¨ ط£ظ† طھظƒظˆظ† 4 ط®ط§ظ†ط§طھ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„")
 
     user.password_hash = hash_password(req.new_password)
     user.must_change_password = False
     db.commit()
 
-    return {"success": True, "message": "تم تغيير كلمة المرور بنجاح"}
+    return {"success": True, "message": "طھظ… طھط؛ظٹظٹط± ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط¨ظ†ط¬ط§ط­"}
 
 class UpdateProfileRequest(BaseModel):
     name: Optional[str] = None
@@ -322,7 +322,7 @@ def update_user_profile(req: UpdateProfileRequest, user: User = Depends(get_curr
         user.bio = req.bio.strip()
 
     db.commit()
-    return {"success": True, "message": "تم تحديث البيانات الشخصية بنجاح"}
+    return {"success": True, "message": "طھظ… طھط­ط¯ظٹط« ط§ظ„ط¨ظٹط§ظ†ط§طھ ط§ظ„ط´ط®طµظٹط© ط¨ظ†ط¬ط§ط­"}
 
 # Registration Request
 class RegisterRequest(BaseModel):
@@ -339,18 +339,18 @@ class RegisterRequest(BaseModel):
 def register_student(req: RegisterRequest, db: Session = Depends(get_db)):
     name = req.name.strip()
     if not name:
-        raise HTTPException(status_code=400, detail="الاسم الكامل مطلوب للتسجيل")
+        raise HTTPException(status_code=400, detail="ط§ظ„ط§ط³ظ… ط§ظ„ظƒط§ظ…ظ„ ظ…ط·ظ„ظˆط¨ ظ„ظ„طھط³ط¬ظٹظ„")
 
     pwd = req.password.strip()
     if len(pwd) < 4:
-        raise HTTPException(status_code=400, detail="كلمة المرور يجب أن تكون 4 خانات على الأقل")
+        raise HTTPException(status_code=400, detail="ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ظٹط¬ط¨ ط£ظ† طھظƒظˆظ† 4 ط®ط§ظ†ط§طھ ط¹ظ„ظ‰ ط§ظ„ط£ظ‚ظ„")
 
     # Check Seat Number uniqueness constraint
     seat_no = req.seat_number.strip() if req.seat_number and req.seat_number.strip() else None
     if seat_no:
         existing_seat = db.query(User).filter((User.seat_number == seat_no) | (User.id == seat_no)).first()
         if existing_seat:
-            raise HTTPException(status_code=400, detail=f"عذراً! رقم الجلوس / الرقم الجامعي ({seat_no}) مسجل بالفعل لحساب طالب آخر بالنظام ({existing_seat.name}). يرجى التأكد من رقم جلوسك.")
+            raise HTTPException(status_code=400, detail=f"ط¹ط°ط±ط§ظ‹! ط±ظ‚ظ… ط§ظ„ط¬ظ„ظˆط³ / ط§ظ„ط±ظ‚ظ… ط§ظ„ط¬ط§ظ…ط¹ظٹ ({seat_no}) ظ…ط³ط¬ظ„ ط¨ط§ظ„ظپط¹ظ„ ظ„ط­ط³ط§ط¨ ط·ط§ظ„ط¨ ط¢ط®ط± ط¨ط§ظ„ظ†ط¸ط§ظ… ({existing_seat.name}). ظٹط±ط¬ظ‰ ط§ظ„طھط£ظƒط¯ ظ…ظ† ط±ظ‚ظ… ط¬ظ„ظˆط³ظƒ.")
 
     # Find next Student ID: max numeric ID + 1
     all_users = db.query(User).all()
@@ -397,7 +397,7 @@ def register_student(req: RegisterRequest, db: Session = Depends(get_db)):
 
     return {
         "success": True,
-        "message": f"تم إنشاء حساب الطالب بنجاح! الرقم التعريفي الخاص بك هو: {new_id}",
+        "message": f"طھظ… ط¥ظ†ط´ط§ط، ط­ط³ط§ط¨ ط§ظ„ط·ط§ظ„ط¨ ط¨ظ†ط¬ط§ط­! ط§ظ„ط±ظ‚ظ… ط§ظ„طھط¹ط±ظٹظپظٹ ط§ظ„ط®ط§طµ ط¨ظƒ ظ‡ظˆ: {new_id}",
         "token": token,
         "user": {
             "id": new_user.id,
@@ -431,17 +431,17 @@ class AdminUpdateUserProfileRequest(BaseModel):
 def admin_update_user_profile(req: AdminUpdateUserProfileRequest, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     target = db.query(User).filter(User.id == req.target_user_id).first()
     if not target:
-        raise HTTPException(status_code=404, detail="المستخدم غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     # Update ID if changed
     if req.new_user_id and req.new_user_id.strip() and req.new_user_id.strip() != target.id:
         new_id = req.new_user_id.strip()
         if is_master_admin(target):
-            raise HTTPException(status_code=400, detail="لا يمكن تغيير الرقم التعريفي لحساب الماستر أدمن المحمي")
+            raise HTTPException(status_code=400, detail="ظ„ط§ ظٹظ…ظƒظ† طھط؛ظٹظٹط± ط§ظ„ط±ظ‚ظ… ط§ظ„طھط¹ط±ظٹظپظٹ ظ„ط­ط³ط§ط¨ ط§ظ„ظ…ط§ط³طھط± ط£ط¯ظ…ظ† ط§ظ„ظ…ط­ظ…ظٹ")
         
         existing = db.query(User).filter(User.id == new_id).first()
         if existing:
-            raise HTTPException(status_code=400, detail=f"الـ ID الجديد ({new_id}) مستخدم بالفعل لحساب آخر")
+            raise HTTPException(status_code=400, detail=f"ط§ظ„ظ€ ID ط§ظ„ط¬ط¯ظٹط¯ ({new_id}) ظ…ط³طھط®ط¯ظ… ط¨ط§ظ„ظپط¹ظ„ ظ„ط­ط³ط§ط¨ ط¢ط®ط±")
 
         old_id = target.id
         db.query(User).filter(User.assigned_supporter_id == old_id).update({"assigned_supporter_id": new_id})
@@ -478,7 +478,7 @@ def admin_update_user_profile(req: AdminUpdateUserProfileRequest, user: User = D
         target.role = r_val
 
     db.commit()
-    return {"success": True, "message": f"تم تحديث بيانات ورولات المستخدم {target.name} بنجاح"}
+    return {"success": True, "message": f"طھظ… طھط­ط¯ظٹط« ط¨ظٹط§ظ†ط§طھ ظˆط±ظˆظ„ط§طھ ط§ظ„ظ…ط³طھط®ط¯ظ… {target.name} ط¨ظ†ط¬ط§ط­"}
 
 @app.get("/api/admin/database-view")
 def get_clean_database_view(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -495,9 +495,9 @@ def get_clean_database_view(user: User = Depends(require_role([RoleEnum.ADMIN]))
             "seat_number": u.seat_number or "",
             "academic_level": u.academic_level or "",
             "program": u.program or "",
-            "assigned_supporter": u.assigned_supporter.name if u.assigned_supporter else "غير معين",
-            "assigned_hr": u.assigned_hr.name if u.assigned_hr else "غير معين",
-            "team_name": u.team.name if u.team else "بدون فريق",
+            "assigned_supporter": u.assigned_supporter.name if u.assigned_supporter else "ط؛ظٹط± ظ…ط¹ظٹظ†",
+            "assigned_hr": u.assigned_hr.name if u.assigned_hr else "ط؛ظٹط± ظ…ط¹ظٹظ†",
+            "team_name": u.team.name if u.team else "ط¨ط¯ظˆظ† ظپط±ظٹظ‚",
             "created_at": u.created_at.strftime("%Y-%m-%d %H:%M") if u.created_at else ""
         })
     return {"total": len(records), "records": records}
@@ -557,9 +557,9 @@ def get_me(user: User = Depends(get_current_user)):
         "roles": roles,
         "must_change_password": user.must_change_password,
         "assigned_supporter_id": user.assigned_supporter_id,
-        "assigned_supporter_name": user.assigned_supporter.name if user.assigned_supporter else "غير معين",
+        "assigned_supporter_name": user.assigned_supporter.name if user.assigned_supporter else "ط؛ظٹط± ظ…ط¹ظٹظ†",
         "assigned_hr_id": hr_user.id if hr_user else None,
-        "assigned_hr_name": hr_user.name if hr_user else "غير معين",
+        "assigned_hr_name": hr_user.name if hr_user else "ط؛ظٹط± ظ…ط¹ظٹظ†",
         "assigned_hr_email": (hr_user.official_email or hr_user.email or "") if hr_user else "",
         "assigned_hr_phone": hr_user.phone or "" if hr_user else "",
         "assigned_hr_bio": hr_user.bio or "" if hr_user else "",
@@ -650,7 +650,7 @@ def get_system_stats(user: User = Depends(require_role([RoleEnum.ADMIN])), db: S
     certs_list = [{
         "id": c.id,
         "user_id": c.user_id,
-        "recipient_name": c.recipient.name if c.recipient else "عام للجميع",
+        "recipient_name": c.recipient.name if c.recipient else "ط¹ط§ظ… ظ„ظ„ط¬ظ…ظٹط¹",
         "title": c.title,
         "created_at": c.created_at.strftime("%Y-%m-%d %H:%M") if c.created_at else ""
     } for c in certs]
@@ -675,44 +675,44 @@ def get_system_stats(user: User = Depends(require_role([RoleEnum.ADMIN])), db: S
 def change_role(req: ChangeRoleRequest, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     target_user = db.query(User).filter(User.id == req.user_id).first()
     if not target_user:
-        raise HTTPException(status_code=404, detail="المستخدم غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     if is_master_admin(target_user):
-        raise HTTPException(status_code=400, detail="عفواً! حساب الماستر (مروان صبحي) محمي بالكامل ولا يمكن تعديل صفتها كـ Admin.")
+        raise HTTPException(status_code=400, detail="ط¹ظپظˆط§ظ‹! ط­ط³ط§ط¨ ط§ظ„ظ…ط§ط³طھط± (ظ…ط±ظˆط§ظ† طµط¨ط­ظٹ) ظ…ط­ظ…ظٹ ط¨ط§ظ„ظƒط§ظ…ظ„ ظˆظ„ط§ ظٹظ…ظƒظ† طھط¹ط¯ظٹظ„ طµظپطھظ‡ط§ ظƒظ€ Admin.")
 
     target_user.role = req.new_role
     db.commit()
-    return {"success": True, "message": f"تم تغيير دور {target_user.name} إلى {req.new_role.value}"}
+    return {"success": True, "message": f"طھظ… طھط؛ظٹظٹط± ط¯ظˆط± {target_user.name} ط¥ظ„ظ‰ {req.new_role.value}"}
 
 @app.post("/api/admin/reset-password")
 def reset_password(user_id: str = Form(...), user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     target_user = db.query(User).filter(User.id == user_id).first()
     if not target_user:
-        raise HTTPException(status_code=404, detail="المستخدم غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     if is_master_admin(target_user) and user.id != target_user.id:
-        raise HTTPException(status_code=400, detail="عفواً! حساب الماستر (مروان صبحي) محمي من إعادة تعيين كلمة المرور بواسطة أدمن آخر.")
+        raise HTTPException(status_code=400, detail="ط¹ظپظˆط§ظ‹! ط­ط³ط§ط¨ ط§ظ„ظ…ط§ط³طھط± (ظ…ط±ظˆط§ظ† طµط¨ط­ظٹ) ظ…ط­ظ…ظٹ ظ…ظ† ط¥ط¹ط§ط¯ط© طھط¹ظٹظٹظ† ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط¨ظˆط§ط³ط·ط© ط£ط¯ظ…ظ† ط¢ط®ط±.")
 
     target_user.password_hash = hash_password(target_user.id)
     target_user.must_change_password = True
     db.commit()
-    return {"success": True, "message": f"تم إعادة تعيين كلمة المرور إلى الـ ID ({target_user.id}) وجعل التغيير إجبارياً."}
+    return {"success": True, "message": f"طھظ… ط¥ط¹ط§ط¯ط© طھط¹ظٹظٹظ† ظƒظ„ظ…ط© ط§ظ„ظ…ط±ظˆط± ط¥ظ„ظ‰ ط§ظ„ظ€ ID ({target_user.id}) ظˆط¬ط¹ظ„ ط§ظ„طھط؛ظٹظٹط± ط¥ط¬ط¨ط§ط±ظٹط§ظ‹."}
 
 @app.delete("/api/admin/users/{target_id}")
 def delete_user(target_id: str, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     if target_id == user.id:
-        raise HTTPException(status_code=400, detail="لا يمكنك حذف حسابك الحالي أثناء تسجيل الدخول به")
+        raise HTTPException(status_code=400, detail="ظ„ط§ ظٹظ…ظƒظ†ظƒ ط­ط°ظپ ط­ط³ط§ط¨ظƒ ط§ظ„ط­ط§ظ„ظٹ ط£ط«ظ†ط§ط، طھط³ط¬ظٹظ„ ط§ظ„ط¯ط®ظˆظ„ ط¨ظ‡")
 
     target = db.query(User).filter(User.id == target_id).first()
     if not target:
-        raise HTTPException(status_code=404, detail="المستخدم غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظ…ط³طھط®ط¯ظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     if is_master_admin(target):
-        raise HTTPException(status_code=400, detail="عفواً! حساب الماستر (مروان صبحي) محمي من الحذف نهائياً.")
+        raise HTTPException(status_code=400, detail="ط¹ظپظˆط§ظ‹! ط­ط³ط§ط¨ ط§ظ„ظ…ط§ط³طھط± (ظ…ط±ظˆط§ظ† طµط¨ط­ظٹ) ظ…ط­ظ…ظٹ ظ…ظ† ط§ظ„ط­ط°ظپ ظ†ظ‡ط§ط¦ظٹط§ظ‹.")
 
     db.delete(target)
     db.commit()
-    return {"success": True, "message": f"تم حذف المستخدم {target_id} بنجاح"}
+    return {"success": True, "message": f"طھظ… ط­ط°ظپ ط§ظ„ظ…ط³طھط®ط¯ظ… {target_id} ط¨ظ†ط¬ط§ط­"}
 
 @app.delete("/api/admin/users/all/clear")
 def delete_all_users(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -732,11 +732,11 @@ def delete_all_users(user: User = Depends(require_role([RoleEnum.ADMIN])), db: S
     # Delete all users except current performing admin and Marwan Subhi master account
     count = db.query(User).filter(
         User.id != user.id,
-        ~User.name.like("%مروان صبحي%"),
+        ~User.name.like("%ظ…ط±ظˆط§ظ† طµط¨ط­ظٹ%"),
         User.id != "2023170570"
     ).delete(synchronize_session=False)
     db.commit()
-    return {"success": True, "message": f"تم تفريغ النظام ومسح {count} حساب تجريبي مع الحفاظ التام على حساب الماستر (مروان صبحي)."}
+    return {"success": True, "message": f"طھظ… طھظپط±ظٹط؛ ط§ظ„ظ†ط¸ط§ظ… ظˆظ…ط³ط­ {count} ط­ط³ط§ط¨ طھط¬ط±ظٹط¨ظٹ ظ…ط¹ ط§ظ„ط­ظپط§ط¸ ط§ظ„طھط§ظ… ط¹ظ„ظ‰ ط­ط³ط§ط¨ ط§ظ„ظ…ط§ط³طھط± (ظ…ط±ظˆط§ظ† طµط¨ط­ظٹ)."}
 
 @app.post("/api/admin/upload-excel")
 async def upload_excel(file: UploadFile = File(...), user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -750,18 +750,18 @@ async def upload_excel(file: UploadFile = File(...), user: User = Depends(requir
 def assign_supporter(req: AssignSupporterRequest, user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR])), db: Session = Depends(get_db)):
     student = db.query(User).filter(User.id == req.student_id).first()
     if not student:
-        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط·ط§ظ„ط¨ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     if req.supporter_id:
         supporter = db.query(User).filter(User.id == req.supporter_id).first()
         if not supporter or supporter.role not in [RoleEnum.SUPPORTER, RoleEnum.INSTRUCTOR, RoleEnum.ADMIN]:
-            raise HTTPException(status_code=400, detail="المساعد غير موجود أو غير مؤهل لهذا الدور")
+            raise HTTPException(status_code=400, detail="ط§ظ„ظ…ط³ط§ط¹ط¯ ط؛ظٹط± ظ…ظˆط¬ظˆط¯ ط£ظˆ ط؛ظٹط± ظ…ط¤ظ‡ظ„ ظ„ظ‡ط°ط§ ط§ظ„ط¯ظˆط±")
         student.assigned_supporter_id = req.supporter_id
     else:
         student.assigned_supporter_id = None
 
     db.commit()
-    return {"success": True, "message": "تم تعيين المساعد للطالب بنجاح"}
+    return {"success": True, "message": "طھظ… طھط¹ظٹظٹظ† ط§ظ„ظ…ط³ط§ط¹ط¯ ظ„ظ„ط·ط§ظ„ط¨ ط¨ظ†ط¬ط§ط­"}
 
 # --- STUDENT ENDPOINTS ---
 @app.get("/api/student/dashboard")
@@ -791,15 +791,15 @@ def get_student_dashboard(user: User = Depends(require_role([RoleEnum.STUDENT, R
                 "id": user.assigned_supporter.id,
                 "name": user.assigned_supporter.name,
                 "email": user.assigned_supporter.email,
-                "phone": user.assigned_supporter.phone or "غير مسجل",
+                "phone": user.assigned_supporter.phone or "ط؛ظٹط± ظ…ط³ط¬ظ„",
                 "bio": user.assigned_supporter.bio or ""
             } if user.assigned_supporter else None,
             "assigned_hr": {
                 "id": hr_user.id,
                 "name": hr_user.name,
-                "email": hr_user.official_email or hr_user.email or "غير مسجل",
-                "phone": hr_user.phone or "غير مسجل",
-                "bio": hr_user.bio or "مسؤول غياب وإدارات الفرق"
+                "email": hr_user.official_email or hr_user.email or "ط؛ظٹط± ظ…ط³ط¬ظ„",
+                "phone": hr_user.phone or "ط؛ظٹط± ظ…ط³ط¬ظ„",
+                "bio": hr_user.bio or "ظ…ط³ط¤ظˆظ„ ط؛ظٹط§ط¨ ظˆط¥ط¯ط§ط±ط§طھ ط§ظ„ظپط±ظ‚"
             } if hr_user else None
         },
         "attendance": {
@@ -815,14 +815,14 @@ def get_student_dashboard(user: User = Depends(require_role([RoleEnum.STUDENT, R
 @app.get("/api/student/supporter-info")
 def get_student_supporter_info(user: User = Depends(get_current_user)):
     if not user.assigned_supporter:
-        raise HTTPException(status_code=404, detail="لم يتم إسناد مساعد لك بعد")
+        raise HTTPException(status_code=404, detail="ظ„ظ… ظٹطھظ… ط¥ط³ظ†ط§ط¯ ظ…ط³ط§ط¹ط¯ ظ„ظƒ ط¨ط¹ط¯")
     sup = user.assigned_supporter
     return {
         "id": sup.id,
         "name": sup.name,
         "email": sup.email,
-        "phone": sup.phone or "غير مسجل",
-        "bio": sup.bio or "لا توجد ملاحظات إضافية"
+        "phone": sup.phone or "ط؛ظٹط± ظ…ط³ط¬ظ„",
+        "bio": sup.bio or "ظ„ط§ طھظˆط¬ط¯ ظ…ظ„ط§ط­ط¸ط§طھ ط¥ط¶ط§ظپظٹط©"
     }
 
 @app.get("/api/student/tasks")
@@ -848,12 +848,12 @@ def get_student_tasks(user: User = Depends(get_current_user), db: Session = Depe
         elif is_expired:
             sub_data = {
                 "id": None,
-                "code_content": "# لم يتم تسليم كود قبل الموعد النهائي",
+                "code_content": "# ظ„ظ… ظٹطھظ… طھط³ظ„ظٹظ… ظƒظˆط¯ ظ‚ط¨ظ„ ط§ظ„ظ…ظˆط¹ط¯ ط§ظ„ظ†ظ‡ط§ط¦ظٹ",
                 "file_name": "N/A",
-                "submitted_at": "لم يُسلم (انتهى الموعد)",
+                "submitted_at": "ظ„ظ… ظٹظڈط³ظ„ظ… (ط§ظ†طھظ‡ظ‰ ط§ظ„ظ…ظˆط¹ط¯)",
                 "score": 0,
-                "feedback": "تلقائي: تم إغلاق التسليم بسبب انقضاء الموعد النهائي (الدرجة: 0)",
-                "graded_by_name": "النظام الآلي (Auto-Zero)"
+                "feedback": "طھظ„ظ‚ط§ط¦ظٹ: طھظ… ط¥ط؛ظ„ط§ظ‚ ط§ظ„طھط³ظ„ظٹظ… ط¨ط³ط¨ط¨ ط§ظ†ظ‚ط¶ط§ط، ط§ظ„ظ…ظˆط¹ط¯ ط§ظ„ظ†ظ‡ط§ط¦ظٹ (ط§ظ„ط¯ط±ط¬ط©: 0)",
+                "graded_by_name": "ط§ظ„ظ†ط¸ط§ظ… ط§ظ„ط¢ظ„ظٹ (Auto-Zero)"
             }
         else:
             sub_data = None
@@ -862,7 +862,7 @@ def get_student_tasks(user: User = Depends(get_current_user), db: Session = Depe
             "id": t.id,
             "title": t.title,
             "description": t.description,
-            "instructor_name": t.instructor.name if t.instructor else "المدرب",
+            "instructor_name": t.instructor.name if t.instructor else "ط§ظ„ظ…ط¯ط±ط¨",
             "deadline": t.deadline.strftime("%Y-%m-%dT%H:%M:%S"),
             "max_score": t.max_score,
             "allowed_languages": t.allowed_languages,
@@ -875,11 +875,11 @@ def get_student_tasks(user: User = Depends(get_current_user), db: Session = Depe
 def submit_task(req: TaskSubmitRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     task = db.query(Task).filter(Task.id == req.task_id).first()
     if not task:
-        raise HTTPException(status_code=404, detail="المهمة غير موجودة")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظ…ظ‡ظ…ط© ط؛ظٹط± ظ…ظˆط¬ظˆط¯ط©")
 
     now = datetime.now()
     if now > task.deadline:
-        raise HTTPException(status_code=400, detail="عذراً! لقد انتهى الموعد النهائي لتسليم هذه المهمة (Deadline Exceeded).")
+        raise HTTPException(status_code=400, detail="ط¹ط°ط±ط§ظ‹! ظ„ظ‚ط¯ ط§ظ†طھظ‡ظ‰ ط§ظ„ظ…ظˆط¹ط¯ ط§ظ„ظ†ظ‡ط§ط¦ظٹ ظ„طھط³ظ„ظٹظ… ظ‡ط°ظ‡ ط§ظ„ظ…ظ‡ظ…ط© (Deadline Exceeded).")
 
     existing_sub = db.query(Submission).filter(Submission.task_id == req.task_id, Submission.student_id == user.id).first()
     if existing_sub:
@@ -906,7 +906,7 @@ def submit_task(req: TaskSubmitRequest, user: User = Depends(get_current_user), 
     except Exception as e:
         print(f"Anti-cheating error: {e}")
 
-    return {"success": True, "message": "تم تسليم الحل وفحصه بنجاح!"}
+    return {"success": True, "message": "طھظ… طھط³ظ„ظٹظ… ط§ظ„ط­ظ„ ظˆظپط­طµظ‡ ط¨ظ†ط¬ط§ط­!"}
 
 # --- SUPPORTER ENDPOINTS ---
 @app.get("/api/supporter/assigned-students")
@@ -960,18 +960,18 @@ def self_assign_student(student_id: str, user: User = Depends(require_role([Role
     if ("supporter" in user_roles or "instructor" in user_roles) and "admin" not in user_roles:
         current_count = db.query(User).filter(User.assigned_supporter_id == user.id).count()
         if current_count >= 20:
-            raise HTTPException(status_code=400, detail="عذراً! لقد وصلت للحد الأقصى لعدد الطلاب المسندين إليك (20 طالب كحد أقصى).")
+            raise HTTPException(status_code=400, detail="ط¹ط°ط±ط§ظ‹! ظ„ظ‚ط¯ ظˆطµظ„طھ ظ„ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ظ„ط¹ط¯ط¯ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„ظ…ط³ظ†ط¯ظٹظ† ط¥ظ„ظٹظƒ (20 ط·ط§ظ„ط¨ ظƒط­ط¯ ط£ظ‚طµظ‰).")
 
     student = db.query(User).filter(User.id == student_id).first()
     if not student or "student" not in get_user_roles(student):
-        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط·ط§ظ„ط¨ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     if student.assigned_supporter_id and student.assigned_supporter_id != user.id and "admin" not in user_roles:
-        raise HTTPException(status_code=400, detail="هذا الطالب مخصص بالفعل لمساعد آخر")
+        raise HTTPException(status_code=400, detail="ظ‡ط°ط§ ط§ظ„ط·ط§ظ„ط¨ ظ…ط®طµطµ ط¨ط§ظ„ظپط¹ظ„ ظ„ظ…ط³ط§ط¹ط¯ ط¢ط®ط±")
 
     student.assigned_supporter_id = user.id
     db.commit()
-    return {"success": True, "message": f"تم إسناد الطالب ({student.name}) لقائمتك بنجاح"}
+    return {"success": True, "message": f"طھظ… ط¥ط³ظ†ط§ط¯ ط§ظ„ط·ط§ظ„ط¨ ({student.name}) ظ„ظ‚ط§ط¦ظ…طھظƒ ط¨ظ†ط¬ط§ط­"}
 
 @app.get("/api/supporter/submissions")
 def get_supporter_submissions(task_id: Optional[int] = None, user: User = Depends(require_role([RoleEnum.SUPPORTER, RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -1028,12 +1028,12 @@ def get_supporter_submissions(task_id: Optional[int] = None, user: User = Depend
                         "max_score": t.max_score,
                         "student_id": s.id,
                         "student_name": s.name,
-                        "code_content": "# لم يتم تسليم كود من الطالب قبل الموعد النهائي",
+                        "code_content": "# ظ„ظ… ظٹطھظ… طھط³ظ„ظٹظ… ظƒظˆط¯ ظ…ظ† ط§ظ„ط·ط§ظ„ط¨ ظ‚ط¨ظ„ ط§ظ„ظ…ظˆط¹ط¯ ط§ظ„ظ†ظ‡ط§ط¦ظٹ",
                         "file_name": "N/A",
-                        "submitted_at": "لم يُسلم (انتهى الموعد)",
+                        "submitted_at": "ظ„ظ… ظٹظڈط³ظ„ظ… (ط§ظ†طھظ‡ظ‰ ط§ظ„ظ…ظˆط¹ط¯)",
                         "score": 0,
-                        "feedback": "تلقائي: انقضى الموعد النهائي دون تسليم حل (الدرجة: 0)",
-                        "graded_by_name": "النظام الآلي (Auto-Zero)",
+                        "feedback": "طھظ„ظ‚ط§ط¦ظٹ: ط§ظ†ظ‚ط¶ظ‰ ط§ظ„ظ…ظˆط¹ط¯ ط§ظ„ظ†ظ‡ط§ط¦ظٹ ط¯ظˆظ† طھط³ظ„ظٹظ… ط­ظ„ (ط§ظ„ط¯ط±ط¬ط©: 0)",
+                        "graded_by_name": "ط§ظ„ظ†ط¸ط§ظ… ط§ظ„ط¢ظ„ظٹ (Auto-Zero)",
                         "is_auto_zero": True,
                         "can_grade": False
                     })
@@ -1043,11 +1043,11 @@ def get_supporter_submissions(task_id: Optional[int] = None, user: User = Depend
 @app.post("/api/supporter/grade")
 def grade_submission(req: GradeSubmissionRequest, user: User = Depends(require_role([RoleEnum.SUPPORTER, RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     if req.submission_id is None:
-        raise HTTPException(status_code=400, detail="عذراً! لا يمكن تصحيح مهمة لم يتم تسليم كود بها وانتهى موعدها، درجتها مثبتة عند 0 تلقائياً.")
+        raise HTTPException(status_code=400, detail="ط¹ط°ط±ط§ظ‹! ظ„ط§ ظٹظ…ظƒظ† طھطµط­ظٹط­ ظ…ظ‡ظ…ط© ظ„ظ… ظٹطھظ… طھط³ظ„ظٹظ… ظƒظˆط¯ ط¨ظ‡ط§ ظˆط§ظ†طھظ‡ظ‰ ظ…ظˆط¹ط¯ظ‡ط§طŒ ط¯ط±ط¬طھظ‡ط§ ظ…ط«ط¨طھط© ط¹ظ†ط¯ 0 طھظ„ظ‚ط§ط¦ظٹط§ظ‹.")
 
     sub = db.query(Submission).filter(Submission.id == req.submission_id).first()
     if not sub:
-        raise HTTPException(status_code=404, detail="التسليم غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„طھط³ظ„ظٹظ… ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     sub.score = req.score
     sub.feedback = req.feedback
@@ -1055,7 +1055,7 @@ def grade_submission(req: GradeSubmissionRequest, user: User = Depends(require_r
     sub.graded_at = datetime.now()
     db.commit()
 
-    return {"success": True, "message": "تم تقييم التسليم ورصد الدرجة بنجاح"}
+    return {"success": True, "message": "طھظ… طھظ‚ظٹظٹظ… ط§ظ„طھط³ظ„ظٹظ… ظˆط±طµط¯ ط§ظ„ط¯ط±ط¬ط© ط¨ظ†ط¬ط§ط­"}
 
 # --- INSTRUCTOR & SESSIONS ENDPOINTS ---
 @app.get("/api/instructor/tasks")
@@ -1081,7 +1081,7 @@ def create_task(req: TaskCreateRequest, user: User = Depends(require_role([RoleE
     try:
         deadline_dt = datetime.fromisoformat(req.deadline.replace('Z', '+00:00'))
     except Exception:
-        raise HTTPException(status_code=400, detail="صيغة التاريخ والوقت غير صحيحة")
+        raise HTTPException(status_code=400, detail="طµظٹط؛ط© ط§ظ„طھط§ط±ظٹط® ظˆط§ظ„ظˆظ‚طھ ط؛ظٹط± طµط­ظٹط­ط©")
 
     task = Task(
         title=req.title,
@@ -1093,7 +1093,7 @@ def create_task(req: TaskCreateRequest, user: User = Depends(require_role([RoleE
     )
     db.add(task)
     db.commit()
-    return {"success": True, "task_id": task.id, "message": "تم إنشاء المهمة بنجاح"}
+    return {"success": True, "task_id": task.id, "message": "طھظ… ط¥ظ†ط´ط§ط، ط§ظ„ظ…ظ‡ظ…ط© ط¨ظ†ط¬ط§ط­"}
 
 @app.get("/api/sessions")
 def get_sessions(x_session_token: Optional[str] = Header(None), db: Session = Depends(get_db)):
@@ -1121,7 +1121,7 @@ def get_sessions(x_session_token: Optional[str] = Header(None), db: Session = De
             "id": s.id,
             "title": s.title,
             "description": s.description,
-            "instructor_name": s.instructor.name if s.instructor else "المدرب",
+            "instructor_name": s.instructor.name if s.instructor else "ط§ظ„ظ…ط¯ط±ط¨",
             "date_time": s.date_time.strftime("%Y-%m-%d %H:%M"),
             "location_or_link": s.location_or_link,
             "my_attendance": att_status,
@@ -1132,7 +1132,7 @@ def get_sessions(x_session_token: Optional[str] = Header(None), db: Session = De
 @app.get("/api/admin/backup-db")
 def download_database_backup(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     if not os.path.exists(DB_PATH):
-        raise HTTPException(status_code=404, detail="ملف قاعدة البيانات غير موجود")
+        raise HTTPException(status_code=404, detail="ظ…ظ„ظپ ظ‚ط§ط¹ط¯ط© ط§ظ„ط¨ظٹط§ظ†ط§طھ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     
     filename = f"lms_database_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
     return StreamingResponse(
@@ -1146,7 +1146,7 @@ def create_session(req: SessionCreateRequest, user: User = Depends(require_role(
     try:
         dt = datetime.fromisoformat(req.date_time.replace('Z', '+00:00'))
     except Exception:
-        raise HTTPException(status_code=400, detail="صيغة التاريخ غير صحيحة")
+        raise HTTPException(status_code=400, detail="طµظٹط؛ط© ط§ظ„طھط§ط±ظٹط® ط؛ظٹط± طµط­ظٹط­ط©")
 
     sess = SessionSchedule(
         title=req.title,
@@ -1157,7 +1157,7 @@ def create_session(req: SessionCreateRequest, user: User = Depends(require_role(
     )
     db.add(sess)
     db.commit()
-    return {"success": True, "message": "تم إضافة ميعاد السيشن بنجاح"}
+    return {"success": True, "message": "طھظ… ط¥ط¶ط§ظپط© ظ…ظٹط¹ط§ط¯ ط§ظ„ط³ظٹط´ظ† ط¨ظ†ط¬ط§ط­"}
 
 @app.post("/api/instructor/attendance")
 def mark_attendance(req: AttendanceMarkRequest, user: User = Depends(require_role([RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -1175,7 +1175,7 @@ def mark_attendance(req: AttendanceMarkRequest, user: User = Depends(require_rol
         db.add(att)
 
     db.commit()
-    return {"success": True, "message": "تم رصد الغياب/الحضور بنجاح"}
+    return {"success": True, "message": "طھظ… ط±طµط¯ ط§ظ„ط؛ظٹط§ط¨/ط§ظ„ط­ط¶ظˆط± ط¨ظ†ط¬ط§ط­"}
 
 # --- PLAGIARISM REPORTS ENDPOINT ---
 @app.post("/api/plagiarism/run-analysis/{task_id}")
@@ -1183,7 +1183,7 @@ def trigger_plagiarism_analysis(task_id: int, user: User = Depends(require_role(
     reports = check_task_plagiarism(task_id, db)
     return {
         "success": True,
-        "message": f"تم إجراء فحص الغش البرمجي على {len(reports)} زوج تسليمات بنجاح",
+        "message": f"طھظ… ط¥ط¬ط±ط§ط، ظپط­طµ ط§ظ„ط؛ط´ ط§ظ„ط¨ط±ظ…ط¬ظٹ ط¹ظ„ظ‰ {len(reports)} ط²ظˆط¬ طھط³ظ„ظٹظ…ط§طھ ط¨ظ†ط¬ط§ط­",
         "count": len(reports)
     }
 
@@ -1210,11 +1210,11 @@ def get_plagiarism_reports(task_id: int, user: User = Depends(require_role([Role
         st_a = r.student_a
         st_b = r.student_b
 
-        supporter_a_name = st_a.assigned_supporter.name if (st_a and st_a.assigned_supporter) else "غير معين"
-        hr_a_name = st_a.assigned_hr.name if (st_a and st_a.assigned_hr) else "غير معين"
+        supporter_a_name = st_a.assigned_supporter.name if (st_a and st_a.assigned_supporter) else "ط؛ظٹط± ظ…ط¹ظٹظ†"
+        hr_a_name = st_a.assigned_hr.name if (st_a and st_a.assigned_hr) else "ط؛ظٹط± ظ…ط¹ظٹظ†"
 
-        supporter_b_name = st_b.assigned_supporter.name if (st_b and st_b.assigned_supporter) else "غير معين"
-        hr_b_name = st_b.assigned_hr.name if (st_b and st_b.assigned_hr) else "غير معين"
+        supporter_b_name = st_b.assigned_supporter.name if (st_b and st_b.assigned_supporter) else "ط؛ظٹط± ظ…ط¹ظٹظ†"
+        hr_b_name = st_b.assigned_hr.name if (st_b and st_b.assigned_hr) else "ط؛ظٹط± ظ…ط¹ظٹظ†"
 
         res.append({
             "id": r.id,
@@ -1248,16 +1248,16 @@ def get_plagiarism_reports(task_id: int, user: User = Depends(require_role([Role
 @app.get("/api/download-sample-excel")
 def download_sample_excel():
     data = [
-        {"ID": "2024001", "Name": "أحمد محمود علي", "Email": "ahmed@example.com", "Role": "student", "AssignedSupporterID": "SUP-01", "AssignedHRID": "HR-01"},
-        {"ID": "2024002", "Name": "سارة محمد خليل", "Email": "sara@example.com", "Role": "student", "AssignedSupporterID": "SUP-01", "AssignedHRID": "HR-01"},
-        {"ID": "2024003", "Name": "عمر حسن إبراهيم", "Email": "omar@example.com", "Role": "student", "AssignedSupporterID": "SUP-02", "AssignedHRID": "HR-01"},
-        {"ID": "2024004", "Name": "مريم يوسف كمال", "Email": "mariam@example.com", "Role": "student", "AssignedSupporterID": "SUP-02", "AssignedHRID": "HR-01"},
-        {"ID": "HR-01", "Name": "مسؤول الموارد البشرية مريم", "Email": "hr@example.com", "Role": "hr", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "MEDIA-01", "Name": "مسؤول الميديا أحمد عادل", "Email": "media@example.com", "Role": "media", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "SUP-01", "Name": "المساعد طارق سعيد", "Email": "tarek@example.com", "Role": "supporter", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "SUP-02", "Name": "المساعد ياسمين عادل", "Email": "yasmine@example.com", "Role": "supporter", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "INST-01", "Name": "المهندس يوسف (Instructor)", "Email": "yousef@example.com", "Role": "instructor", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "ADMIN-01", "Name": "مدير النظام (Admin)", "Email": "admin@example.com", "Role": "admin", "AssignedSupporterID": "", "AssignedHRID": ""},
+        {"ID": "2024001", "Name": "ط£ط­ظ…ط¯ ظ…ط­ظ…ظˆط¯ ط¹ظ„ظٹ", "Email": "ahmed@example.com", "Role": "student", "AssignedSupporterID": "SUP-01", "AssignedHRID": "HR-01"},
+        {"ID": "2024002", "Name": "ط³ط§ط±ط© ظ…ط­ظ…ط¯ ط®ظ„ظٹظ„", "Email": "sara@example.com", "Role": "student", "AssignedSupporterID": "SUP-01", "AssignedHRID": "HR-01"},
+        {"ID": "2024003", "Name": "ط¹ظ…ط± ط­ط³ظ† ط¥ط¨ط±ط§ظ‡ظٹظ…", "Email": "omar@example.com", "Role": "student", "AssignedSupporterID": "SUP-02", "AssignedHRID": "HR-01"},
+        {"ID": "2024004", "Name": "ظ…ط±ظٹظ… ظٹظˆط³ظپ ظƒظ…ط§ظ„", "Email": "mariam@example.com", "Role": "student", "AssignedSupporterID": "SUP-02", "AssignedHRID": "HR-01"},
+        {"ID": "HR-01", "Name": "ظ…ط³ط¤ظˆظ„ ط§ظ„ظ…ظˆط§ط±ط¯ ط§ظ„ط¨ط´ط±ظٹط© ظ…ط±ظٹظ…", "Email": "hr@example.com", "Role": "hr", "AssignedSupporterID": "", "AssignedHRID": ""},
+        {"ID": "MEDIA-01", "Name": "ظ…ط³ط¤ظˆظ„ ط§ظ„ظ…ظٹط¯ظٹط§ ط£ط­ظ…ط¯ ط¹ط§ط¯ظ„", "Email": "media@example.com", "Role": "media", "AssignedSupporterID": "", "AssignedHRID": ""},
+        {"ID": "SUP-01", "Name": "ط§ظ„ظ…ط³ط§ط¹ط¯ ط·ط§ط±ظ‚ ط³ط¹ظٹط¯", "Email": "tarek@example.com", "Role": "supporter", "AssignedSupporterID": "", "AssignedHRID": ""},
+        {"ID": "SUP-02", "Name": "ط§ظ„ظ…ط³ط§ط¹ط¯ ظٹط§ط³ظ…ظٹظ† ط¹ط§ط¯ظ„", "Email": "yasmine@example.com", "Role": "supporter", "AssignedSupporterID": "", "AssignedHRID": ""},
+        {"ID": "INST-01", "Name": "ط§ظ„ظ…ظ‡ظ†ط¯ط³ ظٹظˆط³ظپ (Instructor)", "Email": "yousef@example.com", "Role": "instructor", "AssignedSupporterID": "", "AssignedHRID": ""},
+        {"ID": "ADMIN-01", "Name": "ظ…ط¯ظٹط± ط§ظ„ظ†ط¸ط§ظ… (Admin)", "Email": "admin@example.com", "Role": "admin", "AssignedSupporterID": "", "AssignedHRID": ""},
     ]
     df = pd.DataFrame(data)
     output = io.BytesIO()
@@ -1288,11 +1288,11 @@ def get_hr_assigned_students(user: User = Depends(require_role([RoleEnum.HR, Rol
             "id": s.id,
             "name": s.name,
             "email": s.email or "---",
-            "phone": s.phone or "غير مدخل",
+            "phone": s.phone or "ط؛ظٹط± ظ…ط¯ط®ظ„",
             "assigned_hr_id": s.assigned_hr_id,
             "team_id": s.team_id,
-            "team_name": s.team.name if s.team else "لا يوجد فريق",
-            "hr_name": s.team.creator_hr.name if (s.team and s.team.creator_hr) else (s.assigned_hr.name if s.assigned_hr else "غير معين")
+            "team_name": s.team.name if s.team else "ظ„ط§ ظٹظˆط¬ط¯ ظپط±ظٹظ‚",
+            "hr_name": s.team.creator_hr.name if (s.team and s.team.creator_hr) else (s.assigned_hr.name if s.assigned_hr else "ط؛ظٹط± ظ…ط¹ظٹظ†")
         })
     return res
 
@@ -1322,7 +1322,7 @@ def get_team_settings(user: User = Depends(get_current_user), db: Session = Depe
         "my_team": {
             "id": user.team.id,
             "name": user.team.name,
-            "hr_name": user.team.creator_hr.name if (user.team and user.team.creator_hr) else "غير معين"
+            "hr_name": user.team.creator_hr.name if (user.team and user.team.creator_hr) else "ط؛ظٹط± ظ…ط¹ظٹظ†"
         } if user.team else None
     }
 
@@ -1332,7 +1332,7 @@ def update_team_settings(req: TeamSettingsUpdateRequest, user: User = Depends(re
     if req.deadline:
         set_system_setting("team_registration_deadline", req.deadline, db)
     set_system_setting("max_members_per_team", str(req.max_members_per_team), db)
-    return {"success": True, "message": "تم تحديث إعدادات مواعيد تسجيل التيمات بنجاح"}
+    return {"success": True, "message": "طھظ… طھط­ط¯ظٹط« ط¥ط¹ط¯ط§ط¯ط§طھ ظ…ظˆط§ط¹ظٹط¯ طھط³ط¬ظٹظ„ ط§ظ„طھظٹظ…ط§طھ ط¨ظ†ط¬ط§ط­"}
 
 @app.post("/api/student/teams/create")
 def student_create_team(req: TeamCreateRequest, user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
@@ -1346,18 +1346,18 @@ def student_create_team(req: TeamCreateRequest, user: User = Depends(require_rol
         pass
 
     if not is_open:
-        raise HTTPException(status_code=400, detail="عفواً، انتهت الفترة المتاحة لتسجيل التيمات وتم إغلاق التسجيل.")
+        raise HTTPException(status_code=400, detail="ط¹ظپظˆط§ظ‹طŒ ط§ظ†طھظ‡طھ ط§ظ„ظپطھط±ط© ط§ظ„ظ…طھط§ط­ط© ظ„طھط³ط¬ظٹظ„ ط§ظ„طھظٹظ…ط§طھ ظˆطھظ… ط¥ط؛ظ„ط§ظ‚ ط§ظ„طھط³ط¬ظٹظ„.")
 
     if user.team_id:
-        raise HTTPException(status_code=400, detail=f"عفواً، أنت مسجل بالفعل في فريق '{user.team.name}' ولا يمكنك التسجيل في أكثر من فريق واحد.")
+        raise HTTPException(status_code=400, detail=f"ط¹ظپظˆط§ظ‹طŒ ط£ظ†طھ ظ…ط³ط¬ظ„ ط¨ط§ظ„ظپط¹ظ„ ظپظٹ ظپط±ظٹظ‚ '{user.team.name}' ظˆظ„ط§ ظٹظ…ظƒظ†ظƒ ط§ظ„طھط³ط¬ظٹظ„ ظپظٹ ط£ظƒط«ط± ظ…ظ† ظپط±ظٹظ‚ ظˆط§ط­ط¯.")
 
     team_name = req.name.strip()
     if not team_name:
-        raise HTTPException(status_code=400, detail="اسم الفريق مطلوب")
+        raise HTTPException(status_code=400, detail="ط§ط³ظ… ط§ظ„ظپط±ظٹظ‚ ظ…ط·ظ„ظˆط¨")
 
     existing = db.query(Team).filter(Team.name == team_name).first()
     if existing:
-        raise HTTPException(status_code=400, detail="اسم الفريق مستخدم بالفعل، اختر اسماً آخر.")
+        raise HTTPException(status_code=400, detail="ط§ط³ظ… ط§ظ„ظپط±ظٹظ‚ ظ…ط³طھط®ط¯ظ… ط¨ط§ظ„ظپط¹ظ„طŒ ط§ط®طھط± ط§ط³ظ…ط§ظ‹ ط¢ط®ط±.")
 
     team = Team(name=team_name)
     db.add(team)
@@ -1366,7 +1366,7 @@ def student_create_team(req: TeamCreateRequest, user: User = Depends(require_rol
 
     user.team_id = team.id
     db.commit()
-    return {"success": True, "message": f"تم إنشاء الفريق '{team.name}' والانضمام إليه بنجاح", "team_id": team.id}
+    return {"success": True, "message": f"طھظ… ط¥ظ†ط´ط§ط، ط§ظ„ظپط±ظٹظ‚ '{team.name}' ظˆط§ظ„ط§ظ†ط¶ظ…ط§ظ… ط¥ظ„ظٹظ‡ ط¨ظ†ط¬ط§ط­", "team_id": team.id}
 
 @app.post("/api/student/teams/invite")
 def invite_student_to_team(req: TeamInviteRequest, user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
@@ -1380,23 +1380,23 @@ def invite_student_to_team(req: TeamInviteRequest, user: User = Depends(require_
         pass
 
     if not is_open:
-        raise HTTPException(status_code=400, detail="عفواً، تم إغلاق فترة تسجيل التيمات.")
+        raise HTTPException(status_code=400, detail="ط¹ظپظˆط§ظ‹طŒ طھظ… ط¥ط؛ظ„ط§ظ‚ ظپطھط±ط© طھط³ط¬ظٹظ„ ط§ظ„طھظٹظ…ط§طھ.")
 
     if not user.team_id:
-        raise HTTPException(status_code=400, detail="عفواً، يجب أن تكون أنشأت فريقاً أولاً لتتمكن من إرسال الدعوات لأصحابك.")
+        raise HTTPException(status_code=400, detail="ط¹ظپظˆط§ظ‹طŒ ظٹط¬ط¨ ط£ظ† طھظƒظˆظ† ط£ظ†ط´ط£طھ ظپط±ظٹظ‚ط§ظ‹ ط£ظˆظ„ط§ظ‹ ظ„طھطھظ…ظƒظ† ظ…ظ† ط¥ط±ط³ط§ظ„ ط§ظ„ط¯ط¹ظˆط§طھ ظ„ط£طµط­ط§ط¨ظƒ.")
 
     invited_id = req.invited_student_id.strip()
     target_student = db.query(User).filter(User.id == invited_id, User.role == RoleEnum.STUDENT).first()
     if not target_student:
-        raise HTTPException(status_code=404, detail=f"الطالب برقم (ID: {invited_id}) غير موجود.")
+        raise HTTPException(status_code=404, detail=f"ط§ظ„ط·ط§ظ„ط¨ ط¨ط±ظ‚ظ… (ID: {invited_id}) ط؛ظٹط± ظ…ظˆط¬ظˆط¯.")
 
     if target_student.team_id:
-        raise HTTPException(status_code=400, detail=f"عفواً، الطالب '{target_student.name}' ينتمي بالفعل إلى فريق آخر.")
+        raise HTTPException(status_code=400, detail=f"ط¹ظپظˆط§ظ‹طŒ ط§ظ„ط·ط§ظ„ط¨ '{target_student.name}' ظٹظ†طھظ…ظٹ ط¨ط§ظ„ظپط¹ظ„ ط¥ظ„ظ‰ ظپط±ظٹظ‚ ط¢ط®ط±.")
 
     max_members = int(get_system_setting("max_members_per_team", "5", db))
     current_count = db.query(User).filter(User.team_id == user.team_id).count()
     if current_count >= max_members:
-        raise HTTPException(status_code=400, detail=f"عفواً، وصل فريقك إلى الحد الأقصى للأعضاء ({max_members} أعضاء).")
+        raise HTTPException(status_code=400, detail=f"ط¹ظپظˆط§ظ‹طŒ ظˆطµظ„ ظپط±ظٹظ‚ظƒ ط¥ظ„ظ‰ ط§ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ظ„ظ„ط£ط¹ط¶ط§ط، ({max_members} ط£ط¹ط¶ط§ط،).")
 
     existing_inv = db.query(TeamInvitation).filter(
         TeamInvitation.team_id == user.team_id,
@@ -1405,7 +1405,7 @@ def invite_student_to_team(req: TeamInviteRequest, user: User = Depends(require_
     ).first()
 
     if existing_inv:
-        return {"success": True, "message": f"تم إرسال دعوة من قبل للطالب {target_student.name} وهى في انتظار قبوله."}
+        return {"success": True, "message": f"طھظ… ط¥ط±ط³ط§ظ„ ط¯ط¹ظˆط© ظ…ظ† ظ‚ط¨ظ„ ظ„ظ„ط·ط§ظ„ط¨ {target_student.name} ظˆظ‡ظ‰ ظپظٹ ط§ظ†طھط¸ط§ط± ظ‚ط¨ظˆظ„ظ‡."}
 
     inv = TeamInvitation(
         team_id=user.team_id,
@@ -1415,7 +1415,7 @@ def invite_student_to_team(req: TeamInviteRequest, user: User = Depends(require_
     )
     db.add(inv)
     db.commit()
-    return {"success": True, "message": f"تم إرسال دعوة الانضمام للطالب {target_student.name} بنجاح!"}
+    return {"success": True, "message": f"طھظ… ط¥ط±ط³ط§ظ„ ط¯ط¹ظˆط© ط§ظ„ط§ظ†ط¶ظ…ط§ظ… ظ„ظ„ط·ط§ظ„ط¨ {target_student.name} ط¨ظ†ط¬ط§ط­!"}
 
 @app.get("/api/student/invitations")
 def get_student_invitations(user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
@@ -1429,8 +1429,8 @@ def get_student_invitations(user: User = Depends(require_role([RoleEnum.STUDENT]
         res.append({
             "id": inv.id,
             "team_id": inv.team_id,
-            "team_name": inv.team.name if inv.team else "فريق",
-            "inviter_name": inv.inviter.name if inv.inviter else "زميلك",
+            "team_name": inv.team.name if inv.team else "ظپط±ظٹظ‚",
+            "inviter_name": inv.inviter.name if inv.inviter else "ط²ظ…ظٹظ„ظƒ",
             "created_at": inv.created_at.strftime("%Y-%m-%d %H:%M")
         })
     return res
@@ -1439,10 +1439,10 @@ def get_student_invitations(user: User = Depends(require_role([RoleEnum.STUDENT]
 def respond_to_team_invitation(inv_id: int, req: TeamInviteRespondRequest, user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
     inv = db.query(TeamInvitation).filter(TeamInvitation.id == inv_id, TeamInvitation.invited_student_id == user.id).first()
     if not inv:
-        raise HTTPException(status_code=404, detail="الدعوة غير موجودة")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط¯ط¹ظˆط© ط؛ظٹط± ظ…ظˆط¬ظˆط¯ط©")
 
     if inv.status != TeamInvitationStatusEnum.PENDING:
-        raise HTTPException(status_code=400, detail="تم الرد على هذه الدعوة من قبل.")
+        raise HTTPException(status_code=400, detail="طھظ… ط§ظ„ط±ط¯ ط¹ظ„ظ‰ ظ‡ط°ظ‡ ط§ظ„ط¯ط¹ظˆط© ظ…ظ† ظ‚ط¨ظ„.")
 
     if req.action.lower() == "accept":
         is_open = get_system_setting("team_registration_open", "true", db).lower() == "true"
@@ -1455,24 +1455,24 @@ def respond_to_team_invitation(inv_id: int, req: TeamInviteRespondRequest, user:
             pass
 
         if not is_open:
-            raise HTTPException(status_code=400, detail="عفواً، انتهت الفترة المتاحة لتسجيل التيمات.")
+            raise HTTPException(status_code=400, detail="ط¹ظپظˆط§ظ‹طŒ ط§ظ†طھظ‡طھ ط§ظ„ظپطھط±ط© ط§ظ„ظ…طھط§ط­ط© ظ„طھط³ط¬ظٹظ„ ط§ظ„طھظٹظ…ط§طھ.")
 
         if user.team_id:
-            raise HTTPException(status_code=400, detail=f"عفواً، أنت مسجل بالفعل في فريق '{user.team.name}'.")
+            raise HTTPException(status_code=400, detail=f"ط¹ظپظˆط§ظ‹طŒ ط£ظ†طھ ظ…ط³ط¬ظ„ ط¨ط§ظ„ظپط¹ظ„ ظپظٹ ظپط±ظٹظ‚ '{user.team.name}'.")
 
         max_members = int(get_system_setting("max_members_per_team", "5", db))
         current_count = db.query(User).filter(User.team_id == inv.team_id).count()
         if current_count >= max_members:
-            raise HTTPException(status_code=400, detail=f"عفواً، اكتمل عدد أعضاء الفريق ({max_members} أعضاء).")
+            raise HTTPException(status_code=400, detail=f"ط¹ظپظˆط§ظ‹طŒ ط§ظƒطھظ…ظ„ ط¹ط¯ط¯ ط£ط¹ط¶ط§ط، ط§ظ„ظپط±ظٹظ‚ ({max_members} ط£ط¹ط¶ط§ط،).")
 
         user.team_id = inv.team_id
         inv.status = TeamInvitationStatusEnum.ACCEPTED
         db.commit()
-        return {"success": True, "message": f"تم قبول الدعوة والانضمام إلى الفريق '{inv.team.name}' بنجاح!"}
+        return {"success": True, "message": f"طھظ… ظ‚ط¨ظˆظ„ ط§ظ„ط¯ط¹ظˆط© ظˆط§ظ„ط§ظ†ط¶ظ…ط§ظ… ط¥ظ„ظ‰ ط§ظ„ظپط±ظٹظ‚ '{inv.team.name}' ط¨ظ†ط¬ط§ط­!"}
     else:
         inv.status = TeamInvitationStatusEnum.DECLINED
         db.commit()
-        return {"success": True, "message": "تم رفض الدعوة."}
+        return {"success": True, "message": "طھظ… ط±ظپط¶ ط§ظ„ط¯ط¹ظˆط©."}
 
 @app.get("/api/student/unassigned-students")
 def get_unassigned_students_for_invite(user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
@@ -1496,32 +1496,32 @@ def student_leave_team(user: User = Depends(require_role([RoleEnum.STUDENT])), d
         pass
 
     if not is_open:
-        raise HTTPException(status_code=400, detail="عفواً، تم إغلاق فترة تغيير التيمات ولا يمكنك المغادرة حالياً.")
+        raise HTTPException(status_code=400, detail="ط¹ظپظˆط§ظ‹طŒ طھظ… ط¥ط؛ظ„ط§ظ‚ ظپطھط±ط© طھط؛ظٹظٹط± ط§ظ„طھظٹظ…ط§طھ ظˆظ„ط§ ظٹظ…ظƒظ†ظƒ ط§ظ„ظ…ط؛ط§ط¯ط±ط© ط­ط§ظ„ظٹط§ظ‹.")
 
     if not user.team_id:
-        raise HTTPException(status_code=400, detail="أنت لست عضواً في أي فريق حالياً.")
+        raise HTTPException(status_code=400, detail="ط£ظ†طھ ظ„ط³طھ ط¹ط¶ظˆط§ظ‹ ظپظٹ ط£ظٹ ظپط±ظٹظ‚ ط­ط§ظ„ظٹط§ظ‹.")
 
     team_name = user.team.name if user.team else ""
     user.team_id = None
     db.commit()
-    return {"success": True, "message": f"تمت المغادرة من الفريق '{team_name}' بنجاح"}
+    return {"success": True, "message": f"طھظ…طھ ط§ظ„ظ…ط؛ط§ط¯ط±ط© ظ…ظ† ط§ظ„ظپط±ظٹظ‚ '{team_name}' ط¨ظ†ط¬ط§ط­"}
 
 @app.post("/api/admin/teams/assign-hr")
 def assign_team_hr(req: AssignTeamHRRequest, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     team = db.query(Team).filter(Team.id == req.team_id).first()
     if not team:
-        raise HTTPException(status_code=404, detail="الفريق غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظپط±ظٹظ‚ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     if req.hr_id:
         hr_user = db.query(User).filter(User.id == req.hr_id, User.role == RoleEnum.HR).first()
         if not hr_user:
-            raise HTTPException(status_code=404, detail="مسؤول الـ HR غير موجود")
+            raise HTTPException(status_code=404, detail="ظ…ط³ط¤ظˆظ„ ط§ظ„ظ€ HR ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
         team.hr_id = hr_user.id
     else:
         team.hr_id = None
 
     db.commit()
-    return {"success": True, "message": f"تم إسناد الفريق '{team.name}' لـ مسؤول الـ HR بنجاح"}
+    return {"success": True, "message": f"طھظ… ط¥ط³ظ†ط§ط¯ ط§ظ„ظپط±ظٹظ‚ '{team.name}' ظ„ظ€ ظ…ط³ط¤ظˆظ„ ط§ظ„ظ€ HR ط¨ظ†ط¬ط§ط­"}
 
 @app.post("/api/hr/attendance/excel")
 async def upload_attendance_excel(
@@ -1533,14 +1533,14 @@ async def upload_attendance_excel(
     contents = await file.read()
     res = import_attendance_from_excel_or_csv(contents, file.filename, session_id, db)
     if not res.get("success"):
-        raise HTTPException(status_code=400, detail=res.get("error", "فشل استيراد الحضور"))
+        raise HTTPException(status_code=400, detail=res.get("error", "ظپط´ظ„ ط§ط³طھظٹط±ط§ط¯ ط§ظ„ط­ط¶ظˆط±"))
     return res
 
 @app.post("/api/hr/attendance/bulk-manual")
 def mark_bulk_attendance(req: BulkAttendanceRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     sess = db.query(SessionSchedule).filter(SessionSchedule.id == req.session_id).first()
     if not sess:
-        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط³ظٹط´ظ† ط؛ظٹط± ظ…ظˆط¬ظˆط¯ط©")
 
     count = 0
     for rec in req.records:
@@ -1563,14 +1563,14 @@ def mark_bulk_attendance(req: BulkAttendanceRequest, user: User = Depends(requir
         count += 1
 
     db.commit()
-    return {"success": True, "message": f"تم حفظ غياب السيشن لـ {count} طالب بنجاح"}
+    return {"success": True, "message": f"طھظ… ط­ظپط¸ ط؛ظٹط§ط¨ ط§ظ„ط³ظٹط´ظ† ظ„ظ€ {count} ط·ط§ظ„ط¨ ط¨ظ†ط¬ط§ط­"}
 
 @app.get("/api/hr/download-sample-attendance-excel")
 def download_sample_attendance_excel():
     data = [
-        {"Student_ID": "2024001", "Student_Name": "أحمد محمود علي", "Attendance": "حاضر"},
-        {"Student_ID": "2024002", "Student_Name": "سارة محمد خليل", "Attendance": "غائب"},
-        {"Student_ID": "2024003", "Student_Name": "عمر حسن إبراهيم", "Attendance": "مستأذن"},
+        {"Student_ID": "2024001", "Student_Name": "ط£ط­ظ…ط¯ ظ…ط­ظ…ظˆط¯ ط¹ظ„ظٹ", "Attendance": "ط­ط§ط¶ط±"},
+        {"Student_ID": "2024002", "Student_Name": "ط³ط§ط±ط© ظ…ط­ظ…ط¯ ط®ظ„ظٹظ„", "Attendance": "ط؛ط§ط¦ط¨"},
+        {"Student_ID": "2024003", "Student_Name": "ط¹ظ…ط± ط­ط³ظ† ط¥ط¨ط±ط§ظ‡ظٹظ…", "Attendance": "ظ…ط³طھط£ط°ظ†"},
     ]
     df = pd.DataFrame(data)
     output = io.BytesIO()
@@ -1589,7 +1589,7 @@ def create_team(req: TeamCreateRequest, user: User = Depends(require_role([RoleE
     db.add(team)
     db.commit()
     db.refresh(team)
-    return {"success": True, "message": f"تم إنشاء الفريق '{team.name}' بنجاح", "team_id": team.id}
+    return {"success": True, "message": f"طھظ… ط¥ظ†ط´ط§ط، ط§ظ„ظپط±ظٹظ‚ '{team.name}' ط¨ظ†ط¬ط§ط­", "team_id": team.id}
 
 @app.get("/api/hr/teams")
 def list_teams(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -1609,7 +1609,7 @@ def list_teams(user: User = Depends(get_current_user), db: Session = Depends(get
 def assign_students_to_team(req: AssignTeamRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     team = db.query(Team).filter(Team.id == req.team_id).first()
     if not team:
-        raise HTTPException(status_code=404, detail="الفريق غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظپط±ظٹظ‚ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     for sid in req.student_ids:
         st = db.query(User).filter(User.id == sid).first()
@@ -1617,37 +1617,37 @@ def assign_students_to_team(req: AssignTeamRequest, user: User = Depends(require
             st.team_id = team.id
 
     db.commit()
-    return {"success": True, "message": f"تم إضافة {len(req.student_ids)} طالب إلى الفريق بنجاح"}
+    return {"success": True, "message": f"طھظ… ط¥ط¶ط§ظپط© {len(req.student_ids)} ط·ط§ظ„ط¨ ط¥ظ„ظ‰ ط§ظ„ظپط±ظٹظ‚ ط¨ظ†ط¬ط§ط­"}
 
 @app.delete("/api/hr/teams/{team_id}")
 def delete_team(team_id: int, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     team = db.query(Team).filter(Team.id == team_id).first()
     if not team:
-        raise HTTPException(status_code=404, detail="الفريق غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ظپط±ظٹظ‚ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     
     # Unassign students
     db.query(User).filter(User.team_id == team_id).update({"team_id": None})
     db.delete(team)
     db.commit()
-    return {"success": True, "message": "تم حذف الفريق بنجاح"}
+    return {"success": True, "message": "طھظ… ط­ط°ظپ ط§ظ„ظپط±ظٹظ‚ ط¨ظ†ط¬ط§ط­"}
 
 @app.post("/api/admin/assign-hr")
 def assign_hr_to_student(req: AssignHRRequest, user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.HR])), db: Session = Depends(get_db)):
     st = db.query(User).filter(User.id == req.student_id).first()
     if not st:
-        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط·ط§ظ„ط¨ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
     
     if req.hr_id:
         hr_user = db.query(User).filter(User.id == req.hr_id).first()
         if not hr_user:
-            raise HTTPException(status_code=404, detail="مسؤول HR غير موجود")
+            raise HTTPException(status_code=404, detail="ظ…ط³ط¤ظˆظ„ HR ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
         current_count = db.query(User).filter(User.assigned_hr_id == req.hr_id).count()
         if current_count >= 50 and st.assigned_hr_id != req.hr_id:
-            raise HTTPException(status_code=400, detail=f"عذراً! مسئول الـ HR ({hr_user.name}) وصل للحد الأقصى المسموح به (50 طالب كحد أقصى).")
+            raise HTTPException(status_code=400, detail=f"ط¹ط°ط±ط§ظ‹! ظ…ط³ط¦ظˆظ„ ط§ظ„ظ€ HR ({hr_user.name}) ظˆطµظ„ ظ„ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ط§ظ„ظ…ط³ظ…ظˆط­ ط¨ظ‡ (50 ط·ط§ظ„ط¨ ظƒط­ط¯ ط£ظ‚طµظ‰).")
 
     st.assigned_hr_id = req.hr_id
     db.commit()
-    return {"success": True, "message": "تم تعيين مسئول الـ HR للطالب بنجاح"}
+    return {"success": True, "message": "طھظ… طھط¹ظٹظٹظ† ظ…ط³ط¦ظˆظ„ ط§ظ„ظ€ HR ظ„ظ„ط·ط§ظ„ط¨ ط¨ظ†ط¬ط§ط­"}
 
 @app.post("/api/hr/self-assign/{student_id}")
 def self_assign_student_hr(student_id: str, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -1655,18 +1655,18 @@ def self_assign_student_hr(student_id: str, user: User = Depends(require_role([R
     if "hr" in user_roles and "admin" not in user_roles:
         current_count = db.query(User).filter(User.assigned_hr_id == user.id).count()
         if current_count >= 50:
-            raise HTTPException(status_code=400, detail="عذراً! لقد وصلت للحد الأقصى لعدد الطلاب المسندين لـ HR واحد (50 طالب كحد أقصى).")
+            raise HTTPException(status_code=400, detail="ط¹ط°ط±ط§ظ‹! ظ„ظ‚ط¯ ظˆطµظ„طھ ظ„ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ظ„ط¹ط¯ط¯ ط§ظ„ط·ظ„ط§ط¨ ط§ظ„ظ…ط³ظ†ط¯ظٹظ† ظ„ظ€ HR ظˆط§ط­ط¯ (50 ط·ط§ظ„ط¨ ظƒط­ط¯ ط£ظ‚طµظ‰).")
 
     student = db.query(User).filter(User.id == student_id).first()
     if not student or "student" not in get_user_roles(student):
-        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط·ط§ظ„ط¨ ط؛ظٹط± ظ…ظˆط¬ظˆط¯")
 
     if student.assigned_hr_id and student.assigned_hr_id != user.id and "admin" not in user_roles:
-        raise HTTPException(status_code=400, detail="هذا الطالب مخصص بالفعل لمسؤول HR آخر")
+        raise HTTPException(status_code=400, detail="ظ‡ط°ط§ ط§ظ„ط·ط§ظ„ط¨ ظ…ط®طµطµ ط¨ط§ظ„ظپط¹ظ„ ظ„ظ…ط³ط¤ظˆظ„ HR ط¢ط®ط±")
 
     student.assigned_hr_id = user.id
     db.commit()
-    return {"success": True, "message": f"تم إسناد الطالب ({student.name}) لقائمتك بنجاح"}
+    return {"success": True, "message": f"طھظ… ط¥ط³ظ†ط§ط¯ ط§ظ„ط·ط§ظ„ط¨ ({student.name}) ظ„ظ‚ط§ط¦ظ…طھظƒ ط¨ظ†ط¬ط§ط­"}
 
 # --- MEDIA & CERTIFICATES ENDPOINTS ---
 import os
@@ -1690,7 +1690,7 @@ async def upload_certificate(
     if ext not in ALLOWED_CERTIFICATE_EXTENSIONS:
         raise HTTPException(
             status_code=400,
-            detail=f"نوع الملف غير مسموح به. الصيغ المسموحة للشهادات هى: {', '.join(ALLOWED_CERTIFICATE_EXTENSIONS)}"
+            detail=f"ظ†ظˆط¹ ط§ظ„ظ…ظ„ظپ ط؛ظٹط± ظ…ط³ظ…ظˆط­ ط¨ظ‡. ط§ظ„طµظٹط؛ ط§ظ„ظ…ط³ظ…ظˆط­ط© ظ„ظ„ط´ظ‡ط§ط¯ط§طھ ظ‡ظ‰: {', '.join(ALLOWED_CERTIFICATE_EXTENSIONS)}"
         )
 
     clean_filename = re.sub(r'[^a-zA-Z0-9_\.-]', '_', base_name)
@@ -1699,7 +1699,7 @@ async def upload_certificate(
 
     contents = await file.read()
     if len(contents) > 15 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="حجم ملف الشهادة كبير جداً. الحد الأقصى المسموح به هو 15 ميجابايت.")
+        raise HTTPException(status_code=400, detail="ط­ط¬ظ… ظ…ظ„ظپ ط§ظ„ط´ظ‡ط§ط¯ط© ظƒط¨ظٹط± ط¬ط¯ط§ظ‹. ط§ظ„ط­ط¯ ط§ظ„ط£ظ‚طµظ‰ ط§ظ„ظ…ط³ظ…ظˆط­ ط¨ظ‡ ظ‡ظˆ 15 ظ…ظٹط¬ط§ط¨ط§ظٹطھ.")
 
     with open(file_path, "wb") as buffer:
         buffer.write(contents)
@@ -1715,7 +1715,7 @@ async def upload_certificate(
     db.add(cert)
     db.commit()
     db.refresh(cert)
-    return {"success": True, "message": "تم رفع الشهادة بنجاح وتأمينها", "certificate_id": cert.id}
+    return {"success": True, "message": "طھظ… ط±ظپط¹ ط§ظ„ط´ظ‡ط§ط¯ط© ط¨ظ†ط¬ط§ط­ ظˆطھط£ظ…ظٹظ†ظ‡ط§", "certificate_id": cert.id}
 
 @app.get("/api/certificates")
 def get_certificates(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -1735,8 +1735,8 @@ def get_certificates(user: User = Depends(get_current_user), db: Session = Depen
             "id": c.id,
             "title": c.title,
             "file_path": c.file_path,
-            "recipient": {"id": recipient.id, "name": recipient.name} if recipient else {"id": None, "name": "عام للجميع"},
-            "uploader": uploader.name if uploader else "مسؤول الميديا",
+            "recipient": {"id": recipient.id, "name": recipient.name} if recipient else {"id": None, "name": "ط¹ط§ظ… ظ„ظ„ط¬ظ…ظٹط¹"},
+            "uploader": uploader.name if uploader else "ظ…ط³ط¤ظˆظ„ ط§ظ„ظ…ظٹط¯ظٹط§",
             "created_at": c.created_at.strftime("%Y-%m-%d %H:%M") if c.created_at else ""
         })
     return res
@@ -1745,7 +1745,7 @@ def get_certificates(user: User = Depends(get_current_user), db: Session = Depen
 def delete_certificate(cert_id: int, user: User = Depends(require_role([RoleEnum.MEDIA, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     cert = db.query(Certificate).filter(Certificate.id == cert_id).first()
     if not cert:
-        raise HTTPException(status_code=404, detail="الشهادة غير موجودة")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط´ظ‡ط§ط¯ط© ط؛ظٹط± ظ…ظˆط¬ظˆط¯ط©")
     
     # Remove file if exists
     full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", cert.file_path.lstrip("/"))
@@ -1757,17 +1757,17 @@ def delete_certificate(cert_id: int, user: User = Depends(require_role([RoleEnum
 
     db.delete(cert)
     db.commit()
-    return {"success": True, "message": "تم حذف الشهادة بنجاح"}
+    return {"success": True, "message": "طھظ… ط­ط°ظپ ط§ظ„ط´ظ‡ط§ط¯ط© ط¨ظ†ط¬ط§ط­"}
 
 # --- STUDENT TEAM & PORTAL ENDPOINTS ---
 @app.get("/api/student/team")
 def get_student_team(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.team_id:
-        return {"has_team": False, "message": "لم يتم إضافة الطالب إلى تيم بعد."}
+        return {"has_team": False, "message": "ظ„ظ… ظٹطھظ… ط¥ط¶ط§ظپط© ط§ظ„ط·ط§ظ„ط¨ ط¥ظ„ظ‰ طھظٹظ… ط¨ط¹ط¯."}
     
     team = db.query(Team).filter(Team.id == user.team_id).first()
     if not team:
-        return {"has_team": False, "message": "الفريق غير موجود."}
+        return {"has_team": False, "message": "ط§ظ„ظپط±ظٹظ‚ ط؛ظٹط± ظ…ظˆط¬ظˆط¯."}
         
     members = db.query(User).filter(User.team_id == team.id).all()
     members_data = []
@@ -1776,8 +1776,8 @@ def get_student_team(user: User = Depends(get_current_user), db: Session = Depen
             "id": m.id,
             "name": m.name,
             "role": m.role,
-            "email": m.email or "غير مدخل",
-            "phone": m.phone or "غير مدخل",
+            "email": m.email or "ط؛ظٹط± ظ…ط¯ط®ظ„",
+            "phone": m.phone or "ط؛ظٹط± ظ…ط¯ط®ظ„",
             "is_me": m.id == user.id
         })
         
@@ -1804,7 +1804,7 @@ def get_leaderboard(db: Session = Depends(get_db)):
             
             # Calculate attendance rate
             att_total = db.query(Attendance).filter(Attendance.student_id == u.id).count()
-            att_present = db.query(Attendance).filter(Attendance.student_id == u.id, Attendance.status == "حاضر").count()
+            att_present = db.query(Attendance).filter(Attendance.student_id == u.id, Attendance.status == "ط­ط§ط¶ط±").count()
             att_rate = round((att_present / att_total * 100)) if att_total > 0 else 100
             
             # Final composite score
@@ -1812,11 +1812,11 @@ def get_leaderboard(db: Session = Depends(get_db)):
             
             badges = []
             if att_rate == 100:
-                badges.append("🌟 Perfect Attendance")
+                badges.append("ًںŒں Perfect Attendance")
             if total_task_score >= 100:
-                badges.append("⚡ Code Master")
+                badges.append("âڑ، Code Master")
             if u.team_id:
-                badges.append("🏆 Team Captain")
+                badges.append("ًںڈ† Team Captain")
                 
             student_scores.append({
                 "id": u.id,
@@ -1846,8 +1846,8 @@ def get_user_notifications(user: User = Depends(get_current_user), db: Session =
         notifications.append({
             "id": f"sess-{s.id}",
             "type": "session",
-            "title": f"📅 سيشن قادمة: {s.title}",
-            "body": f"الموعد: {s.date_time} | المكان: {s.location_or_link or 'غير محدد'}",
+            "title": f"ًں“… ط³ظٹط´ظ† ظ‚ط§ط¯ظ…ط©: {s.title}",
+            "body": f"ط§ظ„ظ…ظˆط¹ط¯: {s.date_time} | ط§ظ„ظ…ظƒط§ظ†: {s.location_or_link or 'ط؛ظٹط± ظ…ط­ط¯ط¯'}",
             "time": s.date_time
         })
         
@@ -1857,8 +1857,8 @@ def get_user_notifications(user: User = Depends(get_current_user), db: Session =
         notifications.append({
             "id": f"task-{t.id}",
             "type": "task",
-            "title": f"📝 واجب جديد: {t.title}",
-            "body": f"الديدلاين: {t.deadline.strftime('%Y-%m-%d %H:%M')} | الدرجة: {t.max_score}",
+            "title": f"ًں“‌ ظˆط§ط¬ط¨ ط¬ط¯ظٹط¯: {t.title}",
+            "body": f"ط§ظ„ط¯ظٹط¯ظ„ط§ظٹظ†: {t.deadline.strftime('%Y-%m-%d %H:%M')} | ط§ظ„ط¯ط±ط¬ط©: {t.max_score}",
             "time": t.created_at.strftime("%Y-%m-%d %H:%M")
         })
         
@@ -1869,8 +1869,8 @@ def get_user_notifications(user: User = Depends(get_current_user), db: Session =
             notifications.append({
                 "id": f"inv-{inv.id}",
                 "type": "team",
-                "title": f"✉️ دعوة انضمام لفريق: {inv.team.name}",
-                "body": f"قام الطالب {inv.sender.name} بدعوتك للانضمام لقريقه.",
+                "title": f"âœ‰ï¸ڈ ط¯ط¹ظˆط© ط§ظ†ط¶ظ…ط§ظ… ظ„ظپط±ظٹظ‚: {inv.team.name}",
+                "body": f"ظ‚ط§ظ… ط§ظ„ط·ط§ظ„ط¨ {inv.sender.name} ط¨ط¯ط¹ظˆطھظƒ ظ„ظ„ط§ظ†ط¶ظ…ط§ظ… ظ„ظ‚ط±ظٹظ‚ظ‡.",
                 "time": inv.created_at.strftime("%Y-%m-%d %H:%M")
             })
             
@@ -1890,12 +1890,12 @@ def export_plagiarism_excel(task_id: int, user: User = Depends(require_role([Rol
             "Similarity Match %": f"{r.similarity_score}%",
             "Student A ID": st_a.id if st_a else "",
             "Student A Name": st_a.name if st_a else "",
-            "Student A TA": st_a.assigned_supporter.name if (st_a and st_a.assigned_supporter) else "غير معين",
-            "Student A HR": st_a.assigned_hr.name if (st_a and st_a.assigned_hr) else "غير معين",
+            "Student A TA": st_a.assigned_supporter.name if (st_a and st_a.assigned_supporter) else "ط؛ظٹط± ظ…ط¹ظٹظ†",
+            "Student A HR": st_a.assigned_hr.name if (st_a and st_a.assigned_hr) else "ط؛ظٹط± ظ…ط¹ظٹظ†",
             "Student B ID": st_b.id if st_b else "",
             "Student B Name": st_b.name if st_b else "",
-            "Student B TA": st_b.assigned_supporter.name if (st_b and st_b.assigned_supporter) else "غير معين",
-            "Student B HR": st_b.assigned_hr.name if (st_b and st_b.assigned_hr) else "غير معين"
+            "Student B TA": st_b.assigned_supporter.name if (st_b and st_b.assigned_supporter) else "ط؛ظٹط± ظ…ط¹ظٹظ†",
+            "Student B HR": st_b.assigned_hr.name if (st_b and st_b.assigned_hr) else "ط؛ظٹط± ظ…ط¹ظٹظ†"
         })
         
     df = pd.DataFrame(data)
@@ -1913,7 +1913,7 @@ def export_plagiarism_excel(task_id: int, user: User = Depends(require_role([Rol
 def export_hr_attendance_excel(session_id: int, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     sess = db.query(SessionSchedule).filter(SessionSchedule.id == session_id).first()
     if not sess:
-        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+        raise HTTPException(status_code=404, detail="ط§ظ„ط³ظٹط´ظ† ط؛ظٹط± ظ…ظˆط¬ظˆط¯ط©")
         
     # Get students
     if user.role == RoleEnum.ADMIN or "admin" in get_user_roles(user):
@@ -1933,7 +1933,7 @@ def export_hr_attendance_excel(session_id: int, user: User = Depends(require_rol
                 "Seat Number": s.seat_number or "",
                 "Academic Level": s.academic_level or "",
                 "Program": s.program or "",
-                "Attendance Status": att.status if att else "غائب",
+                "Attendance Status": att.status if att else "ط؛ط§ط¦ط¨",
                 "Notes": att.notes if att else ""
             })
             
