@@ -1,5 +1,6 @@
 import io
 import json
+import os
 import enum
 from datetime import datetime, timedelta
 from typing import Optional, List
@@ -36,6 +37,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Static files directory
+_STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+
+# Root route → serve index.html
+@app.get("/", include_in_schema=False)
+def serve_root():
+    index_path = os.path.join(_STATIC_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path, media_type="text/html")
+    return Response(content="LMS API is running. index.html not found.", status_code=200)
 
 # HTTP Security Headers Middleware
 @app.get("/favicon.ico", include_in_schema=False)
@@ -1930,3 +1942,7 @@ def export_hr_attendance_excel(session_id: int, user: User = Depends(require_rol
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename=session_{session_id}_attendance.xlsx"}
     )
+
+# Mount static files LAST (after all API routes)
+if os.path.isdir(_STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
