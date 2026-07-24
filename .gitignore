@@ -18,9 +18,9 @@ venv/
 .venv/
 env/
 
-# Database (لا ترفع الـ DB، هيتعمل تلقائي على Render)
-*.db
-*.sqlite
+# Database - DO NOT ignore, we want to deploy with data
+# *.db
+# *.sqlite
 
 # IDE
 .vscode/
