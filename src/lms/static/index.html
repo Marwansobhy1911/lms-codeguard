@@ -2117,8 +2117,29 @@
 
             try {
                 const res = await fetch(endpoint, config);
-                const result = await res.json();
-                if (!res.ok) throw new Error(result.detail || 'Error occurred');
+                let result = null;
+                try {
+                    result = await res.json();
+                } catch (e) {
+                    if (!res.ok) throw new Error(`حدث خطأ في الاستجابة من السيرفر (${res.status})`);
+                }
+
+                if (!res.ok) {
+                    let errMsg = 'حدث خطأ غير متوقع';
+                    if (result) {
+                        const rawDetail = result.detail || result.message || result.error;
+                        if (typeof rawDetail === 'string') {
+                            errMsg = rawDetail;
+                        } else if (Array.isArray(rawDetail)) {
+                            errMsg = rawDetail.map(d => (typeof d === 'string' ? d : d.msg || d.detail || JSON.stringify(d))).join('\n');
+                        } else if (rawDetail && typeof rawDetail === 'object') {
+                            errMsg = rawDetail.msg || rawDetail.message || JSON.stringify(rawDetail);
+                        }
+                    }
+                    const err = new Error(errMsg);
+                    err.detail = errMsg;
+                    throw err;
+                }
                 return result;
             } catch (err) { throw err; }
         }
