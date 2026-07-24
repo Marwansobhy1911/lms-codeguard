@@ -2,13 +2,22 @@ import json
 from sqlalchemy.orm import Session
 from src.lms.models import Submission as DBSubmission, PlagiarismReport
 from src.core.entities.submission import Submission as EngineSubmission
-from src.application.use_cases.run_comparison import RunComparisonUseCase
+
+try:
+    from src.application.use_cases.run_comparison import RunComparisonUseCase
+    _PLAGIARISM_AVAILABLE = True
+except Exception:
+    _PLAGIARISM_AVAILABLE = False
+    RunComparisonUseCase = None
 
 def check_task_plagiarism(task_id: int, db: Session) -> list:
     """
     Runs plagiarism detection across all student submissions for a given task_id.
     Saves/updates PlagiarismReport records in the database.
     """
+    if not _PLAGIARISM_AVAILABLE:
+        return []
+
     submissions_db = db.query(DBSubmission).filter(DBSubmission.task_id == task_id).all()
     if len(submissions_db) < 2:
         return []
