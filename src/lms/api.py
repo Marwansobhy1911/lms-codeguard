@@ -27,7 +27,12 @@ from src.lms.excel_service import import_users_from_excel_or_csv, import_attenda
 from src.lms.anti_cheating import check_task_plagiarism
 import re
 
+from fastapi.middleware.gzip import GZipMiddleware
+
 app = FastAPI(title="CodeGuard LMS API", version="1.0.0")
+
+# Enable response compression for mobile bandwidth optimization
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Enable CORS for web UI
 app.add_middleware(
