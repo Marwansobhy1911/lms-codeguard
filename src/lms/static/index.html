@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl" id="html-root">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>CodeGuard LMS - Smart Learning Management System</title>
     <link rel="icon" type="image/jpeg" href="/logo2.jpeg">
     <!-- Google Fonts: Cairo & Inter -->
@@ -27,7 +27,13 @@
             --text-muted: #94a3b8;
         }
 
-        * {
+        html {
+            width: 100%;
+            -webkit-text-size-adjust: 100%;
+            box-sizing: border-box;
+        }
+
+        *, *:before, *:after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -37,7 +43,11 @@
         body {
             background-color: var(--bg-primary);
             color: var(--text-main);
+            width: 100%;
             min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            position: relative;
             background-image: 
                 radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 20%),
                 radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 20%);
