@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.spec
+
+# Excel temp lock files
+~$*
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Database (لا ترفع الـ DB، هيتعمل تلقائي على Render)
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pytest cache
+.pytest_cache/
+
+# Compiled files
+*.ico

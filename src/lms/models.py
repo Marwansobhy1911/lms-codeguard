@@ -1,0 +1,178 @@
+import enum
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float, ForeignKey, Text, Enum
+from sqlalchemy.orm import declarative_base, relationship
+
+Base = declarative_base()
+
+class RoleEnum(str, enum.Enum):
+    STUDENT = "student"
+    SUPPORTER = "supporter"
+    INSTRUCTOR = "instructor"
+    HR = "hr"
+    MEDIA = "media"
+    ADMIN = "admin"
+
+class AttendanceStatusEnum(str, enum.Enum):
+    PRESENT = "present"
+    ABSENT = "absent"
+    EXCUSED = "excused"
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True, index=True) # User ID (e.g. 2024001 or STU-101)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=True) # Personal Email
+    official_email = Column(String, nullable=True) # Official FCIS Email
+    phone = Column(String, nullable=True) # Student Mobile Number
+    seat_number = Column(String, nullable=True) # Student FCIS Seat Number / الرقم الجامعي
+    academic_level = Column(String, nullable=True) # Level during last academic year (25-26)
+    program = Column(String, nullable=True) # Program (General, CS, IT, etc.)
+    bio = Column(Text, nullable=True)
+    role = Column(String, default="student", nullable=False) # Multi-role comma-separated string e.g. "student,hr"
+    password_hash = Column(String, nullable=False)
+    must_change_password = Column(Boolean, default=True, nullable=False)
+    assigned_supporter_id = Column(String, ForeignKey("users.id"), nullable=True)
+    assigned_hr_id = Column(String, ForeignKey("users.id"), nullable=True)
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
+
+    created_at = Column(DateTime, default=datetime.now)
+
+    # Relationships
+    assigned_supporter = relationship("User", remote_side=[id], foreign_keys=[assigned_supporter_id], backref="assigned_students")
+    assigned_hr = relationship("User", remote_side=[id], foreign_keys=[assigned_hr_id], backref="assigned_students_hr")
+    team = relationship("Team", back_populates="members", foreign_keys=[team_id])
+    submissions = relationship("Submission", back_populates="student", foreign_keys="Submission.student_id", cascade="all, delete-orphan")
+    attendances = relationship("Attendance", back_populates="student", cascade="all, delete-orphan")
+    certificates = relationship("Certificate", back_populates="recipient", foreign_keys="Certificate.user_id", cascade="all, delete-orphan")
+
+class Team(Base):
+    __tablename__ = "teams"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    hr_id = Column(String, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+
+    creator_hr = relationship("User", foreign_keys=[hr_id])
+    members = relationship("User", back_populates="team", foreign_keys=[User.team_id])
+
+class Certificate(Base):
+    __tablename__ = "certificates"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    uploaded_by_id = Column(String, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    recipient = relationship("User", foreign_keys=[user_id], back_populates="certificates")
+    uploaded_by = relationship("User", foreign_keys=[uploaded_by_id])
+
+class SessionSchedule(Base):
+    __tablename__ = "session_schedules"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    instructor_id = Column(String, ForeignKey("users.id"), nullable=False)
+    date_time = Column(DateTime, nullable=False)
+    location_or_link = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+
+    instructor = relationship("User")
+    attendances = relationship("Attendance", back_populates="session", cascade="all, delete-orphan")
+
+class Attendance(Base):
+    __tablename__ = "attendances"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(Integer, ForeignKey("session_schedules.id"), nullable=False)
+    student_id = Column(String, ForeignKey("users.id"), nullable=False)
+    status = Column(Enum(AttendanceStatusEnum), default=AttendanceStatusEnum.PRESENT, nullable=False)
+    notes = Column(String, nullable=True)
+    marked_at = Column(DateTime, default=datetime.now)
+
+    session = relationship("SessionSchedule", back_populates="attendances")
+    student = relationship("User", back_populates="attendances")
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    instructor_id = Column(String, ForeignKey("users.id"), nullable=False)
+    deadline = Column(DateTime, nullable=False)
+    max_score = Column(Float, default=100.0)
+    allowed_languages = Column(String, default="python,c,cpp,javascript")
+    created_at = Column(DateTime, default=datetime.now)
+
+    instructor = relationship("User")
+    submissions = relationship("Submission", back_populates="task", cascade="all, delete-orphan")
+
+class Submission(Base):
+    __tablename__ = "submissions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
+    student_id = Column(String, ForeignKey("users.id"), nullable=False)
+    code_content = Column(Text, nullable=False)
+    file_name = Column(String, default="solution.py")
+    language = Column(String, default="python")
+    submitted_at = Column(DateTime, default=datetime.now)
+    
+    score = Column(Float, nullable=True)
+    feedback = Column(Text, nullable=True)
+    graded_by_id = Column(String, ForeignKey("users.id"), nullable=True)
+    graded_at = Column(DateTime, nullable=True)
+
+    task = relationship("Task", back_populates="submissions")
+    student = relationship("User", foreign_keys=[student_id], back_populates="submissions")
+    graded_by = relationship("User", foreign_keys=[graded_by_id])
+
+class PlagiarismReport(Base):
+    __tablename__ = "plagiarism_reports"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
+    submission_a_id = Column(Integer, ForeignKey("submissions.id"), nullable=False)
+    submission_b_id = Column(Integer, ForeignKey("submissions.id"), nullable=False)
+    student_a_id = Column(String, ForeignKey("users.id"), nullable=False)
+    student_b_id = Column(String, ForeignKey("users.id"), nullable=False)
+    similarity_score = Column(Float, nullable=False)
+    details_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+
+    task = relationship("Task")
+    submission_a = relationship("Submission", foreign_keys=[submission_a_id])
+    submission_b = relationship("Submission", foreign_keys=[submission_b_id])
+    student_a = relationship("User", foreign_keys=[student_a_id])
+    student_b = relationship("User", foreign_keys=[student_b_id])
+
+class SystemSetting(Base):
+    __tablename__ = "system_settings"
+
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=False)
+
+class TeamInvitationStatusEnum(str, enum.Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    DECLINED = "declined"
+
+class TeamInvitation(Base):
+    __tablename__ = "team_invitations"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
+    inviter_id = Column(String, ForeignKey("users.id"), nullable=False)
+    invited_student_id = Column(String, ForeignKey("users.id"), nullable=False)
+    status = Column(Enum(TeamInvitationStatusEnum), default=TeamInvitationStatusEnum.PENDING, nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+
+    team = relationship("Team")
+    inviter = relationship("User", foreign_keys=[inviter_id])
+    invited_student = relationship("User", foreign_keys=[invited_student_id])
