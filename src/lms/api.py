@@ -352,22 +352,19 @@ def register_student(req: RegisterRequest, db: Session = Depends(get_db)):
         if existing_seat:
             raise HTTPException(status_code=400, detail=f"عذراً! رقم الجلوس / الرقم الجامعي ({seat_no}) مسجل بالفعل لحساب طالب آخر بالنظام ({existing_seat.name}). يرجى التأكد من رقم جلوسك.")
 
-    # Find next Student ID: max numeric ID + 1
-    all_users = db.query(User).all()
-    numeric_ids = []
-    for u in all_users:
-        try:
-            clean_digits = "".join(ch for ch in str(u.id) if ch.isdigit())
-            if clean_digits:
-                numeric_ids.append(int(clean_digits))
-        except ValueError:
-            pass
+    # Find next Student ID: last created numeric user ID + 1
+    recent_users = db.query(User).order_by(User.created_at.desc()).all()
+    new_id = None
+    next_id_num = None
+    for u in recent_users:
+        if u.id and u.id.isdigit():
+            next_id_num = int(u.id) + 1
+            new_id = str(next_id_num)
+            break
 
-    if numeric_ids:
-        next_id_num = max(numeric_ids) + 1
+    if not new_id:
+        next_id_num = 20261000
         new_id = str(next_id_num)
-    else:
-        new_id = "20261000"
 
     while db.query(User).filter(User.id == new_id).first():
         next_id_num += 1

@@ -50,7 +50,16 @@ def import_users_from_excel_or_csv(file_bytes: bytes, filename: str, db: Session
 
     imported_count = 0
     updated_count = 0
-    generated_id_counter = 100
+    recent_users = db.query(User).order_by(User.created_at.desc()).all()
+    next_generated_num = None
+    for u in recent_users:
+        if u.id and u.id.isdigit():
+            next_generated_num = int(u.id) + 1
+            break
+
+    if next_generated_num is None:
+        next_generated_num = 20260100
+
     batch_seen_ids = set()
 
     for idx, row in df.iterrows():
@@ -79,8 +88,8 @@ def import_users_from_excel_or_csv(file_bytes: bytes, filename: str, db: Session
             if is_marwan:
                 user_id = "2023170570"
             else:
-                user_id = f"2026{generated_id_counter:04d}"
-                generated_id_counter += 1
+                user_id = str(next_generated_num)
+                next_generated_num += 1
 
         # Deduplicate user_id in batch
         base_id = user_id
