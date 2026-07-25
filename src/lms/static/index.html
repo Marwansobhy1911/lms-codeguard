@@ -802,7 +802,7 @@
         <div id="hr-contact-modal" class="modal-overlay">
             <div class="modal-content">
                 <button class="close-btn" onclick="closeModal('hr-contact-modal')">&times;</button>
-                <h3 style="margin-bottom: 16px; color: #fb7185;">👔 بيانات التواصل مع مسؤول الغياب (HR)</h3>
+                <h3 style="margin-bottom: 16px; color: #fb7185;" data-i18n="hr_contact_title">👔 بيانات التواصل مع مسؤول الغياب (HR)</h3>
                 <div style="background: rgba(15,23,42,0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--border-card);">
                     <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; color: #fb7185;" id="hr-info-name">---</div>
                     <div style="margin-bottom: 10px; font-size: 0.95rem;">
@@ -823,51 +823,51 @@
         <div id="profile-edit-modal" class="modal-overlay">
             <div class="modal-content" style="max-width: 600px;">
                 <button class="close-btn" onclick="closeModal('profile-edit-modal')">&times;</button>
-                <h3 style="margin-bottom: 16px; color: var(--accent-cyan);">✏️ تحديث البيانات الشخصية</h3>
+                <h3 style="margin-bottom: 16px; color: var(--accent-cyan);" data-i18n="edit_profile_title">✏️ تحديث البيانات الشخصية</h3>
                 <form onsubmit="handleUpdateProfile(event)">
                     <div class="form-group">
-                        <label>الرقم التعريفي (ID - ثابت لا يمكن تعديله)</label>
+                        <label data-i18n="label_id">الرقم التعريفي (ID)</label>
                         <input type="text" id="pe-id" readonly disabled style="opacity: 0.6; cursor: not-allowed;">
                     </div>
                     <div class="form-group">
-                        <label>الاسم الكامل</label>
+                        <label data-i18n="label_name">الاسم الكامل</label>
                         <input type="text" id="pe-name" required>
                     </div>
                     <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
                         <div class="form-group" style="margin: 0;">
-                            <label>البريد الأكاديمي الرسمي</label>
+                            <label data-i18n="label_official_email">البريد الأكاديمي الرسمي</label>
                             <input type="email" id="pe-official-email" placeholder="xxx@cis.asu.edu.eg">
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label>البريد الإلكتروني الشخصي</label>
+                            <label data-i18n="label_personal_email">البريد الإلكتروني الشخصي</label>
                             <input type="email" id="pe-email">
                         </div>
                     </div>
                     <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
                         <div class="form-group" style="margin: 0;">
-                            <label>رقم الهاتف / الموبايل</label>
+                            <label data-i18n="label_phone_no">رقم الهاتف / الموبايل</label>
                             <input type="text" id="pe-phone" placeholder="010XXXXXXXX">
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label>رقم الجلوس / الرقم الجامعي</label>
+                            <label data-i18n="label_seat_no">رقم الجلوس / الرقم الجامعي</label>
                             <input type="text" id="pe-seat">
                         </div>
                     </div>
                     <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
                         <div class="form-group" style="margin: 0;">
-                            <label>المستوى الدراسي / الفرقة</label>
+                            <label data-i18n="label_level">المستوى الدراسي / الفرقة</label>
                             <input type="text" id="pe-level" placeholder="مثال: level 3 أو Level 1">
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label>البرنامج / التخصص</label>
+                            <label data-i18n="label_program">البرنامج / التخصص</label>
                             <input type="text" id="pe-program" placeholder="مثال: General أو CS">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>نبذة / الملاحظات الشخصية</label>
+                        <label data-i18n="label_bio">نبذة / الملاحظات الشخصية</label>
                         <textarea id="pe-bio" style="height: 70px;" placeholder="اكتب نبذة عنك..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_save_profile">
                         💾 حفظ البيانات المعدلة
                     </button>
                 </form>
@@ -878,63 +878,63 @@
         <div id="admin-edit-user-modal" class="modal-overlay">
             <div class="modal-content" style="max-width: 600px;">
                 <button class="close-btn" onclick="closeModal('admin-edit-user-modal')">&times;</button>
-                <h3 style="margin-bottom: 16px; color: var(--accent-amber);">🛠️ تعديل بيانات ورول الـ ID بصفة أدمن</h3>
+                <h3 style="margin-bottom: 16px; color: var(--accent-amber);" data-i18n="admin_edit_user_title">🛠️ تعديل بيانات ورول الـ ID بصفة أدمن</h3>
                 <form onsubmit="handleAdminUpdateUserProfile(event)">
                     <input type="hidden" id="ae-original-id">
                     <div class="form-group" style="margin-bottom: 14px;">
-                        <label>الرقم التعريفي (ID)</label>
+                        <label data-i18n="label_id">الرقم التعريفي (ID)</label>
                         <input type="text" id="ae-id" required style="border: 1px solid var(--accent-cyan);">
                     </div>
                     <div class="form-group" style="margin-bottom: 14px;">
-                        <label>رولات وصلاحيات الحساب (يمكن اختيار أكثر من رول):</label>
+                        <label data-i18n="th_role">رولات وصلاحيات الحساب (يمكن اختيار أكثر من رول):</label>
                         <div style="display: flex; gap: 12px; flex-wrap: wrap; background: rgba(15,23,42,0.6); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-card); margin-top: 4px;">
-                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="student"> 🎓 student (طالب)</label>
-                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="hr"> 👔 hr (مسؤول غياب)</label>
-                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="media"> 🎨 media (مسؤول ميديا)</label>
-                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="supporter"> 🛠️ supporter (مساعد)</label>
-                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="instructor"> 👨‍🏫 instructor (مدرب)</label>
-                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="admin"> 👑 admin (أدمن)</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="student"> 🎓 Student (طالب)</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="hr"> 👔 HR</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="media"> 🎨 Media</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="supporter"> 🛠️ Supporter (TA)</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="instructor"> 👨‍🏫 Instructor</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="admin"> 👑 Admin</label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>الاسم الكامل</label>
+                        <label data-i18n="label_name">الاسم الكامل</label>
                         <input type="text" id="ae-name" required>
                     </div>
                     <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
                         <div class="form-group" style="margin: 0;">
-                            <label>البريد الأكاديمي الرسمي</label>
+                            <label data-i18n="label_official_email">البريد الأكاديمي الرسمي</label>
                             <input type="email" id="ae-official-email">
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label>البريد الإلكتروني الشخصي</label>
+                            <label data-i18n="label_personal_email">البريد الإلكتروني الشخصي</label>
                             <input type="email" id="ae-email">
                         </div>
                     </div>
                     <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
                         <div class="form-group" style="margin: 0;">
-                            <label>رقم الهاتف / الموبايل</label>
+                            <label data-i18n="label_phone_no">رقم الهاتف / الموبايل</label>
                             <input type="text" id="ae-phone">
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label>رقم الجلوس / الرقم الجامعي</label>
+                            <label data-i18n="label_seat_no">رقم الجلوس / الرقم الجامعي</label>
                             <input type="text" id="ae-seat">
                         </div>
                     </div>
                     <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
                         <div class="form-group" style="margin: 0;">
-                            <label>المستوى الدراسي / الفرقة</label>
+                            <label data-i18n="label_level">المستوى الدراسي / الفرقة</label>
                             <input type="text" id="ae-level">
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label>البرنامج / التخصص</label>
+                            <label data-i18n="label_program">البرنامج / التخصص</label>
                             <input type="text" id="ae-program">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>نبذة / الملاحظات الشخصية</label>
+                        <label data-i18n="label_bio">نبذة / الملاحظات الشخصية</label>
                         <textarea id="ae-bio" style="height: 70px;"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_save_profile">
                         💾 حفظ تعديلات الحساب والـ ID والرول
                     </button>
                 </form>
@@ -946,8 +946,8 @@
             <div class="modal-content" style="max-width: 1000px; width: 95%;">
                 <button class="close-btn" onclick="closeModal('admin-database-view-modal')">&times;</button>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                    <h3 style="color: var(--accent-emerald);">📊 معاينة جدول الداتابيز الكاملة (Clean Database View)</h3>
-                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="window.open('/api/admin/database-export-excel')">
+                    <h3 style="color: var(--accent-emerald);" data-i18n="admin_db_view_title">📊 معاينة جدول الداتابيز الكاملة (Clean Database View)</h3>
+                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="window.open('/api/admin/database-export-excel')" data-i18n="btn_export_db_excel">
                         📥 تصدير الداتابيز شيت إكسيل (Clean Excel Export)
                     </button>
                 </div>
@@ -959,15 +959,15 @@
                         <thead>
                             <tr style="position: sticky; top: 0; background: #0f172a; z-index: 10;">
                                 <th>ID</th>
-                                <th>اسم المستخدم</th>
-                                <th>الرول</th>
-                                <th>إيميل الكلية الرسمي</th>
-                                <th>رقم الموبايل</th>
-                                <th>رقم الجلوس</th>
-                                <th>المستوى والتخصص</th>
-                                <th>المساعد المسند</th>
-                                <th>الـ HR المسند</th>
-                                <th>الفريق</th>
+                                <th data-i18n="th_name">اسم المستخدم</th>
+                                <th data-i18n="th_role">الرول</th>
+                                <th data-i18n="label_official_email">إيميل الكلية الرسمي</th>
+                                <th data-i18n="label_phone_no">رقم الموبايل</th>
+                                <th data-i18n="label_seat_no">رقم الجلوس</th>
+                                <th data-i18n="label_level">المستوى والتخصص</th>
+                                <th data-i18n="th_supporter">المساعد المسند</th>
+                                <th data-i18n="stat_hr">الـ HR المسند</th>
+                                <th data-i18n="stat_card_teams">الفريق</th>
                                 <th>تاريخ الإنشاء</th>
                             </tr>
                         </thead>
@@ -989,8 +989,8 @@
                         <thead>
                             <tr id="stats-detail-modal-thead">
                                 <th>ID</th>
-                                <th>الاسم</th>
-                                <th>البريد الإلكتروني</th>
+                                <th data-i18n="th_name">الاسم</th>
+                                <th data-i18n="th_email">البريد الإلكتروني</th>
                             </tr>
                         </thead>
                         <tbody id="stats-detail-modal-tbody">
@@ -1005,7 +1005,7 @@
         <div id="user-change-password-modal" class="modal-overlay">
             <div class="modal-content">
                 <button class="close-btn" onclick="closeModal('user-change-password-modal')">&times;</button>
-                <h3 style="margin-bottom: 12px; color: var(--accent-cyan);">🔒 تغيير كلمة المرور للحساب</h3>
+                <h3 style="margin-bottom: 12px; color: var(--accent-cyan);" data-i18n="user_change_pass_title">🔒 تغيير كلمة المرور للحساب</h3>
                 <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
                     يرجى إدخال كلمة المرور الحالية وكلمة المرور الجديدة لحماية حسابك.
                 </p>
@@ -1152,18 +1152,18 @@
 
                 <!-- STUDENT LEADERBOARD & BADGES -->
                 <div class="glass-card" style="margin-top: 24px; border: 1px solid var(--accent-amber);">
-                    <h3 style="margin-bottom: 12px; color: var(--accent-amber);">🏆 لوحة الطلاب المتميزين والأوسمة (Top Performers Leaderboard)</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">يتم تجميع وتحديث الترتيب آلياً بناءً على تقييمات التاسكات ونسبة حضور السيشنات.</p>
+                    <h3 style="margin-bottom: 12px; color: var(--accent-amber);" data-i18n="leaderboard_title">🏆 لوحة الطلاب المتميزين والأوسمة (Top Performers Leaderboard)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;" data-i18n="leaderboard_sub">يتم تجميع وتحديث الترتيب آلياً بناءً على تقييمات التاسكات ونسبة حضور السيشنات.</p>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>الترتيب</th>
-                                    <th>اسم الطالب</th>
-                                    <th>رقم الجلوس</th>
-                                    <th>مجموع الواجبات</th>
-                                    <th>نسبة الحضور</th>
-                                    <th>الأوسمة المستحقة</th>
+                                    <th data-i18n="th_rank">الترتيب</th>
+                                    <th data-i18n="th_student_name">اسم الطالب</th>
+                                    <th data-i18n="th_seat_no">رقم الجلوس</th>
+                                    <th data-i18n="th_total_assignments">مجموع الواجبات</th>
+                                    <th data-i18n="th_attendance_rate">نسبة الحضور</th>
+                                    <th data-i18n="th_badges">الأوسمة المستحقة</th>
                                 </tr>
                             </thead>
                             <tbody id="student-leaderboard-tbody">
@@ -1881,7 +1881,21 @@
                 label_level: "المستوى الدراسي / الفرقة",
                 label_program: "البرنامج / التخصص",
                 label_reg_password: "كلمة المرور للحساب",
-                btn_register_submit: "✨ إنشاء الحساب وتوليد الـ ID والدخول فوراً"
+                btn_register_submit: "✨ إنشاء الحساب وتوليد الـ ID والدخول فوراً",
+                hr_contact_title: "👔 بيانات التواصل مع مسؤول الغياب (HR)",
+                admin_edit_user_title: "🛠️ تعديل بيانات ورول الـ ID بصفة أدمن",
+                admin_db_view_title: "📊 معاينة جدول الداتابيز الكاملة (Clean Database View)",
+                btn_export_db_excel: "📥 تصدير الداتابيز شيت إكسيل (Clean Excel Export)",
+                user_change_pass_title: "🔒 تغيير كلمة المرور للحساب",
+                att_details_title: "📊 تفاصيل نسبة الحضور والسيشنات",
+                sub_tasks_details_title: "📝 قائمة التاسكات التي قمت بتسليمها",
+                leaderboard_title: "🏆 لوحة الطلاب المتميزين والأوسمة (Top Performers Leaderboard)",
+                leaderboard_sub: "يتم تجميع وتحديث الترتيب آلياً بناءً على تقييمات التاسكات ونسبة حضور السيشنات.",
+                th_rank: "الترتيب",
+                th_total_assignments: "مجموع الواجبات",
+                th_attendance_rate: "نسبة الحضور",
+                th_badges: "الأوسمة المستحقة",
+                ta_contact_title: "📞 بيانات التواصل مع المعيد / السابورتر"
             },
             en: {
                 logout: "Logout",
@@ -2016,9 +2030,77 @@
                 label_level: "Academic Level",
                 label_program: "Program / Major",
                 label_reg_password: "Account Password",
-                btn_register_submit: "✨ Register & Generate ID"
+                btn_register_submit: "✨ Register & Generate ID",
+                hr_contact_title: "👔 HR Contact Details",
+                admin_edit_user_title: "🛠️ Edit User Profile & Roles (Admin)",
+                admin_db_view_title: "📊 Complete Database Inspector (Clean View)",
+                btn_export_db_excel: "📥 Export Database to Excel",
+                user_change_pass_title: "🔒 Change Account Password",
+                att_details_title: "📊 Session Attendance Details",
+                sub_tasks_details_title: "📝 Submitted Assignments List",
+                leaderboard_title: "🏆 Top Performers Leaderboard & Badges",
+                leaderboard_sub: "Rankings are updated automatically based on task scores and attendance rates.",
+                th_rank: "Rank",
+                th_total_assignments: "Total Score",
+                th_attendance_rate: "Attendance Rate",
+                th_badges: "Earned Badges",
+                ta_contact_title: "📞 TA / Supporter Contact Details"
             }
         };
+
+        function t(key, fallback = '') {
+            if (I18N[currentLang] && I18N[currentLang][key] !== undefined) {
+                return I18N[currentLang][key];
+            }
+            if (I18N['ar'] && I18N['ar'][key] !== undefined) {
+                return I18N['ar'][key];
+            }
+            return fallback || key;
+        }
+
+        function translateRole(roleStr) {
+            if (!roleStr) return currentLang === 'ar' ? 'طالب' : 'Student';
+            const roles = String(roleStr).split(',').map(r => r.trim().toLowerCase());
+            const roleMap = {
+                student: { ar: 'طالب', en: 'Student' },
+                supporter: { ar: 'سابورتر (TA)', en: 'Supporter (TA)' },
+                instructor: { ar: 'انستراكتور', en: 'Instructor' },
+                hr: { ar: 'إتش آر (HR)', en: 'HR' },
+                media: { ar: 'ميديا', en: 'Media' },
+                admin: { ar: 'أدمن', en: 'Admin' }
+            };
+            return roles.map(r => (roleMap[r] ? roleMap[r][currentLang] || r : r)).join(', ');
+        }
+
+        function translateAttendanceStatus(statusStr) {
+            if (!statusStr) return currentLang === 'ar' ? 'حاضر' : 'Present';
+            const s = String(statusStr).toLowerCase();
+            if (s === 'present' || s === 'حاضر') return currentLang === 'ar' ? 'حاضر' : 'Present';
+            if (s === 'absent' || s === 'غائب' || s === 'غياب') return currentLang === 'ar' ? 'غائب' : 'Absent';
+            if (s === 'excused' || s === 'مستأذن' || s === 'عذر') return currentLang === 'ar' ? 'مستأذن' : 'Excused';
+            return statusStr;
+        }
+
+        function translateLevel(levelStr) {
+            if (!levelStr) return '';
+            const l = String(levelStr).trim().toLowerCase();
+            if (l.includes('1') || l.includes('الأول') || l.includes('الاول')) return currentLang === 'ar' ? 'المستوى الأول (Level 1)' : 'Level 1';
+            if (l.includes('2') || l.includes('الثاني')) return currentLang === 'ar' ? 'المستوى الثاني (Level 2)' : 'Level 2';
+            if (l.includes('3') || l.includes('الثالث')) return currentLang === 'ar' ? 'المستوى الثالث (Level 3)' : 'Level 3';
+            if (l.includes('4') || l.includes('الرابع')) return currentLang === 'ar' ? 'المستوى الرابع (Level 4)' : 'Level 4';
+            return levelStr;
+        }
+
+        function translateProgram(progStr) {
+            if (!progStr) return '';
+            const p = String(progStr).trim().toLowerCase();
+            if (p.includes('general') || p.includes('عام')) return currentLang === 'ar' ? 'عام (General)' : 'General';
+            if (p.includes('cs') || p.includes('حاسب')) return currentLang === 'ar' ? 'علوم الحاسب (CS)' : 'Computer Science (CS)';
+            if (p.includes('is') || p.includes('معلومات')) return currentLang === 'ar' ? 'نظم المعلومات (IS)' : 'Information Systems (IS)';
+            if (p.includes('it') || p.includes('تكنولوجيا')) return currentLang === 'ar' ? 'تكنولوجيا المعلومات (IT)' : 'Information Technology (IT)';
+            if (p.includes('ai') || p.includes('ذكاء')) return currentLang === 'ar' ? 'الذكاء الاصطناعي (AI)' : 'Artificial Intelligence (AI)';
+            return progStr;
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             applyLanguage(currentLang);
@@ -2815,25 +2897,25 @@
                     const unassignedStudents = await apiRequest('/api/student/unassigned-students');
                     const teamContainer = document.getElementById('student-team-container');
 
-                    let deadlineText = teamSettings.deadline ? teamSettings.deadline.replace('T', ' ') : 'غير محدد';
+                    let deadlineText = teamSettings.deadline ? teamSettings.deadline.replace('T', ' ') : (currentLang === 'ar' ? 'غير محدد' : 'Not specified');
                     let statusBadge = teamSettings.is_open ? 
-                        `<span class="badge badge-supporter">⏳ تسجيل التيمات مفتوح حتى: ${deadlineText}</span>` : 
-                        `<span class="badge badge-admin">⛔ فترة تسجيل التيمات مغلقة</span>`;
+                        `<span class="badge badge-supporter">⏳ ${currentLang === 'ar' ? 'تسجيل التيمات مفتوح حتى:' : 'Team registration open until:'} ${deadlineText}</span>` : 
+                        `<span class="badge badge-admin">⛔ ${currentLang === 'ar' ? 'فترة تسجيل التيمات مغلقة' : 'Team registration window is closed'}</span>`;
 
                     let invSectionHtml = '';
                     if (invites.length > 0) {
                         invSectionHtml = `
                             <div style="background: rgba(192, 132, 252, 0.15); padding: 14px; border-radius: 10px; border: 1px solid #c084fc; margin-bottom: 16px;">
-                                <h5 style="color: #c084fc; margin-bottom: 8px;">📩 لديك دعوة انضمام جديدة لتيم!</h5>
+                                <h5 style="color: #c084fc; margin-bottom: 8px;">📩 ${currentLang === 'ar' ? 'لديك دعوة انضمام جديدة لتيم!' : 'You have a new team invitation!'}</h5>
                                 ${invites.map(inv => `
                                     <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.6); padding: 10px 14px; border-radius: 8px; margin-top: 6px;">
                                         <div>
-                                            <strong>فريق: ${inv.team_name}</strong>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);">بواسطة زميلك: ${inv.inviter_name} (${inv.created_at})</div>
+                                            <strong>${currentLang === 'ar' ? 'فريق:' : 'Team:'} ${inv.team_name}</strong>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">${currentLang === 'ar' ? 'بواسطة زميلك:' : 'Invited by:'} ${inv.inviter_name} (${inv.created_at})</div>
                                         </div>
                                         <div style="display: flex; gap: 6px;">
-                                            <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.85rem;" onclick="handleRespondInvite(${inv.id}, 'accept')">✅ قبول</button>
-                                            <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.85rem;" onclick="handleRespondInvite(${inv.id}, 'decline')">❌ رفض</button>
+                                            <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.85rem;" onclick="handleRespondInvite(${inv.id}, 'accept')">✅ ${currentLang === 'ar' ? 'قبول' : 'Accept'}</button>
+                                            <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.85rem;" onclick="handleRespondInvite(${inv.id}, 'decline')">❌ ${currentLang === 'ar' ? 'رفض' : 'Decline'}</button>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -2846,30 +2928,30 @@
                             ${invSectionHtml}
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <div style="font-weight: bold; font-size: 1.1rem; color: #c084fc;">🏆 ${teamInfo.team_name}</div>
-                                <span class="badge badge-student">${currentLang === 'ar' ? 'تيم محدد (1/1 Limit)' : 'Assigned Team'}</span>
+                                <span class="badge badge-student">${currentLang === 'ar' ? 'تيم محدد (1/1 Limit)' : 'Assigned Team (1/1 Limit)'}</span>
                             </div>
                             <div style="font-size: 0.9rem; margin-bottom: 10px; color: var(--text-muted);">${currentLang === 'ar' ? 'أعضاء الفريق ووسائل التواصل:' : 'Team Members & Contacts:'}</div>
                             <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
                                 ${teamInfo.members.map(m => `
                                     <div style="background: rgba(15,23,42,0.6); padding: 10px 14px; border-radius: 8px; border: 1px solid ${m.is_me ? 'var(--accent-purple)' : 'var(--border-card)'}; display: flex; justify-content: space-between; align-items: center;">
                                         <div>
-                                            <strong style="color: ${m.is_me ? '#c084fc' : 'white'};">${m.name} ${m.is_me ? '(أنت)' : ''}</strong>
+                                            <strong style="color: ${m.is_me ? '#c084fc' : 'white'};">${m.name} ${m.is_me ? (currentLang === 'ar' ? '(أنت)' : '(You)') : ''}</strong>
                                             <div style="font-size: 0.8rem; color: var(--text-muted);">✉️ ${m.email} | 📞 ${m.phone}</div>
                                         </div>
-                                        <span class="badge badge-${m.role}">${m.role}</span>
+                                        <span class="badge badge-${m.role}">${translateRole(m.role)}</span>
                                     </div>
                                 `).join('')}
                             </div>
 
                             ${teamSettings.is_open ? `
                                 <div style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 10px; border: 1px solid var(--border-card); margin-bottom: 14px;">
-                                    <h5 style="color: var(--accent-cyan); margin-bottom: 8px;">✉️ إرسال دعوة لزميل غير مسجل لتيمكم:</h5>
+                                    <h5 style="color: var(--accent-cyan); margin-bottom: 8px;">✉️ ${currentLang === 'ar' ? 'إرسال دعوة لزميل غير مسجل لتيمكم:' : 'Send invitation to an unassigned teammate:'}</h5>
                                     <div style="display: flex; gap: 8px;">
                                         <select id="student-invite-select" style="flex: 1; font-size: 0.85rem;">
-                                            <option value="">-- اختر الطالب غير المسجل في تيم --</option>
+                                            <option value="">-- ${currentLang === 'ar' ? 'اختر الطالب غير المسجل في تيم' : 'Select unassigned student'} --</option>
                                             ${unassignedStudents.map(st => `<option value="${st.id}">${st.name} (${st.id})</option>`).join('')}
                                         </select>
-                                        <button class="btn btn-primary" style="font-size: 0.85rem;" onclick="handleSendInvite()">إرسال دعوة</button>
+                                        <button class="btn btn-primary" style="font-size: 0.85rem;" onclick="handleSendInvite()">${currentLang === 'ar' ? 'إرسال دعوة' : 'Send Invite'}</button>
                                     </div>
                                 </div>
                                 <button class="btn btn-outline" style="color: #f43f5e; border-color: rgba(244,63,94,0.4); width: 100%; justify-content: center; font-size: 0.85rem;" onclick="handleStudentLeaveTeam()">
@@ -2884,13 +2966,13 @@
                                 <div style="margin-bottom: 14px;">
                                     ${statusBadge}
                                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-                                        ⚠️ تنبيه: الانضمام للتيمات يكون إما عبر **قبول دعوة** من صديق أو **إنشاء فريق جديد وإرسال الدعوات لأصحابك** أو عبر إسناد الـ HR.
+                                        ⚠️ ${currentLang === 'ar' ? 'تنبيه: الانضمام للتيمات يكون إما عبر قبول دعوة من صديق أو إنشاء فريق جديد وإرسال الدعوات لأصحابك أو عبر إسناد الـ HR.' : 'Notice: Join a team by accepting an invite, creating a new team, or HR assignment.'}
                                     </p>
                                 </div>
                                 <div style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 10px; border: 1px solid var(--border-card);">
-                                    <h5 style="color: #c084fc; margin-bottom: 8px;">➕ إنشاء فريق جديد وتوجيه الدعوات لأصحابك:</h5>
+                                    <h5 style="color: #c084fc; margin-bottom: 8px;">➕ ${currentLang === 'ar' ? 'إنشاء فريق جديد وتوجيه الدعوات لأصحابك:' : 'Create a new team & invite members:'}</h5>
                                     <div style="display: flex; gap: 8px;">
-                                        <input type="text" id="student-new-team-name" placeholder="اسم الفريق الجديد..." style="flex: 1; font-size: 0.9rem;">
+                                        <input type="text" id="student-new-team-name" placeholder="${currentLang === 'ar' ? 'اسم الفريق الجديد...' : 'New team name...'}" style="flex: 1; font-size: 0.9rem;">
                                         <button class="btn btn-primary" style="background: #c084fc;" onclick="handleStudentCreateTeam()">${currentLang === 'ar' ? 'إنشاء الفريق' : 'Create Team'}</button>
                                     </div>
                                 </div>
@@ -2900,7 +2982,7 @@
                                 ${invSectionHtml}
                                 <div style="margin-bottom: 10px;">${statusBadge}</div>
                                 <p style="color: var(--text-muted); font-size: 0.9rem;">
-                                    عفواً، انتهت الفترة المتاحة لتسجيل التيمات وتم إغلاق التسجيل. إذا لم تسجل، يرجى التواصل مع مسؤول الـ HR الخاص بك لـ إسنادك.
+                                    ${currentLang === 'ar' ? 'عفواً، انتهت الفترة المتاحة لتسجيل التيمات وتم إغلاق التسجيل. إذا لم تسجل، يرجى التواصل مع مسؤول الـ HR الخاص بك لـ إسنادك.' : 'Team registration window has closed. If unassigned, contact your HR manager.'}
                                 </p>
                             `;
                         }
@@ -2912,16 +2994,16 @@
                     const certs = await apiRequest('/api/certificates');
                     const certsContainer = document.getElementById('student-certificates-container');
                     if (certs.length === 0) {
-                        certsContainer.innerHTML = `<p style="color: var(--text-muted);">لا توجد شهادات صادرة لك حتى الآن.</p>`;
+                        certsContainer.innerHTML = `<p style="color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد شهادات صادرة لك حتى الآن.' : 'No certificates issued for you yet.'}</p>`;
                     } else {
                         certsContainer.innerHTML = certs.map(c => `
                             <div style="background: rgba(15,23,42,0.6); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-card); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                                 <div>
                                     <strong style="color: var(--accent-cyan); font-size: 1rem;">📜 ${c.title}</strong>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">بواسطة: ${c.uploader} | ${c.created_at}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${currentLang === 'ar' ? 'بواسطة:' : 'By:'} ${c.uploader} | ${c.created_at}</div>
                                 </div>
                                 <a href="${c.file_path}" target="_blank" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.85rem; color: #22d3ee; border-color: rgba(34, 211, 238, 0.4);">
-                                    📥 تحميل الشهادة
+                                    📥 ${currentLang === 'ar' ? 'تحميل الشهادة' : 'Download Certificate'}
                                 </a>
                             </div>
                         `).join('');
@@ -3440,12 +3522,12 @@
                     <td>${u.email}</td>
                     <td>
                         <select onchange="handleRoleChange('${u.id}', this.value)" style="padding: 4px 8px; font-size: 0.85rem;">
-                            <option value="student" ${u.role === 'student' ? 'selected' : ''}>student (طالب)</option>
-                            <option value="hr" ${u.role === 'hr' ? 'selected' : ''}>hr (مسؤول غياب)</option>
-                            <option value="media" ${u.role === 'media' ? 'selected' : ''}>media (مسؤول ميديا)</option>
-                            <option value="supporter" ${u.role === 'supporter' ? 'selected' : ''}>supporter (مساعد)</option>
-                            <option value="instructor" ${u.role === 'instructor' ? 'selected' : ''}>instructor (مدرب)</option>
-                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin (أدمن)</option>
+                            <option value="student" ${u.role === 'student' ? 'selected' : ''}>${currentLang === 'ar' ? 'طالب (Student)' : 'Student'}</option>
+                            <option value="hr" ${u.role === 'hr' ? 'selected' : ''}>${currentLang === 'ar' ? 'إتش آر (HR)' : 'HR'}</option>
+                            <option value="media" ${u.role === 'media' ? 'selected' : ''}>${currentLang === 'ar' ? 'ميديا (Media)' : 'Media'}</option>
+                            <option value="supporter" ${u.role === 'supporter' ? 'selected' : ''}>${currentLang === 'ar' ? 'سابورتر (TA)' : 'Supporter (TA)'}</option>
+                            <option value="instructor" ${u.role === 'instructor' ? 'selected' : ''}>${currentLang === 'ar' ? 'انستراكتور (Instructor)' : 'Instructor'}</option>
+                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>${currentLang === 'ar' ? 'أدمن (Admin)' : 'Admin'}</option>
                         </select>
                     </td>
                     <td>
@@ -3454,7 +3536,7 @@
                                 <option value="">${currentLang === 'ar' ? '-- بدون مساعد --' : '-- No TA --'}</option>
                                 ${allSupportersList.map(sup => `<option value="${sup.id}" ${u.assigned_supporter_id === sup.id ? 'selected' : ''}>${sup.name}</option>`).join('')}
                             </select>
-                        ` : `<span style="color: var(--text-muted);">N/A (إدارة)</span>`}
+                        ` : `<span style="color: var(--text-muted);">${currentLang === 'ar' ? 'غير متاح (إدارة)' : 'N/A (Staff)'}</span>`}
                     </td>
                     <td>
                         ${isStudent ? `
@@ -3462,7 +3544,7 @@
                                 <option value="">${currentLang === 'ar' ? '-- بدون HR --' : '-- No HR --'}</option>
                                 ${allHRList.map(hr => `<option value="${hr.id}" ${u.assigned_hr_id === hr.id ? 'selected' : ''}>${hr.name}</option>`).join('')}
                             </select>
-                        ` : `<span style="color: var(--text-muted);">N/A (إدارة)</span>`}
+                        ` : `<span style="color: var(--text-muted);">${currentLang === 'ar' ? 'غير متاح (إدارة)' : 'N/A (Staff)'}</span>`}
                     </td>
                     <td>
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
