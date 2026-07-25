@@ -130,18 +130,32 @@ def import_users_from_excel_or_csv(file_bytes: bytes, filename: str, db: Session
 
         existing_user = db.query(User).filter(User.id == user_id).first()
         if existing_user:
-            existing_user.name = name
-            existing_user.email = email
-            existing_user.official_email = official_email
-            existing_user.phone = phone_val
-            existing_user.seat_number = seat_num
-            existing_user.academic_level = level_val
-            existing_user.program = program_val
-            existing_user.role = role
-            if assigned_supporter_id:
+            # Preserve website UI edits: only update fields if DB currently has empty/default values
+            if name and (not existing_user.name or existing_user.name == "طالب جديد"):
+                existing_user.name = name
+            if email and (not existing_user.email or "@lms.edu" in existing_user.email):
+                existing_user.email = email
+            if official_email and (not existing_user.official_email or "@cis.asu.edu.eg" in existing_user.official_email):
+                existing_user.official_email = official_email
+            if phone_val and not existing_user.phone:
+                existing_user.phone = phone_val
+            if seat_num and (not existing_user.seat_number or existing_user.seat_number == existing_user.id):
+                existing_user.seat_number = seat_num
+            if level_val and not existing_user.academic_level:
+                existing_user.academic_level = level_val
+            if program_val and not existing_user.program:
+                existing_user.program = program_val
+            
+            # Preserve custom roles assigned via Website UI (e.g., admin, hr, supporter, media, instructor)
+            # Only update role if Excel explicitly specifies a special staff role AND user is currently basic student
+            if role != RoleEnum.STUDENT and existing_user.role == RoleEnum.STUDENT:
+                existing_user.role = role
+
+            if assigned_supporter_id and not existing_user.assigned_supporter_id:
                 existing_user.assigned_supporter_id = assigned_supporter_id
-            if assigned_hr_id:
+            if assigned_hr_id and not existing_user.assigned_hr_id:
                 existing_user.assigned_hr_id = assigned_hr_id
+
             updated_count += 1
         else:
             # Default password is the User ID itself!

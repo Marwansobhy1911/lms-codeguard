@@ -1273,23 +1273,23 @@
 
                     <!-- Teams Management -->
                     <div class="glass-card">
-                        <h3 style="margin-bottom: 12px; color: var(--accent-cyan);">👥 إنشاء وإدارة التيمات (Team Management)</h3>
+                        <h3 style="margin-bottom: 12px; color: var(--accent-cyan);" data-i18n="hr_teams_title">👥 إنشاء وإدارة التيمات (Team Management)</h3>
                         
                         <!-- Create Team Form -->
                         <form onsubmit="handleCreateTeam(event)" style="margin-bottom: 24px;">
                             <div class="form-group">
-                                <label>اسم الفريق الجديد</label>
+                                <label data-i18n="label_new_team_name">اسم الفريق الجديد</label>
                                 <input type="text" id="hr-team-name" placeholder="مثال: فريق الابتكار - المجموعه 1" required>
                             </div>
-                            <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;">
+                            <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;" data-i18n="btn_create_new_team">
                                 + إنشاء تيم جديد
                             </button>
                         </form>
 
                         <!-- Existing Teams List -->
-                        <h4 style="margin-bottom: 12px;">التيمات الحالية وتخصيص الطلاب</h4>
+                        <h4 style="margin-bottom: 12px;" data-i18n="hr_existing_teams_title">التيمات الحالية وتخصيص الطلاب</h4>
                         <div id="hr-teams-list">
-                            <p style="color: var(--text-muted);">جاري تحميل التيمات...</p>
+                            <p style="color: var(--text-muted);" data-i18n="loading">جاري تحميل التيمات...</p>
                         </div>
                     </div>
                 </div>
@@ -1300,25 +1300,25 @@
                 <div class="grid-2">
                     <!-- Upload Certificate Form -->
                     <div class="glass-card">
-                        <h3 style="margin-bottom: 12px; color: var(--accent-cyan);">🎓 رفع شهادة جديدة (Upload Certificate)</h3>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">يمكنك رفع شهادة مخصصة لطالب معين عبر كتابة كوده، أو ترك كود الطالب فارغاً لتكون شهادة عامة للجميع.</p>
+                        <h3 style="margin-bottom: 12px; color: var(--accent-cyan);" data-i18n="media_upload_cert_title">🎓 رفع شهادة جديدة (Upload Certificate)</h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="media_upload_cert_sub">يمكنك رفع شهادة مخصصة لطالب معين عبر كتابة كوده، أو ترك كود الطالب فارغاً لتكون شهادة عامة للجميع.</p>
 
                         <form onsubmit="handleUploadCertificate(event)">
                             <div class="form-group">
-                                <label>عنوان الشهادة / التفاصيل</label>
+                                <label data-i18n="label_cert_title">عنوان الشهادة / التفاصيل</label>
                                 <input type="text" id="media-cert-title" placeholder="مثال: شهادة إتمام دبلومة البرمجة" required>
                             </div>
                             <div class="form-group">
-                                <label>كود الطالب المستلم (اختر أو اترك فارغاً للعامة)</label>
+                                <label data-i18n="label_cert_recipient">كود الطالب المستلم (اختر أو اترك فارغاً للعامة)</label>
                                 <select id="media-cert-user-select">
-                                    <option value="">-- شهادة عامة للجميع --</option>
+                                    <option value="" data-i18n="opt_general_cert">-- شهادة عامة للجميع --</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>ملف الشهادة (صورة / PDF / تصميم)</label>
+                                <label data-i18n="label_cert_file">ملف الشهادة (صورة / PDF / تصميم)</label>
                                 <input type="file" id="media-cert-file" accept="image/*, .pdf" required>
                             </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_upload_cert">
                                 📤 رفع الشهادة وحفظها
                             </button>
                         </form>
@@ -1326,7 +1326,7 @@
 
                     <!-- Certificates List -->
                     <div class="glass-card">
-                        <h3 style="margin-bottom: 16px;">📜 قائمة الشهادات المرفوعة</h3>
+                        <h3 style="margin-bottom: 16px;" data-i18n="media_certs_list_title">📜 قائمة الشهادات المرفوعة</h3>
                         <div style="margin-bottom: 12px;">
                             <input type="text" id="hr-students-search-input" placeholder="🔍 ابحث بالاسم أو الرقم التعريفي (ID)..." oninput="filterHrStudentsTable()" style="width: 100%; font-size: 0.85rem;">
                         </div>
@@ -1334,14 +1334,14 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>العنوان</th>
-                                        <th>المستلم</th>
-                                        <th>تاريخ الرفع</th>
-                                        <th>إجراء</th>
+                                        <th data-i18n="th_title">العنوان</th>
+                                        <th data-i18n="th_recipient">المستلم</th>
+                                        <th data-i18n="th_upload_date">تاريخ الرفع</th>
+                                        <th data-i18n="th_actions">إجراء</th>
                                     </tr>
                                 </thead>
                                 <tbody id="media-certs-table">
-                                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted);" data-i18n="loading">جاري التحميل...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1499,22 +1499,22 @@
                     </p>
                     <div class="grid-3" style="margin-bottom: 16px;">
                         <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;">حالة فترة التسجيل:</label>
-                            <select id="admin-team-open-select">
-                                <option value="true">مفتوح للجميع (Open)</option>
-                                <option value="false">مغلق (Closed)</option>
+                            <label style="font-size: 0.85rem;" data-i18n="admin_team_status_label">حالة فترة التسجيل:</label>
+                            <select id="admin-team-open-select" onchange="handleSaveTeamSettings(true)">
+                                <option value="true" data-i18n="opt_open">مفتوح للجميع (Open)</option>
+                                <option value="false" data-i18n="opt_closed">مغلق (Closed)</option>
                             </select>
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;">الديدلاين وتاريخ الإغلاق:</label>
-                            <input type="datetime-local" id="admin-team-deadline-input">
+                            <label style="font-size: 0.85rem;" data-i18n="admin_team_deadline_label">الديدلاين وتاريخ الإغلاق:</label>
+                            <input type="datetime-local" id="admin-team-deadline-input" onchange="handleSaveTeamSettings(true)">
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;">الحد الأقصى للطلاب في التيم الواحدة:</label>
-                            <input type="number" id="admin-team-max-input" value="5" min="1" max="50">
+                            <label style="font-size: 0.85rem;" data-i18n="admin_team_max_label">الحد الأقصى للطلاب في التيم الواحدة:</label>
+                            <input type="number" id="admin-team-max-input" value="5" min="1" max="50" onchange="handleSaveTeamSettings(true)">
                         </div>
                     </div>
-                    <button class="btn btn-primary" onclick="handleSaveTeamSettings()" data-i18n="btn_save_team_settings">💾 حفظ إعدادات تسجيل التيمات والديدلاين</button>
+                    <button class="btn btn-primary" onclick="handleSaveTeamSettings(false)" data-i18n="btn_save_team_settings">💾 حفظ إعدادات تسجيل التيمات والديدلاين</button>
                 </div>
 
                 <!-- User Management Table -->
@@ -1895,7 +1895,27 @@
                 th_total_assignments: "مجموع الواجبات",
                 th_attendance_rate: "نسبة الحضور",
                 th_badges: "الأوسمة المستحقة",
-                ta_contact_title: "📞 بيانات التواصل مع المعيد / السابورتر"
+                ta_contact_title: "📞 بيانات التواصل مع المعيد / السابورتر",
+                admin_team_status_label: "حالة فترة التسجيل:",
+                admin_team_deadline_label: "الديدلاين وتاريخ الإغلاق:",
+                admin_team_max_label: "الحد الأقصى للطلاب في التيم الواحدة:",
+                opt_open: "مفتوح للجميع (Open)",
+                opt_closed: "مغلق (Closed)",
+                hr_teams_title: "👥 إنشاء وإدارة التيمات (Team Management)",
+                label_new_team_name: "اسم الفريق الجديد",
+                btn_create_new_team: "+ إنشاء تيم جديد",
+                hr_existing_teams_title: "التيمات الحالية وتخصيص الطلاب",
+                media_upload_cert_title: "🎓 رفع شهادة جديدة (Upload Certificate)",
+                media_upload_cert_sub: "يمكنك رفع شهادة مخصصة لطالب معين عبر كتابة كوده، أو ترك كود الطالب فارغاً لتكون شهادة عامة للجميع.",
+                label_cert_title: "عنوان الشهادة / التفاصيل",
+                label_cert_recipient: "كود الطالب المستلم (اختر أو اترك فارغاً للعامة)",
+                opt_general_cert: "-- شهادة عامة للجميع --",
+                label_cert_file: "ملف الشهادة (صورة / PDF / تصميم)",
+                btn_upload_cert: "📤 رفع الشهادة وحفظها",
+                media_certs_list_title: "📜 قائمة الشهادات المرفوعة",
+                th_title: "العنوان",
+                th_recipient: "المستلم",
+                th_upload_date: "تاريخ الرفع"
             },
             en: {
                 logout: "Logout",
@@ -2044,7 +2064,27 @@
                 th_total_assignments: "Total Score",
                 th_attendance_rate: "Attendance Rate",
                 th_badges: "Earned Badges",
-                ta_contact_title: "📞 TA / Supporter Contact Details"
+                ta_contact_title: "📞 TA / Supporter Contact Details",
+                admin_team_status_label: "Registration Status:",
+                admin_team_deadline_label: "Deadline & Closing Date:",
+                admin_team_max_label: "Max Students per Team:",
+                opt_open: "Open to all",
+                opt_closed: "Closed",
+                hr_teams_title: "👥 Team Management & Creation",
+                label_new_team_name: "New Team Name",
+                btn_create_new_team: "+ Create New Team",
+                hr_existing_teams_title: "Current Teams & Student Assignments",
+                media_upload_cert_title: "🎓 Upload New Certificate",
+                media_upload_cert_sub: "Upload a custom certificate for a student or leave blank for a general certificate.",
+                label_cert_title: "Certificate Title / Details",
+                label_cert_recipient: "Recipient Student ID (Select or Leave Blank)",
+                opt_general_cert: "-- General Certificate for All --",
+                label_cert_file: "Certificate File (Image / PDF / Graphic)",
+                btn_upload_cert: "📤 Upload & Save Certificate",
+                media_certs_list_title: "📜 Uploaded Certificates List",
+                th_title: "Title",
+                th_recipient: "Recipient",
+                th_upload_date: "Upload Date"
             }
         };
 
@@ -3563,14 +3603,40 @@
             `}).join('');
         }
 
+        function showToast(msg) {
+            let toast = document.getElementById('auto-save-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'auto-save-toast';
+                toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: rgba(34, 197, 94, 0.95); color: white; padding: 12px 20px; border-radius: 10px; font-size: 0.9rem; font-weight: bold; z-index: 9999; box-shadow: 0 6px 16px rgba(0,0,0,0.3); transition: opacity 0.3s;';
+                document.body.appendChild(toast);
+            }
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => { toast.style.display = 'none'; }, 300);
+            }, 2200);
+        }
+
+        async function handleAssignSupporter(studentId, supporterId) {
+            try {
+                const res = await apiRequest('/api/admin/assign-supporter', 'POST', {
+                    student_id: studentId,
+                    supporter_id: supporterId || null
+                });
+                showToast(currentLang === 'ar' ? '✓ تم إسناد المساعد تلقائياً' : '✓ Auto-assigned TA');
+            } catch (err) { alert(err.message); loadAdminDashboard(); }
+        }
+
         async function handleAssignHR(studentId, hrId) {
             try {
                 const res = await apiRequest('/api/admin/assign-hr', 'POST', {
                     student_id: studentId,
                     hr_id: hrId || null
                 });
-                alert(res.message);
-                loadAdminDashboard();
+                showToast(currentLang === 'ar' ? '✓ تم إسناد الـ HR تلقائياً' : '✓ Auto-assigned HR');
             } catch (err) { alert(err.message); loadAdminDashboard(); }
         }
 
@@ -3636,20 +3702,25 @@
             } catch (err) { alert(err.message); }
         }
 
-        async function handleSaveTeamSettings() {
+        async function handleSaveTeamSettings(isAuto = false) {
             const isOpen = document.getElementById('admin-team-open-select').value === 'true';
             const deadline = document.getElementById('admin-team-deadline-input').value;
-            const maxMembers = parseInt(document.getElementById('admin-team-max-input').value);
+            const maxMembers = parseInt(document.getElementById('admin-team-max-input').value) || 5;
 
             try {
                 const res = await apiRequest('/api/admin/team-settings', 'POST', {
                     is_open: isOpen,
-                    deadline: deadline ? deadline + ':00' : null,
+                    deadline: deadline ? (deadline.length === 16 ? deadline + ':00' : deadline) : null,
                     max_members_per_team: maxMembers
                 });
-                alert(res.message);
-                loadAdminDashboard();
-            } catch (err) { alert(err.message); }
+                if (isAuto) {
+                    showToast(currentLang === 'ar' ? '✓ تم حفظ إعدادات التيم تلقائياً' : '✓ Team settings auto-saved');
+                } else {
+                    alert(res.message);
+                }
+            } catch (err) { 
+                if (!isAuto) alert(err.message); 
+            }
         }
 
         async function handleStudentCreateTeam() {
@@ -3830,7 +3901,7 @@
         async function handleRoleChange(userId, newRole) {
             try {
                 await apiRequest('/api/admin/change-role', 'POST', { user_id: userId, new_role: newRole });
-                alert(currentLang === 'ar' ? `تم تغيير دور المستخدم ${userId} إلى ${newRole}` : `Changed role of ${userId} to ${newRole}`);
+                showToast(currentLang === 'ar' ? `✓ تم تغيير دور ${userId} إلى ${newRole}` : `✓ Updated role of ${userId} to ${newRole}`);
             } catch (err) { alert(err.message); }
         }
 
