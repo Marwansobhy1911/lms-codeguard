@@ -622,8 +622,11 @@
                 </button>
                 <div id="notif-dropdown" style="display: none; position: absolute; left: 0; top: 110%; width: 320px; background: #0f172a; border: 1px solid var(--border-card); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 999; padding: 12px;">
                     <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid var(--border-card); padding-bottom: 6px; color: var(--accent-cyan); display: flex; justify-content: space-between; align-items: center;">
-                        <span>🔔 الإشعارات والتنبيهات</span>
-                        <small style="color: var(--text-muted); cursor: pointer;" onclick="toggleNotificationDropdown()">&times; إغلاق</small>
+                        <span data-i18n="notif_header_title">🔔 الإشعارات والتنبيهات</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <small style="color: #f43f5e; cursor: pointer;" onclick="handleClearAllNotifications()" data-i18n="btn_clear_notifs">🗑️ مسح الكل</small>
+                            <small style="color: var(--text-muted); cursor: pointer; font-size: 1rem;" onclick="toggleNotificationDropdown()">&times;</small>
+                        </div>
                     </div>
                     <div id="notif-list-container" style="max-height: 300px; overflow-y: auto;">
                         <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px;">جاري جلب الإشعارات...</div>
@@ -632,7 +635,7 @@
             </div>
             <button class="btn btn-outline" onclick="toggleLanguage()" id="lang-toggle-btn">🌐 English</button>
             <button class="btn btn-outline" onclick="openProfileModal()" id="profile-edit-btn" data-i18n="btn_profile">✏️ البيانات الشخصية</button>
-            <button class="btn btn-outline" onclick="openUserChangePasswordModal()" id="change-pass-btn">🔒 تغيير كلمة المرور</button>
+            <button class="btn btn-outline" onclick="openUserChangePasswordModal()" id="change-pass-btn" data-i18n="btn_change_password">🔒 تغيير كلمة المرور</button>
             <div style="text-align: inherit;">
                 <div id="user-name-display" style="font-weight: 700; font-size: 1.05rem;">اسم المستخدم</div>
                 <div style="font-size: 0.8rem; color: var(--text-muted); display: none;" id="user-id-display">ID: ---</div>
@@ -1006,33 +1009,33 @@
             <div class="modal-content">
                 <button class="close-btn" onclick="closeModal('user-change-password-modal')">&times;</button>
                 <h3 style="margin-bottom: 12px; color: var(--accent-cyan);" data-i18n="user_change_pass_title">🔒 تغيير كلمة المرور للحساب</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;" data-i18n="user_change_pass_sub">
                     يرجى إدخال كلمة المرور الحالية وكلمة المرور الجديدة لحماية حسابك.
                 </p>
                 <div id="user-change-pass-alert" class="alert alert-danger" style="display: none;"></div>
                 <form onsubmit="handleUserManualChangePassword(event)">
                     <div class="form-group">
-                        <label>كلمة المرور الحالية</label>
+                        <label data-i18n="label_current_pass">كلمة المرور الحالية</label>
                         <div class="password-wrapper">
                             <input type="password" id="ucp-current" required autocomplete="current-password">
                             <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('ucp-current', this)">👁️</button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>كلمة المرور الجديدة</label>
+                        <label data-i18n="label_new_pass">كلمة المرور الجديدة</label>
                         <div class="password-wrapper">
                             <input type="password" id="ucp-new" minlength="4" required placeholder="4 خانات على الأقل" autocomplete="new-password">
                             <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('ucp-new', this)">👁️</button>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>تأكيد كلمة المرور الجديدة</label>
+                        <label data-i18n="label_confirm_pass">تأكيد كلمة المرور الجديدة</label>
                         <div class="password-wrapper">
                             <input type="password" id="ucp-confirm" minlength="4" required autocomplete="new-password">
                             <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('ucp-confirm', this)">👁️</button>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_save_pass">
                         💾 حفظ كلمة المرور الجديدة
                     </button>
                 </form>
@@ -1898,7 +1901,9 @@
                 ta_contact_title: "📞 بيانات التواصل مع المعيد / السابورتر",
                 admin_team_status_label: "حالة فترة التسجيل:",
                 admin_team_deadline_label: "الديدلاين وتاريخ الإغلاق:",
-                admin_team_max_label: "الحد الأقصى للطلاب في التيم الواحدة:",
+                admin_team_max_label: "الحد الأقصى للطلاب في التيم الواحد:",
+                btn_change_password: "🔒 تغيير كلمة المرور",
+                user_change_pass_sub: "يرجى إدخال كلمة المرور الحالية وكلمة المرور الجديدة لحماية حسابك.",
                 opt_open: "مفتوح للجميع (Open)",
                 opt_closed: "مغلق (Closed)",
                 hr_teams_title: "👥 إنشاء وإدارة التيمات (Team Management)",
@@ -1915,7 +1920,9 @@
                 media_certs_list_title: "📜 قائمة الشهادات المرفوعة",
                 th_title: "العنوان",
                 th_recipient: "المستلم",
-                th_upload_date: "تاريخ الرفع"
+                th_upload_date: "تاريخ الرفع",
+                notif_header_title: "🔔 الإشعارات والتنبيهات",
+                btn_clear_notifs: "🗑️ مسح الكل"
             },
             en: {
                 logout: "Logout",
@@ -2056,6 +2063,8 @@
                 admin_db_view_title: "📊 Complete Database Inspector (Clean View)",
                 btn_export_db_excel: "📥 Export Database to Excel",
                 user_change_pass_title: "🔒 Change Account Password",
+                user_change_pass_sub: "Please enter your current and new password to secure your account.",
+                btn_change_password: "🔒 Change Password",
                 att_details_title: "📊 Session Attendance Details",
                 sub_tasks_details_title: "📝 Submitted Assignments List",
                 leaderboard_title: "🏆 Top Performers Leaderboard & Badges",
@@ -2068,6 +2077,8 @@
                 admin_team_status_label: "Registration Status:",
                 admin_team_deadline_label: "Deadline & Closing Date:",
                 admin_team_max_label: "Max Students per Team:",
+                notif_header_title: "🔔 Notifications & Alerts",
+                btn_clear_notifs: "🗑️ Clear All",
                 opt_open: "Open to all",
                 opt_closed: "Closed",
                 hr_teams_title: "👥 Team Management & Creation",
@@ -2301,6 +2312,12 @@
             const alertBox = document.getElementById('change-pass-alert');
             alertBox.style.display = 'none';
 
+            if (newPass === currentPass) {
+                alertBox.innerText = currentLang === 'ar' ? 'كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية' : 'New password must be different from current password';
+                alertBox.style.display = 'block';
+                return;
+            }
+
             if (newPass !== confirmPass) {
                 alertBox.innerText = currentLang === 'ar' ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match';
                 alertBox.style.display = 'block';
@@ -2419,25 +2436,45 @@
         async function loadNotifications() {
             try {
                 const notifs = await apiRequest('/api/notifications');
+                window.latestNotifications = notifs;
+
+                const userId = currentUser ? currentUser.id : 'guest';
+                const deletedKey = `lms_deleted_notifs_${userId}`;
+                const readKey = `lms_read_notifs_${userId}`;
+
+                const deletedIds = JSON.parse(localStorage.getItem(deletedKey) || '[]');
+                const readIds = JSON.parse(localStorage.getItem(readKey) || '[]');
+
+                const activeNotifs = notifs.filter(n => !deletedIds.includes(n.id));
+                const unreadNotifs = activeNotifs.filter(n => !readIds.includes(n.id));
+
                 const badge = document.getElementById('notif-badge');
                 const list = document.getElementById('notif-list-container');
-                if (notifs.length > 0) {
+
+                if (unreadNotifs.length > 0) {
                     if (badge) {
                         badge.style.display = 'inline';
-                        badge.innerText = notifs.length;
-                    }
-                    if (list) {
-                        list.innerHTML = notifs.map(n => `
-                            <div style="background: rgba(30,41,59,0.7); padding: 10px; border-radius: 8px; margin-bottom: 8px; border-right: 4px solid var(--accent-cyan);">
-                                <div style="font-weight: bold; font-size: 0.88rem; color: var(--accent-cyan);">${n.title}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">${n.body}</div>
-                                <div style="font-size: 0.7rem; color: #64748b; margin-top: 4px; text-align: left;">⏱️ ${n.time}</div>
-                            </div>
-                        `).join('');
+                        badge.innerText = unreadNotifs.length;
                     }
                 } else {
                     if (badge) badge.style.display = 'none';
-                    if (list) list.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px;">لا توجد إشعارات جديدة.</div>`;
+                }
+
+                if (list) {
+                    if (activeNotifs.length > 0) {
+                        list.innerHTML = activeNotifs.map(n => `
+                            <div style="background: rgba(30,41,59,0.7); padding: 10px; border-radius: 8px; margin-bottom: 8px; border-right: 4px solid var(--accent-cyan); position: relative;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;">
+                                    <div style="font-weight: bold; font-size: 0.88rem; color: var(--accent-cyan); flex: 1;">${n.title}</div>
+                                    <button onclick="handleDeleteSingleNotification('${n.id}')" style="background: transparent; border: none; color: #f43f5e; cursor: pointer; font-size: 0.9rem; padding: 0 4px; line-height: 1;" title="${currentLang === 'ar' ? 'حذف الإشعار' : 'Delete notification'}">&times;</button>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${n.body}</div>
+                                <div style="font-size: 0.7rem; color: #64748b; margin-top: 4px; text-align: left;">⏱️ ${n.time}</div>
+                            </div>
+                        `).join('');
+                    } else {
+                        list.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px;">${currentLang === 'ar' ? 'لا توجد إشعارات جديدة.' : 'No new notifications.'}</div>`;
+                    }
                 }
             } catch (err) { console.error(err); }
         }
@@ -2445,8 +2482,47 @@
         function toggleNotificationDropdown() {
             const dropdown = document.getElementById('notif-dropdown');
             if (dropdown) {
-                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                const isOpening = dropdown.style.display === 'none';
+                dropdown.style.display = isOpening ? 'block' : 'none';
+                if (isOpening) {
+                    const badge = document.getElementById('notif-badge');
+                    if (badge) badge.style.display = 'none';
+
+                    if (window.latestNotifications && currentUser) {
+                        const userId = currentUser.id;
+                        const readKey = `lms_read_notifs_${userId}`;
+                        const readIds = JSON.parse(localStorage.getItem(readKey) || '[]');
+                        window.latestNotifications.forEach(n => {
+                            if (!readIds.includes(n.id)) readIds.push(n.id);
+                        });
+                        localStorage.setItem(readKey, JSON.stringify(readIds));
+                    }
+                }
             }
+        }
+
+        function handleDeleteSingleNotification(notifId) {
+            if (!currentUser) return;
+            const userId = currentUser.id;
+            const deletedKey = `lms_deleted_notifs_${userId}`;
+            const deletedIds = JSON.parse(localStorage.getItem(deletedKey) || '[]');
+            if (!deletedIds.includes(notifId)) {
+                deletedIds.push(notifId);
+                localStorage.setItem(deletedKey, JSON.stringify(deletedIds));
+            }
+            loadNotifications();
+        }
+
+        function handleClearAllNotifications() {
+            if (!currentUser || !window.latestNotifications) return;
+            const userId = currentUser.id;
+            const deletedKey = `lms_deleted_notifs_${userId}`;
+            const deletedIds = JSON.parse(localStorage.getItem(deletedKey) || '[]');
+            window.latestNotifications.forEach(n => {
+                if (!deletedIds.includes(n.id)) deletedIds.push(n.id);
+            });
+            localStorage.setItem(deletedKey, JSON.stringify(deletedIds));
+            loadNotifications();
         }
 
         async function loadLeaderboard() {
@@ -2727,9 +2803,19 @@
             const alertBox = document.getElementById('user-change-pass-alert');
             if (alertBox) alertBox.style.display = 'none';
 
+            if (newPass === currentPass) {
+                if (alertBox) {
+                    alertBox.innerText = currentLang === 'ar' ? 'كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية' : 'New password must be different from current password';
+                    alertBox.style.display = 'block';
+                }
+                return;
+            }
+
             if (newPass !== confirmPass) {
-                alertBox.innerText = currentLang === 'ar' ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match';
-                alertBox.style.display = 'block';
+                if (alertBox) {
+                    alertBox.innerText = currentLang === 'ar' ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match';
+                    alertBox.style.display = 'block';
+                }
                 return;
             }
 
@@ -3409,23 +3495,61 @@
             } catch (err) { alert(err.message); }
         }
 
+        async function handleDeleteTask(taskId) {
+            if (!confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف هذه المهمة وكافة تسليماتها؟' : 'Delete this task and all its submissions?')) return;
+            try {
+                const res = await apiRequest(`/api/instructor/tasks/${taskId}`, 'DELETE');
+                showToast(currentLang === 'ar' ? '✓ تم حذف المهمة' : '✓ Task deleted');
+                loadInstructorDashboard();
+            } catch (err) { alert(err.message); }
+        }
+
+        async function handleDeleteSession(sessionId) {
+            if (!confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف هذه السيشن وسجلات غيابها؟' : 'Delete this session and its attendance records?')) return;
+            try {
+                const res = await apiRequest(`/api/instructor/sessions/${sessionId}`, 'DELETE');
+                showToast(currentLang === 'ar' ? '✓ تم حذف السيشن' : '✓ Session deleted');
+                loadInstructorDashboard();
+            } catch (err) { alert(err.message); }
+        }
+
         async function loadInstructorDashboard() {
             try {
                 const tasks = await apiRequest('/api/instructor/tasks');
-                document.getElementById('instructor-tasks-list').innerHTML = tasks.map(t => `
-                    <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-card); padding: 16px; border-radius: 12px; margin-bottom: 12px;">
-                        <div style="font-weight: bold; font-size: 1.1rem; color: var(--accent-cyan);">${t.title}</div>
-                        <div style="font-size: 0.9rem; color: var(--text-muted); margin: 6px 0;">${currentLang === 'ar' ? 'الديدلاين:' : 'Deadline:'} ${t.deadline.replace('T', ' ')} | ${currentLang === 'ar' ? 'التسليمات:' : 'Submissions:'} ${t.submissions_count}</div>
-                    </div>
-                `).join('');
+                const tasksContainer = document.getElementById('instructor-tasks-list');
+                if (tasks.length === 0) {
+                    tasksContainer.innerHTML = `<p style="color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد مهمات مضافة بعد.' : 'No tasks created yet.'}</p>`;
+                } else {
+                    tasksContainer.innerHTML = tasks.map(t => `
+                        <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-card); padding: 14px 18px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <div style="font-weight: bold; font-size: 1.1rem; color: var(--accent-cyan);">${t.title}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">⏱️ ${currentLang === 'ar' ? 'الديدلاين:' : 'Deadline:'} ${t.deadline.replace('T', ' ')} | 📥 ${currentLang === 'ar' ? 'التسليمات:' : 'Submissions:'} ${t.submissions_count}</div>
+                            </div>
+                            <button class="btn btn-danger" style="padding: 4px 12px; font-size: 0.8rem;" onclick="handleDeleteTask(${t.id})">
+                                🗑️ ${currentLang === 'ar' ? 'حذف المهمة' : 'Delete Task'}
+                            </button>
+                        </div>
+                    `).join('');
+                }
 
                 const sessions = await apiRequest('/api/sessions');
-                document.getElementById('instructor-sessions-list').innerHTML = sessions.map(s => `
-                    <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-card); padding: 16px; border-radius: 12px; margin-bottom: 12px;">
-                        <div style="font-weight: bold; font-size: 1.1rem; color: var(--accent-emerald);">${s.title}</div>
-                        <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 4px;">📅 ${currentLang === 'ar' ? 'الموعد:' : 'Time:'} ${s.date_time}</div>
-                    </div>
-                `).join('');
+                const sessionsContainer = document.getElementById('instructor-sessions-list');
+                if (sessions.length === 0) {
+                    sessionsContainer.innerHTML = `<p style="color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد سيشنات مجدولة بعد.' : 'No scheduled sessions yet.'}</p>`;
+                } else {
+                    sessionsContainer.innerHTML = sessions.map(s => `
+                        <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-card); padding: 14px 18px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <div style="font-weight: bold; font-size: 1.1rem; color: var(--accent-emerald);">${s.title}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">📅 ${currentLang === 'ar' ? 'الموعد:' : 'Time:'} ${s.date_time}</div>
+                            </div>
+                            <button class="btn btn-danger" style="padding: 4px 12px; font-size: 0.8rem;" onclick="handleDeleteSession(${s.id})">
+                                🗑️ ${currentLang === 'ar' ? 'حذف السيشن' : 'Delete Session'}
+                            </button>
+                        </div>
+                    `).join('');
+                }
             } catch (err) { console.error(err); }
         }
 

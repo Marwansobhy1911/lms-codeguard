@@ -283,6 +283,9 @@ def change_password(req: ChangePasswordRequest, user: User = Depends(get_current
     if not verify_password(req.current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="كلمة المرور الحالية غير صحيحة")
 
+    if verify_password(req.new_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية")
+
     if len(req.new_password) < 4:
         raise HTTPException(status_code=400, detail="كلمة المرور الجديدة يجب أن تكون 4 خانات على الأقل")
 
@@ -1155,6 +1158,29 @@ def create_session(req: SessionCreateRequest, user: User = Depends(require_role(
     db.add(sess)
     db.commit()
     return {"success": True, "message": "تم إضافة ميعاد السيشن بنجاح"}
+
+@app.delete("/api/instructor/tasks/{task_id}")
+def delete_task(task_id: int, user: User = Depends(require_role([RoleEnum.SUPPORTER, RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="المهمة غير موجودة")
+
+    db.query(Submission).filter(Submission.task_id == task_id).delete()
+    db.query(PlagiarismReport).filter(PlagiarismReport.task_id == task_id).delete()
+    db.delete(task)
+    db.commit()
+    return {"success": True, "message": "تم حذف المهمة وجميع تسليماتها بنجاح"}
+
+@app.delete("/api/instructor/sessions/{session_id}")
+def delete_session(session_id: int, user: User = Depends(require_role([RoleEnum.INSTRUCTOR, RoleEnum.ADMIN, RoleEnum.HR])), db: Session = Depends(get_db)):
+    sess = db.query(SessionSchedule).filter(SessionSchedule.id == session_id).first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+
+    db.query(Attendance).filter(Attendance.session_id == session_id).delete()
+    db.delete(sess)
+    db.commit()
+    return {"success": True, "message": "تم حذف السيشن وسجلات غيابها بنجاح"}
 
 @app.post("/api/instructor/attendance")
 def mark_attendance(req: AttendanceMarkRequest, user: User = Depends(require_role([RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
