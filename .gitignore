@@ -19,9 +19,9 @@ venv/
 env/
 
 # Database - DO NOT ignore, we want to deploy with data
-# *.db
-# *.sqlite
-
+# (Wait, actually we MUST ignore it to prevent resetting data on deploy)
+*.db
+*.sqlite
 # IDE
 .vscode/
 .idea/

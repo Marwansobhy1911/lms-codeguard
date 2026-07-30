@@ -229,6 +229,8 @@
 
         .table-responsive {
             width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
             overflow-x: auto;
             border-radius: 12px;
             border: 1px solid var(--border-card);
@@ -250,9 +252,13 @@
         }
 
         th {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.95);
             color: var(--text-muted);
             font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         tr:hover td {
@@ -950,7 +956,7 @@
                 <button class="close-btn" onclick="closeModal('admin-database-view-modal')">&times;</button>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                     <h3 style="color: var(--accent-emerald);" data-i18n="admin_db_view_title">📊 معاينة جدول الداتابيز الكاملة (Clean Database View)</h3>
-                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="window.open('/api/admin/database-export-excel')" data-i18n="btn_export_db_excel">
+                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="window.open('/api/admin/database-export-excel?token=' + (localStorage.getItem('lms_token') || ''))" data-i18n="btn_export_db_excel">
                         📥 تصدير الداتابيز شيت إكسيل (Clean Excel Export)
                     </button>
                 </div>
@@ -1245,6 +1251,15 @@
                             <select id="hr-manual-session-select" style="margin-bottom: 12px;">
                                 <option value="">-- اختر السيشن --</option>
                             </select>
+                        </div>
+
+                        <!-- NEW QUICK ID ATTENDANCE FORM -->
+                        <div style="margin-bottom: 24px; padding: 16px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 12px;">
+                            <h5 style="margin-bottom: 8px; color: var(--accent-blue);">⚡ تسجيل سريع للطالب بالـ ID</h5>
+                            <form onsubmit="handleQuickIdAttendance(event)" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <input type="text" id="hr-quick-id-input" placeholder="اكتب ID الطالب واضغط Enter أو تسجيل..." required style="flex: 1; min-width: 200px; font-size: 0.9rem; padding: 10px; border-radius: 8px; border: 1px solid var(--border-card); background: rgba(0,0,0,0.2); color: white;">
+                                <button type="submit" class="btn btn-primary" style="white-space: nowrap; height: 100%; min-height: 40px; padding: 0 20px;">تسجيل</button>
+                            </form>
                         </div>
 
                         <div style="margin-bottom: 12px;">
@@ -2579,7 +2594,7 @@
                 alert(currentLang === 'ar' ? 'يرجى اختيار السيشن أولاً لتصدير الغياب' : 'Please select a session first');
                 return;
             }
-            window.open(`/api/hr/attendance/export-excel/${sessId}`);
+            window.open(`/api/hr/attendance/export-excel/${sessId}?token=${localStorage.getItem('lms_token') || ''}`);
         }
 
         function exportPlagiarismExcel() {
@@ -2588,7 +2603,7 @@
                 alert(currentLang === 'ar' ? 'يرجى اختيار المهمة أولاً لتصدير التقرير' : 'Please select a task first');
                 return;
             }
-            window.open(`/api/plagiarism/export-excel/${taskId}`);
+            window.open(`/api/plagiarism/export-excel/${taskId}?token=${localStorage.getItem('lms_token') || ''}`);
         }
 
         function openProfileModal() {
@@ -3230,14 +3245,14 @@
                         <td><strong>${s.id}</strong></td>
                         <td>${s.name}</td>
                         <td>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <label style="margin: 0; cursor: pointer; color: #34d399; font-weight: normal;">
-                                    <input type="radio" name="att-status-${s.id}" value="present" checked> ${currentLang === 'ar' ? 'حاضر (✓)' : 'Present'}
+                            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                <label style="margin: 0; cursor: pointer; color: #34d399; font-weight: normal; display: flex; align-items: center; gap: 4px;">
+                                    <input type="radio" name="att-status-${s.id}" value="present"> ${currentLang === 'ar' ? 'حاضر (✓)' : 'Present'}
                                 </label>
-                                <label style="margin: 0; cursor: pointer; color: #f43f5e; font-weight: normal;">
-                                    <input type="radio" name="att-status-${s.id}" value="absent"> ${currentLang === 'ar' ? 'غائب (✗)' : 'Absent'}
+                                <label style="margin: 0; cursor: pointer; color: #f43f5e; font-weight: normal; display: flex; align-items: center; gap: 4px;">
+                                    <input type="radio" name="att-status-${s.id}" value="absent" checked> ${currentLang === 'ar' ? 'غائب (✗)' : 'Absent'}
                                 </label>
-                                <label style="margin: 0; cursor: pointer; color: #fbbf24; font-weight: normal;">
+                                <label style="margin: 0; cursor: pointer; color: #fbbf24; font-weight: normal; display: flex; align-items: center; gap: 4px;">
                                     <input type="radio" name="att-status-${s.id}" value="excused"> ${currentLang === 'ar' ? 'مستأذن' : 'Excused'}
                                 </label>
                             </div>
@@ -3255,6 +3270,31 @@
                 (s.name && s.name.toLowerCase().includes(query))
             );
             renderHrStudentsTable(filtered);
+        }
+
+        async function handleQuickIdAttendance(e) {
+            e.preventDefault();
+            const sessId = document.getElementById('hr-manual-session-select').value;
+            const inputEl = document.getElementById('hr-quick-id-input');
+            const studentId = inputEl.value.trim();
+
+            if (!sessId) {
+                alert(currentLang === 'ar' ? 'يرجى اختيار السيشن المراد رصد غيابها أولاً من القائمة أعلاه.' : 'Please select a session first from the dropdown above.');
+                return;
+            }
+            if (!studentId) return;
+
+            try {
+                const res = await apiRequest('/api/hr/attendance/manual-id', 'POST', {
+                    session_id: parseInt(sessId),
+                    student_id: studentId
+                });
+                alert(res.message);
+                inputEl.value = ''; 
+                inputEl.focus(); 
+            } catch (err) {
+                alert(err.message);
+            }
         }
 
         async function handleSaveManualAttendance() {
@@ -4306,7 +4346,7 @@
             <img src="/logo.jpeg" alt="Logo" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;">
             <span style="font-weight: 600; color: var(--text-main);">CodeGuard LMS &copy; 2026</span>
             <span style="opacity: 0.5;">•</span>
-            <strong style="color: var(--accent-cyan); font-size: 0.95rem;">⚡ Powered by Marwan Sobhy</strong>
+            <strong style="color: var(--accent-cyan); font-size: 0.95rem;">⚡ Crafted with ❤️ by Marwan Sobhy & Youssef Al-Sayed</strong>
         </div>
     </footer>
 </body>

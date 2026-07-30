@@ -116,11 +116,14 @@ def sanitize_text(text: Optional[str]) -> Optional[str]:
 def startup_event():
     init_db()
 
+from fastapi import Query
+
 # --- Helper Dependencies ---
-def get_current_user(x_session_token: Optional[str] = Header(None), db: Session = Depends(get_db)) -> User:
-    if not x_session_token:
+def get_current_user(x_session_token: Optional[str] = Header(None), token: Optional[str] = Query(None), db: Session = Depends(get_db)) -> User:
+    actual_token = x_session_token or token
+    if not actual_token:
         raise HTTPException(status_code=401, detail="غير مصرح: يلزم تسجيل الدخول")
-    session = get_session_user(x_session_token)
+    session = get_session_user(actual_token)
     if not session:
         raise HTTPException(status_code=401, detail="الجلسة منتهية أو غير صالحة")
     user = db.query(User).filter(User.id == session["user_id"]).first()
@@ -202,6 +205,10 @@ class BulkAttendanceItem(BaseModel):
 class BulkAttendanceRequest(BaseModel):
     session_id: int
     records: List[BulkAttendanceItem]
+
+class ManualIDAttendanceRequest(BaseModel):
+    session_id: int
+    student_id: str
 
 class TeamCreateRequest(BaseModel):
     name: str
@@ -1184,6 +1191,12 @@ def delete_session(session_id: int, user: User = Depends(require_role([RoleEnum.
 
 @app.post("/api/instructor/attendance")
 def mark_attendance(req: AttendanceMarkRequest, user: User = Depends(require_role([RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    st = db.query(User).filter(User.id == req.student_id).first()
+    if st:
+        is_admin = "admin" in get_user_roles(user)
+        if not is_admin and "student" not in get_user_roles(st):
+            raise HTTPException(status_code=400, detail="عفواً، لا يمكن تسجيل حضور لغير الطلاب. الإدمن فقط من يمكنه ذلك.")
+
     att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == req.student_id).first()
     if att:
         att.status = req.status
@@ -1554,7 +1567,7 @@ async def upload_attendance_excel(
     db: Session = Depends(get_db)
 ):
     contents = await file.read()
-    res = import_attendance_from_excel_or_csv(contents, file.filename, session_id, db)
+    res = import_attendance_from_excel_or_csv(contents, file.filename, session_id, db, user)
     if not res.get("success"):
         raise HTTPException(status_code=400, detail=res.get("error", "فشل استيراد الحضور"))
     return res
@@ -1565,11 +1578,17 @@ def mark_bulk_attendance(req: BulkAttendanceRequest, user: User = Depends(requir
     if not sess:
         raise HTTPException(status_code=404, detail="السيشن غير موجودة")
 
+    is_admin = "admin" in get_user_roles(user)
+
     count = 0
     for rec in req.records:
         st = db.query(User).filter(User.id == rec.student_id).first()
         if not st:
             continue
+        
+        target_roles = get_user_roles(st)
+        if not is_admin and ("hr" in target_roles or "admin" in target_roles or "instructor" in target_roles):
+            raise HTTPException(status_code=400, detail="عفواً، لا يمكن لمسؤول الـ HR تسجيل حضور للزملاء أو المسؤولين. الإدمن فقط من يمكنه ذلك.")
         
         att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == rec.student_id).first()
         if att:
@@ -1587,6 +1606,38 @@ def mark_bulk_attendance(req: BulkAttendanceRequest, user: User = Depends(requir
 
     db.commit()
     return {"success": True, "message": f"تم حفظ غياب السيشن لـ {count} طالب بنجاح"}
+
+@app.post("/api/hr/attendance/manual-id")
+def mark_manual_id_attendance(req: ManualIDAttendanceRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    sess = db.query(SessionSchedule).filter(SessionSchedule.id == req.session_id).first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+
+    st = db.query(User).filter(User.id == req.student_id).first()
+    if not st:
+        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+
+    is_admin = "admin" in get_user_roles(user)
+    target_roles = get_user_roles(st)
+    if not is_admin and ("hr" in target_roles or "admin" in target_roles or "instructor" in target_roles):
+        raise HTTPException(status_code=400, detail="عفواً، لا يمكن تسجيل حضور للمسؤولين أو الزملاء. الإدمن فقط من يمكنه ذلك.")
+
+    att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == req.student_id).first()
+    
+    if att:
+        att.status = AttendanceStatusEnum.PRESENT
+        att.notes = "حضور يدوي بالـ ID"
+    else:
+        att = Attendance(
+            session_id=req.session_id,
+            student_id=req.student_id,
+            status=AttendanceStatusEnum.PRESENT,
+            notes="حضور يدوي بالـ ID"
+        )
+        db.add(att)
+
+    db.commit()
+    return {"success": True, "message": f"تم تسجيل حضور الطالب {st.name} بنجاح"}
 
 @app.get("/api/hr/download-sample-attendance-excel")
 def download_sample_attendance_excel():
@@ -1950,13 +2001,13 @@ def export_hr_attendance_excel(session_id: int, user: User = Depends(require_rol
             att = db.query(Attendance).filter(Attendance.session_id == session_id, Attendance.student_id == s.id).first()
             data.append({
                 "Session Title": sess.title,
-                "Session Date": sess.date_time,
+                "Session Date": sess.date_time.strftime("%Y-%m-%d %H:%M"),
                 "Student ID": s.id,
                 "Student Name": s.name,
                 "Seat Number": s.seat_number or "",
                 "Academic Level": s.academic_level or "",
                 "Program": s.program or "",
-                "Attendance Status": att.status if att else "غائب",
+                "Attendance Status": (att.status.value if hasattr(att.status, 'value') else str(att.status)) if att else "غائب",
                 "Notes": att.notes if att else ""
             })
             

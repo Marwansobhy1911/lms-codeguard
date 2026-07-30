@@ -185,7 +185,7 @@ def import_users_from_excel_or_csv(file_bytes: bytes, filename: str, db: Session
         "updated": updated_count
     }
 
-def import_attendance_from_excel_or_csv(file_bytes: bytes, filename: str, session_id: int, db: Session) -> dict:
+def import_attendance_from_excel_or_csv(file_bytes: bytes, filename: str, session_id: int, db: Session, current_user: User = None) -> dict:
     """
     Parses Excel or CSV containing Student IDs and attendance status/checkbox, and records attendance.
     """
@@ -209,6 +209,11 @@ def import_attendance_from_excel_or_csv(file_bytes: bytes, filename: str, sessio
     if not id_col:
         return {"success": False, "error": "الملف يجب أن يحتوي على عمود كود الطالب (ID)."}
 
+    is_admin = False
+    if current_user:
+        raw_current = current_user.role.value if hasattr(current_user.role, 'value') else str(current_user.role)
+        is_admin = "admin" in raw_current.lower()
+
     updated_records = 0
     created_records = 0
 
@@ -221,16 +226,21 @@ def import_attendance_from_excel_or_csv(file_bytes: bytes, filename: str, sessio
         student = db.query(User).filter(User.id == student_id).first()
         if not student:
             continue
+            
+        raw_st_role = student.role.value if hasattr(student.role, 'value') else str(student.role)
+        st_roles = [r.strip().lower() for r in raw_st_role.split(',')]
+        if not is_admin and ("hr" in st_roles or "admin" in st_roles or "instructor" in st_roles):
+            return {"success": False, "error": f"عفواً، لا يمكن لمسؤول الـ HR تسجيل حضور للزملاء أو المسؤولين ({student.name}). الإدمن فقط من يمكنه ذلك."}
 
-        status_val = AttendanceStatusEnum.PRESENT
+        status_val = AttendanceStatusEnum.ABSENT
         if status_col and pd.notna(row[status_col]):
             raw_s = str(row[status_col]).strip().lower()
-            if raw_s in ['absent', 'غائب', 'غياب', '0', 'false', 'no', 'لا']:
-                status_val = AttendanceStatusEnum.ABSENT
+            if raw_s in ['present', 'حاضر', 'حضور', '1', 'true', 'yes', 'نعم']:
+                status_val = AttendanceStatusEnum.PRESENT
             elif raw_s in ['excused', 'مستأذن', 'عذر']:
                 status_val = AttendanceStatusEnum.EXCUSED
             else:
-                status_val = AttendanceStatusEnum.PRESENT
+                status_val = AttendanceStatusEnum.ABSENT
 
         att = db.query(Attendance).filter(
             Attendance.session_id == session_id,

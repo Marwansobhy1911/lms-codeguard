@@ -91,7 +91,7 @@ class Attendance(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     session_id = Column(Integer, ForeignKey("session_schedules.id"), nullable=False)
     student_id = Column(String, ForeignKey("users.id"), nullable=False)
-    status = Column(Enum(AttendanceStatusEnum), default=AttendanceStatusEnum.PRESENT, nullable=False)
+    status = Column(Enum(AttendanceStatusEnum), default=AttendanceStatusEnum.ABSENT, nullable=False)
     notes = Column(String, nullable=True)
     marked_at = Column(DateTime, default=datetime.now)
 
