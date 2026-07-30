@@ -1214,9 +1214,12 @@
                 <div class="grid-2" style="margin-bottom: 24px;">
                     <!-- Attendance Management -->
                     <div class="glass-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                             <h3 style="color: var(--accent-purple);" data-i18n="hr_attendance_title">📊 إدارة حضور وغياب الطلاب</h3>
-                            <span id="hr-students-count-badge" class="badge badge-hr">الطلاب المسندين: --</span>
+                            <div style="display: flex; gap: 8px;">
+                                <span id="hr-students-count-badge" class="badge badge-hr">الطلاب المسندين: --</span>
+                                <span id="hr-present-count-badge" class="badge" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">الحضور: 0</span>
+                            </div>
                         </div>
                         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="hr_attendance_sub">قم برصد الحضور والغياب للطلاب المسندين إليك لكل سيشن يدويًا عبر التشيك بوكس، أو عبر رفع شيت الإكسيل.</p>
 
@@ -1263,7 +1266,7 @@
                         </div>
 
                         <div style="margin-bottom: 12px;">
-                            <input type="text" id="hr-students-search-input" placeholder="🔍 ابحث في طلابك بالاسم أو الرقم التعريفي (ID)..." oninput="filterHrStudentsTable()" style="width: 100%; font-size: 0.85rem;">
+                            <input type="text" id="hr-students-search-input" placeholder="🔍 ابحث في طلابك بالاسم، الرقم التعريفي، أو رقم الجلوس..." oninput="filterHrStudentsTable()" style="width: 100%; font-size: 0.85rem;">
                         </div>
 
                         <div class="table-responsive" style="margin-bottom: 14px;">
@@ -1280,10 +1283,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <button class="btn btn-success" style="width: 100%; justify-content: center;" onclick="handleSaveManualAttendance()" data-i18n="btn_save_attendance">
-                            💾 حفظ غياب السيشن المحدد
-                        </button>
                         <button class="btn btn-outline" style="width: 100%; justify-content: center; margin-top: 8px; color: var(--accent-cyan); border-color: var(--accent-cyan);" onclick="exportHrAttendanceSheet()">
                             📥 تصدير غياب السيشن شيت إكسيل (Export Session Excel)
                         </button>
@@ -1346,7 +1345,7 @@
                     <div class="glass-card">
                         <h3 style="margin-bottom: 16px;" data-i18n="media_certs_list_title">📜 قائمة الشهادات المرفوعة</h3>
                         <div style="margin-bottom: 12px;">
-                            <input type="text" id="hr-students-search-input" placeholder="🔍 ابحث بالاسم أو الرقم التعريفي (ID)..." oninput="filterHrStudentsTable()" style="width: 100%; font-size: 0.85rem;">
+                            <input type="text" id="hr-students-search-input" placeholder="🔍 ابحث بالاسم، الرقم التعريفي، أو رقم الجلوس..." oninput="filterHrStudentsTable()" style="width: 100%; font-size: 0.85rem;">
                         </div>
                         <div class="table-responsive">
                             <table>
@@ -1535,6 +1534,13 @@
                     <button class="btn btn-primary" onclick="handleSaveTeamSettings(false)" data-i18n="btn_save_team_settings">💾 حفظ إعدادات تسجيل التيمات والديدلاين</button>
                 </div>
 
+                <!-- Admin Sessions Control -->
+                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-cyan);">
+                    <h3 style="margin-bottom: 16px; color: var(--accent-cyan);">📅 إدارة السيشنات وتصاريح الحضور (Sessions Control)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">يمكنك من هنا فتح أو إغلاق التسجيل لمسؤولي الـ HR لكل سيشن.</p>
+                    <div id="admin-sessions-list">جاري التحميل...</div>
+                </div>
+
                 <!-- User Management Table -->
                 <div class="glass-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
@@ -1545,7 +1551,7 @@
                         </div>
                     </div>
                     <div style="margin-bottom: 14px;">
-                        <input type="text" id="admin-user-search-input" placeholder="🔍 ابحث بالاسم، الرقم التعريفي (ID)، البريد، أو الرول..." oninput="filterAdminUsersTable()" style="width: 100%; font-size: 0.9rem;">
+                        <input type="text" id="admin-user-search-input" placeholder="🔍 ابحث بالاسم، الرقم التعريفي، رقم الجلوس، أو الإيميل..." oninput="filterAdminUsersTable()" style="width: 100%; font-size: 0.9rem;">
                     </div>
                     <div class="table-responsive">
                         <table>
@@ -2200,15 +2206,15 @@
             const searchInput = document.getElementById('admin-user-search-input');
             if (searchInput) {
                 searchInput.placeholder = lang === 'ar' 
-                    ? '🔍 ابحث بالاسم، الرقم التعريفي (ID)، البريد، أو الرول...' 
-                    : '🔍 Search by name, user ID, email, or role...';
+                    ? '🔍 ابحث بالاسم، الرقم التعريفي، رقم الجلوس، أو الإيميل...' 
+                    : '🔍 Search by name, ID, seat number, email, or role...';
             }
 
             const hrSearchInput = document.getElementById('hr-students-search-input');
             if (hrSearchInput) {
                 hrSearchInput.placeholder = lang === 'ar'
-                    ? '🔍 ابحث في طلابك بالاسم أو الرقم التعريفي (ID)...'
-                    : '🔍 Search assigned students by name or ID...';
+                    ? '🔍 ابحث في طلابك بالاسم، الرقم التعريفي، أو رقم الجلوس...'
+                    : '🔍 Search assigned students by name, ID, or seat number...';
             }
 
             const loginId = document.getElementById('login-id');
@@ -2260,7 +2266,7 @@
             const headers = { 'Content-Type': 'application/json' };
             if (currentToken) headers['X-Session-Token'] = currentToken;
 
-            const config = { method, headers };
+            const config = { method, headers, cache: 'no-store' };
             if (data && method !== 'GET') config.body = JSON.stringify(data);
 
             try {
@@ -3180,15 +3186,37 @@
                     }
                 } catch (e) { console.error(e); }
 
-                const sessions = await apiRequest('/api/sessions');
+                const allSessions = await apiRequest('/api/sessions');
+                const sessions = allSessions.filter(s => s.is_hr_attendance_open);
                 const sessSelectExcel = document.getElementById('hr-excel-session-select');
                 const sessSelectManual = document.getElementById('hr-manual-session-select');
-                const optionsHtml = '<option value="">-- ' + (currentLang === 'ar' ? 'اختر السيشن' : 'Select Session') + ' --</option>' + sessions.map(s => `
+                const optionsHtml = '<option value="">-- ' + (currentLang === 'ar' ? 'اختر السيشن المفتوحة' : 'Select Open Session') + ' --</option>' + sessions.map(s => `
                     <option value="${s.id}">${s.title} (${s.date_time})</option>
                 `).join('');
                 
                 if (sessSelectExcel) sessSelectExcel.innerHTML = optionsHtml;
-                if (sessSelectManual) sessSelectManual.innerHTML = optionsHtml;
+                if (sessSelectManual) {
+                    sessSelectManual.innerHTML = optionsHtml;
+                    sessSelectManual.addEventListener('change', async function() {
+                        const sessId = this.value;
+                        if (!sessId) {
+                            window.hrSessionAttendanceMap = {};
+                            renderHrStudentsTable(window.hrAssignedStudents || []);
+                            return;
+                        }
+                        try {
+                            const res = await apiRequest(`/api/hr/attendance/${sessId}`);
+                            if (res && res.success) {
+                                window.hrSessionAttendanceMap = res.attendance || {};
+                            } else {
+                                window.hrSessionAttendanceMap = {};
+                            }
+                        } catch (e) {
+                            window.hrSessionAttendanceMap = {};
+                        }
+                        filterHrStudentsTable();
+                    });
+                }
 
                 const students = await apiRequest('/api/hr/assigned-students');
                 window.hrAssignedStudents = students;
@@ -3240,25 +3268,45 @@
             if (students.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب مسندين مطبق عليهم البحث.' : 'No assigned students found.'}</td></tr>`;
             } else {
-                tbody.innerHTML = students.map(s => `
+                const attMap = window.hrSessionAttendanceMap || {};
+                tbody.innerHTML = students.map(s => {
+                    const status = attMap[s.id] ? attMap[s.id].toLowerCase() : 'absent';
+                    return `
                     <tr>
                         <td><strong>${s.id}</strong></td>
                         <td>${s.name}</td>
                         <td>
                             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                                 <label style="margin: 0; cursor: pointer; color: #34d399; font-weight: normal; display: flex; align-items: center; gap: 4px;">
-                                    <input type="radio" name="att-status-${s.id}" value="present"> ${currentLang === 'ar' ? 'حاضر (✓)' : 'Present'}
+                                    <input type="radio" name="att-status-${s.id}" value="present" ${status === 'present' ? 'checked' : ''} onchange="handleAutoSaveAttendance('${s.id}', 'present')"> ${currentLang === 'ar' ? 'حاضر (✓)' : 'Present'}
                                 </label>
                                 <label style="margin: 0; cursor: pointer; color: #f43f5e; font-weight: normal; display: flex; align-items: center; gap: 4px;">
-                                    <input type="radio" name="att-status-${s.id}" value="absent" checked> ${currentLang === 'ar' ? 'غائب (✗)' : 'Absent'}
+                                    <input type="radio" name="att-status-${s.id}" value="absent" ${status === 'absent' ? 'checked' : ''} onchange="handleAutoSaveAttendance('${s.id}', 'absent')"> ${currentLang === 'ar' ? 'غائب (✗)' : 'Absent'}
                                 </label>
                                 <label style="margin: 0; cursor: pointer; color: #fbbf24; font-weight: normal; display: flex; align-items: center; gap: 4px;">
-                                    <input type="radio" name="att-status-${s.id}" value="excused"> ${currentLang === 'ar' ? 'مستأذن' : 'Excused'}
+                                    <input type="radio" name="att-status-${s.id}" value="excused" ${status === 'excused' ? 'checked' : ''} onchange="handleAutoSaveAttendance('${s.id}', 'excused')"> ${currentLang === 'ar' ? 'مستأذن' : 'Excused'}
                                 </label>
-                            </div>
+                    </div>
                         </td>
                     </tr>
-                `).join('');
+                    `
+                }).join('');
+            }
+            updateHrPresentCount();
+        }
+
+        function updateHrPresentCount() {
+            const attMap = window.hrSessionAttendanceMap || {};
+            let presentCount = 0;
+            const students = window.hrAssignedStudents || [];
+            students.forEach(s => {
+                if (attMap[s.id] && attMap[s.id].toLowerCase() === 'present') {
+                    presentCount++;
+                }
+            });
+            const presentBadge = document.getElementById('hr-present-count-badge');
+            if (presentBadge) {
+                presentBadge.innerText = (currentLang === 'ar' ? 'الحضور: ' : 'Present: ') + presentCount;
             }
         }
 
@@ -3267,7 +3315,8 @@
             if (!window.hrAssignedStudents) return;
             const filtered = window.hrAssignedStudents.filter(s => 
                 (s.id && s.id.toLowerCase().includes(query)) ||
-                (s.name && s.name.toLowerCase().includes(query))
+                (s.name && s.name.toLowerCase().includes(query)) ||
+                (s.seat_number && s.seat_number.toLowerCase().includes(query))
             );
             renderHrStudentsTable(filtered);
         }
@@ -3297,32 +3346,28 @@
             }
         }
 
-        async function handleSaveManualAttendance() {
+        async function handleAutoSaveAttendance(studentId, status) {
             const sessId = document.getElementById('hr-manual-session-select').value;
             if (!sessId) {
                 alert(currentLang === 'ar' ? 'يرجى اختيار السيشن المراد رصد غيابها أولاً.' : 'Please select a session first.');
                 return;
             }
 
-            const students = window.hrAssignedStudents || [];
-            if (students.length === 0) {
-                alert(currentLang === 'ar' ? 'لا يوجد طلاب مسندين إليك لرصد غيابهم.' : 'No assigned students available.');
-                return;
-            }
-
-            const records = [];
-            students.forEach(st => {
-                const radio = document.querySelector(`input[name="att-status-${st.id}"]:checked`);
-                const statusVal = radio ? radio.value : 'present';
-                records.push({ student_id: st.id, status: statusVal });
-            });
-
             try {
-                const res = await apiRequest('/api/hr/attendance/bulk-manual', 'POST', {
+                const res = await apiRequest('/api/hr/attendance/single', 'POST', {
                     session_id: parseInt(sessId),
-                    records: records
+                    student_id: studentId,
+                    status: status.toLowerCase()
                 });
-                alert(res.message);
+                
+                // Update local map
+                if (!window.hrSessionAttendanceMap) {
+                    window.hrSessionAttendanceMap = {};
+                }
+                window.hrSessionAttendanceMap[studentId] = status.toLowerCase();
+                updateHrPresentCount();
+                
+                showToast(res.message || (currentLang === 'ar' ? 'تم الحفظ بنجاح' : 'Saved successfully'));
             } catch (err) { alert(err.message); }
         }
 
@@ -3584,13 +3629,31 @@
                                 <div style="font-weight: bold; font-size: 1.1rem; color: var(--accent-emerald);">${s.title}</div>
                                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">📅 ${currentLang === 'ar' ? 'الموعد:' : 'Time:'} ${s.date_time}</div>
                             </div>
-                            <button class="btn btn-danger" style="padding: 4px 12px; font-size: 0.8rem;" onclick="handleDeleteSession(${s.id})">
-                                🗑️ ${currentLang === 'ar' ? 'حذف السيشن' : 'Delete Session'}
-                            </button>
+                            <div style="display: flex; gap: 8px;">
+                                ${(window.currentUser && window.currentUser.role && window.currentUser.role.includes('admin')) ? `
+                                <button class="btn btn-${s.is_hr_attendance_open ? 'success' : 'outline'}" style="padding: 4px 12px; font-size: 0.8rem; ${!s.is_hr_attendance_open ? 'color: var(--accent-cyan); border-color: var(--accent-cyan);' : ''}" onclick="handleToggleHrSession(${s.id})">
+                                    ${s.is_hr_attendance_open ? (currentLang === 'ar' ? 'إغلاق تسجيل HR' : 'Close HR') : (currentLang === 'ar' ? 'فتح تسجيل HR' : 'Open HR')}
+                                </button>
+                                ` : ''}
+                                <button class="btn btn-danger" style="padding: 4px 12px; font-size: 0.8rem;" onclick="handleDeleteSession(${s.id})">
+                                    🗑️ ${currentLang === 'ar' ? 'حذف السيشن' : 'Delete Session'}
+                                </button>
+                            </div>
                         </div>
                     `).join('');
                 }
             } catch (err) { console.error(err); }
+        }
+
+        async function handleToggleHrSession(sessionId) {
+            try {
+                const res = await apiRequest(`/api/admin/sessions/${sessionId}/toggle-hr`, 'POST');
+                showToast(res.message);
+                loadInstructorDashboard(); // Refresh session list
+                if (document.getElementById('admin-view').classList.contains('active') || document.getElementById('tab-admin').classList.contains('active')) {
+                    loadAdminDashboard(); // Refresh admin list as well
+                }
+            } catch (err) { alert(err.message); }
         }
 
         async function loadAdminDashboard() {
@@ -3622,6 +3685,29 @@
 
                 const maxInput = document.getElementById('admin-team-max-input');
                 if (maxInput) maxInput.value = teamSettings.max_members_per_team || 5;
+
+                // Fetch Sessions for Admin Control
+                const sessions = await apiRequest('/api/sessions');
+                const adminSessionsContainer = document.getElementById('admin-sessions-list');
+                if (adminSessionsContainer) {
+                    if (sessions.length === 0) {
+                        adminSessionsContainer.innerHTML = `<p style="color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد سيشنات مجدولة بعد.' : 'No scheduled sessions yet.'}</p>`;
+                    } else {
+                        adminSessionsContainer.innerHTML = sessions.map(s => `
+                            <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-card); padding: 14px 18px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 1.1rem; color: var(--accent-emerald);">${s.title}</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">📅 ${currentLang === 'ar' ? 'الموعد:' : 'Time:'} ${s.date_time}</div>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-${s.is_hr_attendance_open ? 'success' : 'outline'}" style="padding: 4px 12px; font-size: 0.8rem; ${!s.is_hr_attendance_open ? 'color: var(--accent-cyan); border-color: var(--accent-cyan);' : ''}" onclick="handleToggleHrSession(${s.id})">
+                                        ${s.is_hr_attendance_open ? (currentLang === 'ar' ? 'إغلاق تسجيل HR' : 'Close HR') : (currentLang === 'ar' ? 'فتح تسجيل HR' : 'Open HR')}
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
 
                 const users = await apiRequest('/api/admin/users');
                 window.allAdminUsers = users;
@@ -3839,7 +3925,8 @@
                 (u.id && u.id.toLowerCase().includes(query)) ||
                 (u.name && u.name.toLowerCase().includes(query)) ||
                 (u.email && u.email.toLowerCase().includes(query)) ||
-                (u.role && u.role.toLowerCase().includes(query))
+                (u.role && u.role.toLowerCase().includes(query)) ||
+                (u.seat_number && u.seat_number.toLowerCase().includes(query))
             );
             renderAdminUsersTable(filtered);
         }

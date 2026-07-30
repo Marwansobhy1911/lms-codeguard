@@ -81,6 +81,7 @@ class SessionSchedule(Base):
     date_time = Column(DateTime, nullable=False)
     location_or_link = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now)
+    is_hr_attendance_open = Column(Boolean, default=False)
 
     instructor = relationship("User")
     attendances = relationship("Attendance", back_populates="session", cascade="all, delete-orphan")

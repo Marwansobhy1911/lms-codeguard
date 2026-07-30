@@ -1132,9 +1132,20 @@ def get_sessions(x_session_token: Optional[str] = Header(None), db: Session = De
             "date_time": s.date_time.strftime("%Y-%m-%d %H:%M"),
             "location_or_link": s.location_or_link,
             "my_attendance": att_status,
-            "my_attendance_notes": att_notes
+            "my_attendance_notes": att_notes,
+            "is_hr_attendance_open": s.is_hr_attendance_open
         })
     return res
+
+@app.post("/api/admin/sessions/{session_id}/toggle-hr")
+def toggle_session_hr_attendance(session_id: int, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    sess = db.query(SessionSchedule).filter(SessionSchedule.id == session_id).first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+    sess.is_hr_attendance_open = not sess.is_hr_attendance_open
+    db.commit()
+    status_str = "مفتوح" if sess.is_hr_attendance_open else "مغلق"
+    return {"success": True, "message": f"تم تغيير حالة تسجيل الحضور للـ HR إلى {status_str}", "is_hr_attendance_open": sess.is_hr_attendance_open}
 
 @app.get("/api/admin/backup-db")
 def download_database_backup(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -1572,6 +1583,37 @@ async def upload_attendance_excel(
         raise HTTPException(status_code=400, detail=res.get("error", "فشل استيراد الحضور"))
     return res
 
+@app.post("/api/hr/attendance/single")
+def mark_single_attendance(req: AttendanceMarkRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    sess = db.query(SessionSchedule).filter(SessionSchedule.id == req.session_id).first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+
+    is_admin = "admin" in get_user_roles(user)
+    st = db.query(User).filter(User.id == req.student_id).first()
+    if not st:
+        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+
+    target_roles = get_user_roles(st)
+    if not is_admin and ("hr" in target_roles or "admin" in target_roles or "instructor" in target_roles):
+        raise HTTPException(status_code=400, detail="عفواً، لا يمكن لمسؤول الـ HR تسجيل حضور للزملاء أو المسؤولين. الإدمن فقط من يمكنه ذلك.")
+
+    att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == st.id).first()
+    if att:
+        att.status = req.status
+        if req.notes:
+            att.notes = req.notes
+    else:
+        att = Attendance(
+            session_id=req.session_id,
+            student_id=st.id,
+            status=req.status,
+            notes=req.notes
+        )
+        db.add(att)
+    db.commit()
+    return {"success": True, "message": "تم حفظ الحضور بنجاح"}
+
 @app.post("/api/hr/attendance/bulk-manual")
 def mark_bulk_attendance(req: BulkAttendanceRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     sess = db.query(SessionSchedule).filter(SessionSchedule.id == req.session_id).first()
@@ -1590,14 +1632,14 @@ def mark_bulk_attendance(req: BulkAttendanceRequest, user: User = Depends(requir
         if not is_admin and ("hr" in target_roles or "admin" in target_roles or "instructor" in target_roles):
             raise HTTPException(status_code=400, detail="عفواً، لا يمكن لمسؤول الـ HR تسجيل حضور للزملاء أو المسؤولين. الإدمن فقط من يمكنه ذلك.")
         
-        att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == rec.student_id).first()
+        att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == st.id).first()
         if att:
             att.status = rec.status
             att.notes = rec.notes
         else:
             att = Attendance(
                 session_id=req.session_id,
-                student_id=rec.student_id,
+                student_id=st.id,
                 status=rec.status,
                 notes=rec.notes
             )
@@ -1607,13 +1649,28 @@ def mark_bulk_attendance(req: BulkAttendanceRequest, user: User = Depends(requir
     db.commit()
     return {"success": True, "message": f"تم حفظ غياب السيشن لـ {count} طالب بنجاح"}
 
+@app.get("/api/hr/attendance/{session_id}")
+def get_session_attendance(session_id: int, response: Response, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    sess = db.query(SessionSchedule).filter(SessionSchedule.id == session_id).first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+        
+    attendances = db.query(Attendance).filter(Attendance.session_id == session_id).all()
+    res = {}
+    for att in attendances:
+        status_str = att.status.value if hasattr(att.status, 'value') else str(att.status).lower()
+        res[str(att.student_id)] = status_str
+    
+    return {"success": True, "attendance": res}
+
 @app.post("/api/hr/attendance/manual-id")
 def mark_manual_id_attendance(req: ManualIDAttendanceRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     sess = db.query(SessionSchedule).filter(SessionSchedule.id == req.session_id).first()
     if not sess:
         raise HTTPException(status_code=404, detail="السيشن غير موجودة")
 
-    st = db.query(User).filter(User.id == req.student_id).first()
+    st = db.query(User).filter((User.id == req.student_id) | (User.seat_number == req.student_id)).first()
     if not st:
         raise HTTPException(status_code=404, detail="الطالب غير موجود")
 
@@ -1622,7 +1679,7 @@ def mark_manual_id_attendance(req: ManualIDAttendanceRequest, user: User = Depen
     if not is_admin and ("hr" in target_roles or "admin" in target_roles or "instructor" in target_roles):
         raise HTTPException(status_code=400, detail="عفواً، لا يمكن تسجيل حضور للمسؤولين أو الزملاء. الإدمن فقط من يمكنه ذلك.")
 
-    att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == req.student_id).first()
+    att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == st.id).first()
     
     if att:
         att.status = AttendanceStatusEnum.PRESENT
@@ -1630,7 +1687,7 @@ def mark_manual_id_attendance(req: ManualIDAttendanceRequest, user: User = Depen
     else:
         att = Attendance(
             session_id=req.session_id,
-            student_id=req.student_id,
+            student_id=st.id,
             status=AttendanceStatusEnum.PRESENT,
             notes="حضور يدوي بالـ ID"
         )

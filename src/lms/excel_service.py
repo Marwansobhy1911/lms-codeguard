@@ -223,7 +223,7 @@ def import_attendance_from_excel_or_csv(file_bytes: bytes, filename: str, sessio
             continue
 
         # Check if student exists
-        student = db.query(User).filter(User.id == student_id).first()
+        student = db.query(User).filter((User.id == student_id) | (User.seat_number == student_id)).first()
         if not student:
             continue
             
@@ -244,7 +244,7 @@ def import_attendance_from_excel_or_csv(file_bytes: bytes, filename: str, sessio
 
         att = db.query(Attendance).filter(
             Attendance.session_id == session_id,
-            Attendance.student_id == student_id
+            Attendance.student_id == student.id
         ).first()
 
         if att:
@@ -253,7 +253,7 @@ def import_attendance_from_excel_or_csv(file_bytes: bytes, filename: str, sessio
         else:
             att = Attendance(
                 session_id=session_id,
-                student_id=student_id,
+                student_id=student.id,
                 status=status_val
             )
             db.add(att)
