@@ -1532,6 +1532,37 @@
                         </div>
                     </div>
                     <button class="btn btn-primary" onclick="handleSaveTeamSettings(false)" data-i18n="btn_save_team_settings">💾 حفظ إعدادات تسجيل التيمات والديدلاين</button>
+                    <button class="btn btn-primary" onclick="handleSaveTeamSettings(false)" data-i18n="btn_save_team_settings">💾 حفظ إعدادات تسجيل التيمات والديدلاين</button>
+                </div>
+
+                <!-- Admin Crew Attendance Control -->
+                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-indigo);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                        <h3 style="color: var(--accent-indigo);">📋 لوحة تسجيل حضور فريق العمل (Crew Attendance)</h3>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="badge" style="background: var(--accent-emerald); font-size: 0.9rem;" id="admin-crew-present-count-badge">الحضور: 0</span>
+                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="handleDownloadCrewAttendanceExcel()">📥 تحميل شيت إكسيل</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>اختر السيشن (لتسجيل ومراجعة حضور الـ Crew):</label>
+                        <select id="admin-crew-session-select" class="form-control" style="background: rgba(15,23,42,0.6); color: #fff;"></select>
+                    </div>
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الكود (ID)</th>
+                                    <th>الاسم</th>
+                                    <th>الدور (Role)</th>
+                                    <th>تسجيل الحضور</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-crew-attendance-tbody">
+                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">يرجى اختيار السيشن أولاً</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Admin Sessions Control -->
@@ -2680,7 +2711,89 @@
             }
         }
 
-        async function handleRegisterStudent(e) {
+        window.adminCrewList = [];
+        window.adminCrewSessionAttendanceMap = {};
+
+        function renderAdminCrewTable() {
+            const tbody = document.getElementById('admin-crew-attendance-tbody');
+            if (!tbody) return;
+            const sessId = document.getElementById('admin-crew-session-select').value;
+            if (!sessId) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'يرجى اختيار السيشن أولاً' : 'Please select a session first'}</td></tr>`;
+                document.getElementById('admin-crew-present-count-badge').innerText = currentLang === 'ar' ? 'الحضور: 0' : 'Present: 0';
+                return;
+            }
+            if (window.adminCrewList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد أعضاء فريق.' : 'No crew members found.'}</td></tr>`;
+                return;
+            }
+            
+            const attMap = window.adminCrewSessionAttendanceMap || {};
+            tbody.innerHTML = window.adminCrewList.map(s => {
+                const status = attMap[s.id] ? attMap[s.id].toLowerCase() : 'absent';
+                return `
+                <tr>
+                    <td><strong>${s.id}</strong></td>
+                    <td>${s.name}</td>
+                    <td><span class="badge" style="background: var(--accent-indigo);">${translateRole(s.role)}</span></td>
+                    <td>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <label style="margin: 0; cursor: pointer; color: #34d399; font-weight: normal; display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" name="crew-att-${s.id}" value="present" ${status === 'present' ? 'checked' : ''} onchange="handleAdminCrewAutoSave('${s.id}', 'present')"> ${currentLang === 'ar' ? 'حاضر (P)' : 'Present'}
+                            </label>
+                            <label style="margin: 0; cursor: pointer; color: #f43f5e; font-weight: normal; display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" name="crew-att-${s.id}" value="absent" ${status === 'absent' ? 'checked' : ''} onchange="handleAdminCrewAutoSave('${s.id}', 'absent')"> ${currentLang === 'ar' ? 'غائب (A)' : 'Absent'}
+                            </label>
+                            <label style="margin: 0; cursor: pointer; color: #fbbf24; font-weight: normal; display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" name="crew-att-${s.id}" value="excused" ${status === 'excused' ? 'checked' : ''} onchange="handleAdminCrewAutoSave('${s.id}', 'excused')"> ${currentLang === 'ar' ? 'مستأذن (E)' : 'Excused'}
+                            </label>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+            
+            updateAdminCrewPresentCount();
+        }
+
+        function updateAdminCrewPresentCount() {
+            let presentCount = 0;
+            const attMap = window.adminCrewSessionAttendanceMap || {};
+            window.adminCrewList.forEach(s => {
+                if (attMap[s.id] === 'present') presentCount++;
+            });
+            const badge = document.getElementById('admin-crew-present-count-badge');
+            if (badge) {
+                badge.innerText = (currentLang === 'ar' ? 'الحضور: ' : 'Present: ') + presentCount;
+            }
+        }
+
+        async function handleAdminCrewAutoSave(crewId, status) {
+            const sessId = document.getElementById('admin-crew-session-select').value;
+            if (!sessId) return;
+
+            try {
+                const res = await apiRequest('/api/hr/attendance/single', 'POST', {
+                    session_id: parseInt(sessId),
+                    student_id: crewId,
+                    status: status.toLowerCase()
+                });
+                
+                window.adminCrewSessionAttendanceMap[crewId] = status.toLowerCase();
+                updateAdminCrewPresentCount();
+                showToast(res.message || (currentLang === 'ar' ? 'تم الحفظ' : 'Saved'));
+            } catch (err) { alert(err.message); }
+        }
+
+        function handleDownloadCrewAttendanceExcel() {
+            const sessId = document.getElementById('admin-crew-session-select').value;
+            if (!sessId) {
+                alert(currentLang === 'ar' ? 'الرجاء اختيار سيشن أولاً' : 'Please select a session first');
+                return;
+            }
+            window.open(`/api/admin/crew-attendance/export-excel/${sessId}?token=${encodeURIComponent(currentToken)}`, '_blank');
+        }
+
+        async function handleAdminRegisterCrew(e) {
             e.preventDefault();
             const name = document.getElementById('reg-name').value.trim();
             const officialEmail = document.getElementById('reg-official-email').value.trim();
@@ -3712,6 +3825,30 @@
                 const users = await apiRequest('/api/admin/users');
                 window.allAdminUsers = users;
                 allSupportersList = users.filter(u => u.role === 'supporter' || u.role === 'instructor' || u.role === 'admin');
+
+                window.adminCrewList = users.filter(u => u.role && (u.role.includes('admin') || u.role.includes('hr') || u.role.includes('media') || u.role.includes('supporter') || u.role.includes('instructor')));
+                
+                const crewSessSelect = document.getElementById('admin-crew-session-select');
+                if (crewSessSelect) {
+                    const optionsHtml = '<option value="">-- ' + (currentLang === 'ar' ? 'اختر السيشن' : 'Select Session') + ' --</option>' + sessions.map(s => `
+                        <option value="${s.id}">${s.title} (${s.date_time})</option>
+                    `).join('');
+                    crewSessSelect.innerHTML = optionsHtml;
+                    crewSessSelect.onchange = async function() {
+                        const sessId = this.value;
+                        if (!sessId) {
+                            window.adminCrewSessionAttendanceMap = {};
+                            renderAdminCrewTable();
+                            return;
+                        }
+                        try {
+                            const res = await apiRequest(`/api/hr/attendance/${sessId}`);
+                            window.adminCrewSessionAttendanceMap = res.attendance || {};
+                            renderAdminCrewTable();
+                        } catch (err) { alert(err.message); }
+                    };
+                }
+                renderAdminCrewTable();
 
                 renderAdminUsersTable(users);
             } catch (err) { console.error(err); }

@@ -2079,6 +2079,42 @@ def export_hr_attendance_excel(session_id: int, user: User = Depends(require_rol
         headers={"Content-Disposition": f"attachment; filename=session_{session_id}_attendance.xlsx"}
     )
 
+@app.get("/api/admin/crew-attendance/export-excel/{session_id}")
+def export_crew_attendance_excel(session_id: int, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    sess = db.query(SessionSchedule).filter(SessionSchedule.id == session_id).first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+        
+    all_users = db.query(User).all()
+    
+    data = []
+    for s in all_users:
+        roles = get_user_roles(s)
+        # Check if user is crew (has any role other than student)
+        is_crew = any(r in roles for r in ["admin", "hr", "media", "supporter", "instructor"])
+        if is_crew:
+            att = db.query(Attendance).filter(Attendance.session_id == session_id, Attendance.student_id == s.id).first()
+            data.append({
+                "Session Title": sess.title,
+                "Session Date": sess.date_time.strftime("%Y-%m-%d %H:%M"),
+                "Crew ID": s.id,
+                "Crew Name": s.name,
+                "Role": s.role,
+                "Attendance Status": (att.status.value if hasattr(att.status, 'value') else str(att.status)) if att else "غائب",
+                "Notes": att.notes if att else ""
+            })
+            
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Crew_Attendance")
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=session_{session_id}_crew_attendance.xlsx"}
+    )
+
 # Mount static files LAST (after all API routes)
 if os.path.isdir(_STATIC_DIR):
     app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
