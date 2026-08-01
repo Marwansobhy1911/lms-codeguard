@@ -1646,21 +1646,17 @@
     <div id="submit-task-modal" class="modal-overlay">
         <div class="modal-content modal-large">
             <button class="close-btn" onclick="closeModal('submit-task-modal')">&times;</button>
-            <h3 style="margin-bottom: 16px;" data-i18n="modal_submit_title">تسليم كود المهمة</h3>
+            <h3 style="margin-bottom: 16px;" data-i18n="modal_submit_title">تسليم المهمة</h3>
             <div id="submit-modal-task-title" style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 12px;"></div>
             
             <form onsubmit="handleCodeSubmission(event)">
                 <input type="hidden" id="sub-task-id">
                 <div class="form-group">
-                    <label data-i18n="label_filename">اسم الملف البرمجي</label>
-                    <input type="text" id="sub-filename" value="solution.py" required>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="label_code">كود الحل البرمجي (Paste or Type Code)</label>
-                    <textarea id="sub-code-content" placeholder="def solution():&#10;    # اكتب الحل هنا..." required style="height: 250px;"></textarea>
+                    <label data-i18n="label_submission_link">رابط التسليم (URL)</label>
+                    <input type="url" id="sub-link" placeholder="https://..." required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_submit_code">
-                    تسليم الكود وفحصه ضد الغش
+                    تسليم المهمة
                 </button>
             </form>
         </div>
@@ -1722,8 +1718,8 @@
             <div id="grade-student-info" style="color: var(--accent-cyan); margin: 8px 0 16px;"></div>
 
             <div class="form-group">
-                <label data-i18n="label_submitted_code">كود الطالب المقدم:</label>
-                <div id="grade-code-display" class="code-box"></div>
+                <label data-i18n="label_submitted_link">رابط تسليم الطالب:</label>
+                <div id="grade-code-display" style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid var(--border-card); word-break: break-all;"></div>
             </div>
 
             <form onsubmit="handleGradeSubmit(event)">
@@ -1765,6 +1761,10 @@
                 <div class="form-group">
                     <label data-i18n="label_task_desc">وصف المهمة والمطلوب</label>
                     <textarea id="ct-desc" required style="height: 100px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label_task_link">رابط مرجعي للمهمة (Link)</label>
+                    <input type="url" id="ct-link" placeholder="https://...">
                 </div>
                 <div class="form-group">
                     <label data-i18n="label_task_deadline">الموعد النهائي للتسليم (Deadline)</label>
@@ -3098,6 +3098,7 @@
                                 <span class="badge ${badgeClass}">${badgeText}</span>
                             </div>
                             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">${t.description}</p>
+                            ${t.reference_link ? `<div style="margin-bottom: 12px;"><a href="${t.reference_link}" target="_blank" style="color: var(--accent-cyan); text-decoration: underline; font-size: 0.9rem;">🔗 ${currentLang === 'ar' ? 'افتح رابط المهمة' : 'Open Task Link'}</a></div>` : ''}
                             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
                                 <div>⏱️ ${currentLang === 'ar' ? 'الموعد النهائي:' : 'Deadline:'} <strong style="color: ${t.is_expired ? '#f43f5e' : '#38bdf8'};">${t.deadline.replace('T', ' ')}</strong></div>
                                 <div>${currentLang === 'ar' ? 'الدرجة الكلية:' : 'Max Score:'} ${t.max_score}</div>
@@ -3749,6 +3750,7 @@
                         <div style="background: rgba(15,23,42,0.5); border: 1px solid var(--border-card); padding: 14px 18px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                             <div>
                                 <div style="font-weight: bold; font-size: 1.1rem; color: var(--accent-cyan);">${t.title}</div>
+                                ${t.reference_link ? `<div style="margin-top: 4px;"><a href="${t.reference_link}" target="_blank" style="color: var(--accent-cyan); text-decoration: underline; font-size: 0.85rem;">🔗 الرابط المرجعي</a></div>` : ''}
                                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">⏱️ ${currentLang === 'ar' ? 'الديدلاين:' : 'Deadline:'} ${t.deadline.replace('T', ' ')} | 📥 ${currentLang === 'ar' ? 'التسليمات:' : 'Submissions:'} ${t.submissions_count}</div>
                             </div>
                             <button class="btn btn-danger" style="padding: 4px 12px; font-size: 0.8rem;" onclick="handleDeleteTask(${t.id})">
@@ -4385,23 +4387,20 @@
 
         function openSubmitModal(taskId, title) {
             document.getElementById('sub-task-id').value = taskId;
-            document.getElementById('sub-filename').value = 'solution.py';
-            document.getElementById('sub-code-content').value = ''; // Clean previous input code!
-            document.getElementById('submit-modal-task-title').innerText = `${currentLang === 'ar' ? 'تسليم واجب:' : 'Submit Assignment:'} ${title}`;
+            document.getElementById('sub-link').value = ''; 
+            document.getElementById('submit-modal-task-title').innerText = `${currentLang === 'ar' ? 'تسليم مهمة:' : 'Submit Task:'} ${title}`;
             openModal('submit-task-modal');
         }
 
         async function handleCodeSubmission(e) {
             e.preventDefault();
             const taskId = parseInt(document.getElementById('sub-task-id').value);
-            const fileName = document.getElementById('sub-filename').value;
-            const codeContent = document.getElementById('sub-code-content').value;
+            const submissionLink = document.getElementById('sub-link').value;
 
             try {
                 const res = await apiRequest('/api/student/submit-task', 'POST', {
                     task_id: taskId,
-                    file_name: fileName,
-                    code_content: codeContent
+                    submission_link: submissionLink
                 });
                 alert(currentLang === 'ar' ? 'تم التسليم بنجاح!' : 'Submitted Successfully!');
                 closeModal('submit-task-modal');
@@ -4488,8 +4487,8 @@
             if (!s) return;
 
             document.getElementById('grade-sub-id').value = s.id;
-            document.getElementById('grade-student-info').innerText = `${currentLang === 'ar' ? 'تصحيح كود الطالب:' : 'Grading Code for:'} ${s.student_name}`;
-            document.getElementById('grade-code-display').innerText = s.code_content || '';
+            document.getElementById('grade-student-info').innerText = `${currentLang === 'ar' ? 'تصحيح مهمة الطالب:' : 'Grading Task for:'} ${s.student_name}`;
+            document.getElementById('grade-code-display').innerHTML = `<a href="${s.code_content || '#'}" target="_blank" style="color: #38bdf8; text-decoration: underline;">${s.code_content || 'No link provided'}</a>`;
             document.getElementById('grade-score').value = s.score !== null && s.score !== undefined ? s.score : '';
             document.getElementById('grade-feedback').value = s.feedback || '';
 
@@ -4557,12 +4556,13 @@
             e.preventDefault();
             const title = document.getElementById('ct-title').value;
             const description = document.getElementById('ct-desc').value;
+            const link = document.getElementById('ct-link').value;
             const deadline = document.getElementById('ct-deadline').value;
             const maxScore = parseFloat(document.getElementById('ct-max-score').value);
 
             try {
                 const res = await apiRequest('/api/instructor/tasks', 'POST', {
-                    title, description, deadline, max_score: maxScore
+                    title, description, reference_link: link, deadline, max_score: maxScore
                 });
                 alert(res.message);
                 closeModal('create-task-modal');

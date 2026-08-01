@@ -171,14 +171,13 @@ class TaskCreateRequest(BaseModel):
     title: str
     description: str
     deadline: str # ISO format string (e.g. 2026-07-30T23:59:00)
+    reference_link: Optional[str] = None
     max_score: float = 100.0
     allowed_languages: str = "python,c,cpp,javascript"
 
 class TaskSubmitRequest(BaseModel):
     task_id: int
-    code_content: str
-    file_name: str = "solution.py"
-    language: str = "python"
+    submission_link: str
 
 class GradeSubmissionRequest(BaseModel):
     submission_id: int
@@ -871,6 +870,7 @@ def get_student_tasks(user: User = Depends(get_current_user), db: Session = Depe
             "description": t.description,
             "instructor_name": t.instructor.name if t.instructor else "المدرب",
             "deadline": t.deadline.strftime("%Y-%m-%dT%H:%M:%S"),
+            "reference_link": t.reference_link,
             "max_score": t.max_score,
             "allowed_languages": t.allowed_languages,
             "is_expired": is_expired,
@@ -890,17 +890,17 @@ def submit_task(req: TaskSubmitRequest, user: User = Depends(get_current_user), 
 
     existing_sub = db.query(Submission).filter(Submission.task_id == req.task_id, Submission.student_id == user.id).first()
     if existing_sub:
-        existing_sub.code_content = req.code_content
-        existing_sub.file_name = req.file_name
-        existing_sub.language = req.language
+        existing_sub.code_content = req.submission_link
+        existing_sub.file_name = "link"
+        existing_sub.language = "url"
         existing_sub.submitted_at = now
     else:
         new_sub = Submission(
             task_id=req.task_id,
             student_id=user.id,
-            code_content=req.code_content,
-            file_name=req.file_name,
-            language=req.language,
+            code_content=req.submission_link,
+            file_name="link",
+            language="url",
             submitted_at=now
         )
         db.add(new_sub)
@@ -1077,6 +1077,7 @@ def get_instructor_tasks(db: Session = Depends(get_db)):
             "title": t.title,
             "description": t.description,
             "deadline": t.deadline.strftime("%Y-%m-%dT%H:%M:%S"),
+            "reference_link": t.reference_link,
             "max_score": t.max_score,
             "allowed_languages": t.allowed_languages,
             "submissions_count": submissions_count,
@@ -1096,6 +1097,7 @@ def create_task(req: TaskCreateRequest, user: User = Depends(require_role([RoleE
         description=req.description,
         instructor_id=user.id,
         deadline=deadline_dt,
+        reference_link=req.reference_link,
         max_score=req.max_score,
         allowed_languages=req.allowed_languages
     )

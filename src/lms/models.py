@@ -109,6 +109,7 @@ class Task(Base):
     deadline = Column(DateTime, nullable=False)
     max_score = Column(Float, default=100.0)
     allowed_languages = Column(String, default="python,c,cpp,javascript")
+    reference_link = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now)
 
     instructor = relationship("User")
