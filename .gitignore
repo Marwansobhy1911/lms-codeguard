@@ -36,3 +36,4 @@ Thumbs.db
 # Compiled files
 *.ico
 lms_database.db
+*.db
