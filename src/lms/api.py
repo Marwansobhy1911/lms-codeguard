@@ -957,7 +957,8 @@ def get_hr_unassigned_students(user: User = Depends(require_role([RoleEnum.HR, R
             res.append({
                 "id": s.id,
                 "name": s.name,
-                "email": s.official_email or s.email or ""
+                "email": s.official_email or s.email or "",
+                "seat_number": s.seat_number or ""
             })
     return res
 
@@ -1336,6 +1337,7 @@ def get_hr_assigned_students(user: User = Depends(require_role([RoleEnum.HR, Rol
             "name": s.name,
             "email": s.email or "---",
             "phone": s.phone or "غير مدخل",
+            "seat_number": s.seat_number or "",
             "assigned_hr_id": s.assigned_hr_id,
             "team_id": s.team_id,
             "team_name": s.team.name if s.team else "لا يوجد فريق",

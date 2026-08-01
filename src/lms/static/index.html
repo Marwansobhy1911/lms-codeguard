@@ -221,6 +221,12 @@
             gap: 24px;
         }
 
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+            gap: 24px;
+        }
+
         .grid-2 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
@@ -567,7 +573,7 @@
                 flex-shrink: 0;
             }
 
-            .grid-3, .grid-2 {
+            .grid-4, .grid-3, .grid-2 {
                 grid-template-columns: 1fr !important;
                 gap: 14px;
             }
@@ -1073,7 +1079,7 @@
         <div id="app-dashboard" style="display: none;">
 
             <!-- Incomplete Data Alert Banner -->
-            <div id="incomplete-profile-banner" class="alert alert-warning" style="display: none; align-items: center; justify-content: space-between;">
+            <div id="incomplete-profile-banner" class="alert alert-warning" style="display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                 <span data-i18n="incomplete_banner_msg">⚠️ تنبيه: بعض بياناتك الشخصية (كالبريد أو الهاتف) غير مكتملة. يمكنك استكمالها الآن!</span>
                 <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="openProfileModal()" data-i18n="btn_complete_profile">استكمال البيانات</button>
             </div>
@@ -1091,7 +1097,7 @@
 
             <!-- STUDENT VIEW -->
             <div id="student-view" class="view-section active">
-                <div class="grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px;">
+                <div class="grid-4" style="margin-bottom: 28px;">
                     <div class="glass-card stat-card" id="st-ta-card" onclick="openTAContactModal()" style="cursor: pointer; transition: transform 0.2s;" title="اضغط لعرض بيانات التواصل مع المساعد">
                         <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">👤</div>
                         <div>
@@ -1194,12 +1200,16 @@
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;" data-i18n="unassigned_hr_sub">
                         يمكنك اختيار وإسناد أي طالب غير مخصص لمسؤول غياب آخر لمسؤوليتك المباشرة (حتى 50 طالب كحد أقصى).
                     </p>
+                    <div style="margin-bottom: 12px;">
+                        <input type="text" id="hr-unassigned-search-input" placeholder="🔍 ابحث بالاسم، الرقم التعريفي، أو رقم الجلوس..." oninput="filterHrUnassignedTable()" style="width: 100%; font-size: 0.85rem;">
+                    </div>
                     <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
                         <table>
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th data-i18n="th_name">الاسم</th>
+                                    <th data-i18n="label_seat_no">رقم الجلوس</th>
                                     <th data-i18n="th_email">البريد الأكاديمي</th>
                                     <th data-i18n="th_actions">إجراء الإسناد</th>
                                 </tr>
@@ -1275,6 +1285,7 @@
                                     <tr>
                                         <th>ID</th>
                                         <th data-i18n="th_name">اسم الطالب</th>
+                                        <th data-i18n="label_seat_no">رقم الجلوس</th>
                                         <th data-i18n="th_attendance_check">حالة الحضور</th>
                                     </tr>
                                 </thead>
@@ -1458,7 +1469,7 @@
                 <!-- Admin System Statistics Panel -->
                 <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-cyan);">
                     <h3 style="margin-bottom: 16px; color: var(--accent-cyan);" data-i18n="admin_stats_title">📊 إحصائيات وأعداد النظام الشاملة (System Overview Stats)</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 14px;">
                         <div onclick="openStatsDetailModal('student')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
                             <div style="font-size: 1.6rem; font-weight: 800; color: #60a5fa;" id="admin-stat-students">0</div>
                             <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_students">🔍 الطلاب 🎓</div>
@@ -1531,7 +1542,6 @@
                             <input type="number" id="admin-team-max-input" value="5" min="1" max="50" onchange="handleSaveTeamSettings(true)">
                         </div>
                     </div>
-                    <button class="btn btn-primary" onclick="handleSaveTeamSettings(false)" data-i18n="btn_save_team_settings">💾 حفظ إعدادات تسجيل التيمات والديدلاين</button>
                     <button class="btn btn-primary" onclick="handleSaveTeamSettings(false)" data-i18n="btn_save_team_settings">💾 حفظ إعدادات تسجيل التيمات والديدلاين</button>
                 </div>
 
@@ -3278,25 +3288,8 @@
                 // Fetch unassigned students for HR
                 try {
                     const unassigned = await apiRequest('/api/hr/unassigned-students');
-                    const tbody = document.getElementById('hr-unassigned-students-tbody');
-                    if (tbody) {
-                        if (unassigned.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب غير مسندين حالياً.' : 'No unassigned students currently.'}</td></tr>`;
-                        } else {
-                            tbody.innerHTML = unassigned.map(s => `
-                                <tr>
-                                    <td><strong>${s.id}</strong></td>
-                                    <td>${s.name}</td>
-                                    <td><small style="color:#38bdf8;">${s.email}</small></td>
-                                    <td>
-                                        <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.8rem; background: var(--accent-rose);" onclick="handleHrSelfAssign('${s.id}')">
-                                            ${currentLang === 'ar' ? '➕ إسناد الطالب لي' : '➕ Assign to Me'}
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('');
-                        }
-                    }
+                    window.hrUnassignedStudents = unassigned;
+                    renderHrUnassignedTable(unassigned);
                 } catch (e) { console.error(e); }
 
                 const allSessions = await apiRequest('/api/sessions');
@@ -3379,7 +3372,7 @@
             const tbody = document.getElementById('hr-students-table');
             if (!tbody) return;
             if (students.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب مسندين مطبق عليهم البحث.' : 'No assigned students found.'}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب مسندين مطبق عليهم البحث.' : 'No assigned students found.'}</td></tr>`;
             } else {
                 const attMap = window.hrSessionAttendanceMap || {};
                 tbody.innerHTML = students.map(s => {
@@ -3388,6 +3381,7 @@
                     <tr>
                         <td><strong>${s.id}</strong></td>
                         <td>${s.name}</td>
+                        <td>${s.seat_number || '-'}</td>
                         <td>
                             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                                 <label style="margin: 0; cursor: pointer; color: #34d399; font-weight: normal; display: flex; align-items: center; gap: 4px;">
@@ -3423,13 +3417,46 @@
             }
         }
 
+        function renderHrUnassignedTable(unassigned) {
+            const tbody = document.getElementById('hr-unassigned-students-tbody');
+            if (!tbody) return;
+            if (unassigned.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب غير مسندين حالياً.' : 'No unassigned students currently.'}</td></tr>`;
+            } else {
+                tbody.innerHTML = unassigned.map(s => `
+                    <tr>
+                        <td><strong>${s.id}</strong></td>
+                        <td>${s.name}</td>
+                        <td>${s.seat_number || '-'}</td>
+                        <td><small style="color:#38bdf8;">${s.email}</small></td>
+                        <td>
+                            <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.8rem; background: var(--accent-rose);" onclick="handleHrSelfAssign('${s.id}')">
+                                ${currentLang === 'ar' ? '➕ إسناد الطالب لي' : '➕ Assign to Me'}
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function filterHrUnassignedTable() {
+            const query = (document.getElementById('hr-unassigned-search-input').value || '').toLowerCase().trim();
+            if (!window.hrUnassignedStudents) return;
+            const filtered = window.hrUnassignedStudents.filter(s => 
+                (s.id && String(s.id).toLowerCase().includes(query)) ||
+                (s.name && String(s.name).toLowerCase().includes(query)) ||
+                (s.seat_number && String(s.seat_number).toLowerCase().includes(query))
+            );
+            renderHrUnassignedTable(filtered);
+        }
+
         function filterHrStudentsTable() {
             const query = (document.getElementById('hr-students-search-input').value || '').toLowerCase().trim();
             if (!window.hrAssignedStudents) return;
             const filtered = window.hrAssignedStudents.filter(s => 
-                (s.id && s.id.toLowerCase().includes(query)) ||
-                (s.name && s.name.toLowerCase().includes(query)) ||
-                (s.seat_number && s.seat_number.toLowerCase().includes(query))
+                (s.id && String(s.id).toLowerCase().includes(query)) ||
+                (s.name && String(s.name).toLowerCase().includes(query)) ||
+                (s.seat_number && String(s.seat_number).toLowerCase().includes(query))
             );
             renderHrStudentsTable(filtered);
         }
@@ -4059,11 +4086,11 @@
             const query = (document.getElementById('admin-user-search-input').value || '').toLowerCase().trim();
             if (!window.allAdminUsers) return;
             const filtered = window.allAdminUsers.filter(u => 
-                (u.id && u.id.toLowerCase().includes(query)) ||
-                (u.name && u.name.toLowerCase().includes(query)) ||
-                (u.email && u.email.toLowerCase().includes(query)) ||
-                (u.role && u.role.toLowerCase().includes(query)) ||
-                (u.seat_number && u.seat_number.toLowerCase().includes(query))
+                (u.id && String(u.id).toLowerCase().includes(query)) ||
+                (u.name && String(u.name).toLowerCase().includes(query)) ||
+                (u.email && String(u.email).toLowerCase().includes(query)) ||
+                (u.role && String(u.role).toLowerCase().includes(query)) ||
+                (u.seat_number && String(u.seat_number).toLowerCase().includes(query))
             );
             renderAdminUsersTable(filtered);
         }
