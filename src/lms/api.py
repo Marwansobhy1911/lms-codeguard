@@ -272,6 +272,24 @@ def set_material_drive(req: MaterialDriveRequest, user: User = Depends(require_r
     return {"success": True, "message": "تم تحديث رابط درايف الماتيريال بنجاح"}
 
 # --- AUTH ENDPOINTS ---
+from sqlalchemy import text
+
+@app.get("/api/upgrade-db-schema")
+def upgrade_db_schema(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("ALTER TABLE tasks ADD COLUMN reference_link VARCHAR"))
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        
+    try:
+        db.execute(text("ALTER TABLE users ADD COLUMN bonus_points FLOAT DEFAULT 0.0"))
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        
+    return {"message": "Database schema upgraded successfully. You can now login."}
+
 @app.post("/api/auth/login")
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     uid = req.user_id.strip()
