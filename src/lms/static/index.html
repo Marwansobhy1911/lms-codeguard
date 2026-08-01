@@ -1131,6 +1131,11 @@
                         </div>
                     </div>
                 </div>
+                <div style="margin-bottom: 24px;">
+                    <a href="https://drive.google.com/" id="student-drive-link-btn" target="_blank" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem; justify-content: center; background: linear-gradient(45deg, var(--accent-cyan), var(--accent-blue)); border: none; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);">
+                        📚 الدخول لملف الماتيريال (Course Material Drive)
+                    </a>
+                </div>
 
                 <div class="grid-2" style="margin-bottom: 24px;">
                     <div class="glass-card">
@@ -1517,6 +1522,21 @@
                         <button class="btn btn-outline" onclick="downloadSampleExcel()" data-i18n="btn_download_sample">تحميل نموذج شيت الإكسيل</button>
                     </div>
                     <div id="excel-upload-msg" style="margin-top: 12px;"></div>
+                </div>
+
+                <!-- Material Drive Link Settings (Admin) -->
+                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-cyan);">
+                    <h3 style="margin-bottom: 8px; color: var(--accent-cyan);" data-i18n="admin_drive_settings_title">🔗 رابط درايف الماتيريال (Course Material Drive)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                        تحديث الرابط الذي يظهر للطلاب للوصول السريع لملف الدرايف.
+                    </p>
+                    <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; margin: 0;">
+                            <label style="font-size: 0.85rem;">الرابط (URL):</label>
+                            <input type="url" id="admin-drive-url-input" placeholder="https://drive.google.com/..." style="width: 100%;">
+                        </div>
+                        <button class="btn btn-primary" onclick="handleSaveDriveUrl()">حفظ الرابط</button>
+                    </div>
                 </div>
 
                 <!-- Team Registration Window Settings (Admin) -->
@@ -3034,6 +3054,12 @@
 
         async function loadStudentDashboard() {
             try {
+                try {
+                    const driveRes = await apiRequest('/api/settings/material-drive');
+                    const btn = document.getElementById('student-drive-link-btn');
+                    if (btn && driveRes.url) btn.href = driveRes.url;
+                } catch (e) {}
+
                 const dash = await apiRequest('/api/student/dashboard');
                 const supporter = dash.user_info.assigned_supporter;
                 window.currentSupporterDetails = supporter;
@@ -3800,6 +3826,12 @@
 
         async function loadAdminDashboard() {
             try {
+                try {
+                    const driveRes = await apiRequest('/api/settings/material-drive');
+                    const dInput = document.getElementById('admin-drive-url-input');
+                    if(dInput) dInput.value = driveRes.url || '';
+                } catch (e) {}
+                
                 // Fetch System Stats
                 try {
                     const stats = await apiRequest('/api/admin/system-stats');
@@ -4380,6 +4412,16 @@
                 loadAdminDashboard();
             } catch (err) {
                 msgDiv.innerHTML = `<span style="color: var(--accent-rose);">${err.message}</span>`;
+            }
+        }
+
+        async function handleSaveDriveUrl() {
+            const url = document.getElementById('admin-drive-url-input').value;
+            try {
+                const res = await apiRequest('/api/settings/material-drive', 'POST', { url });
+                alert(res.message || 'Saved successfully');
+            } catch (err) {
+                alert(err.message);
             }
         }
 

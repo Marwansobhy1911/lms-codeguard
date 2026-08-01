@@ -190,6 +190,9 @@ class SessionCreateRequest(BaseModel):
     date_time: str # ISO format string
     location_or_link: Optional[str] = None
 
+class MaterialDriveRequest(BaseModel):
+    url: str
+
 class AttendanceMarkRequest(BaseModel):
     session_id: int
     student_id: str
@@ -253,6 +256,16 @@ def set_system_setting(key: str, value: str, db: Session):
         setting = SystemSetting(key=key, value=value)
         db.add(setting)
     db.commit()
+
+@app.get("/api/settings/material-drive")
+def get_material_drive(db: Session = Depends(get_db)):
+    url = get_system_setting("material_drive_url", "https://drive.google.com/", db)
+    return {"url": url}
+
+@app.post("/api/settings/material-drive")
+def set_material_drive(req: MaterialDriveRequest, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    set_system_setting("material_drive_url", req.url, db)
+    return {"success": True, "message": "تم تحديث رابط درايف الماتيريال بنجاح"}
 
 # --- AUTH ENDPOINTS ---
 @app.post("/api/auth/login")
