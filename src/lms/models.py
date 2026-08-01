@@ -31,6 +31,7 @@ class User(Base):
     program = Column(String, nullable=True) # Program (General, CS, IT, etc.)
     bio = Column(Text, nullable=True)
     role = Column(String, default="student", nullable=False) # Multi-role comma-separated string e.g. "student,hr"
+    bonus_points = Column(Float, default=0.0)
     password_hash = Column(String, nullable=False)
     must_change_password = Column(Boolean, default=True, nullable=False)
     assigned_supporter_id = Column(String, ForeignKey("users.id"), nullable=True)

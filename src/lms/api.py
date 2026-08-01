@@ -193,6 +193,10 @@ class SessionCreateRequest(BaseModel):
 class MaterialDriveRequest(BaseModel):
     url: str
 
+class PointAddRequest(BaseModel):
+    student_id: str
+    points_to_add: float
+
 class AttendanceMarkRequest(BaseModel):
     session_id: int
     student_id: str
@@ -612,6 +616,7 @@ def get_all_users(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Sess
             "academic_level": u.academic_level or "",
             "program": u.program or "",
             "bio": u.bio or "",
+            "bonus_points": round(u.bonus_points or 0.0, 1),
             "role": ", ".join(u_roles),
             "roles": u_roles,
             "must_change_password": u.must_change_password,
@@ -944,6 +949,8 @@ def get_assigned_students(user: User = Depends(require_role([RoleEnum.SUPPORTER,
             "id": s.id,
             "name": s.name,
             "email": s.email,
+            "seat_number": s.seat_number or "",
+            "bonus_points": round(s.bonus_points or 0.0, 1),
             "submissions_count": subs_count
         })
     return res
@@ -1937,6 +1944,20 @@ def get_student_team(user: User = Depends(get_current_user), db: Session = Depen
         "members": members_data
     }
 
+# --- POINTS MANAGEMENT ---
+@app.post("/api/points/add")
+def add_bonus_points(req: PointAddRequest, user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])), db: Session = Depends(get_db)):
+    student = db.query(User).filter(User.id == req.student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="الطالب غير موجود")
+    
+    if not student.bonus_points:
+        student.bonus_points = 0.0
+        
+    student.bonus_points += req.points_to_add
+    db.commit()
+    return {"success": True, "message": f"تم التعديل بنجاح! نقاط البونص الحالية: {student.bonus_points}"}
+
 # --- ENHANCEMENTS: LEADERBOARD, NOTIFICATIONS & EXPORTS ---
 
 @app.get("/api/student/leaderboard")
@@ -1956,7 +1977,7 @@ def get_leaderboard(db: Session = Depends(get_db)):
             att_rate = round((att_present / att_total * 100)) if att_total > 0 else 100
             
             # Final composite score
-            final_score = total_task_score + (att_rate * 0.5)
+            final_score = total_task_score + (att_rate * 0.5) + (u.bonus_points or 0.0)
             
             badges = []
             if att_rate == 100:
@@ -1971,6 +1992,7 @@ def get_leaderboard(db: Session = Depends(get_db)):
                 "name": u.name,
                 "seat_number": u.seat_number or "",
                 "total_score": round(total_task_score, 1),
+                "bonus_points": round(u.bonus_points or 0.0, 1),
                 "attendance_rate": f"{att_rate}%",
                 "final_score": round(final_score, 1),
                 "badges": badges
@@ -2081,7 +2103,7 @@ def export_hr_attendance_excel(session_id: int, user: User = Depends(require_rol
                 "Seat Number": s.seat_number or "",
                 "Academic Level": s.academic_level or "",
                 "Program": s.program or "",
-                "Attendance Status": (att.status.value if hasattr(att.status, 'value') else str(att.status)) if att else "غائب",
+                "Attendance Status": (att.status.value if hasattr(att.status, 'value') else str(att.status)) if att else "absent",
                 "Notes": att.notes if att else ""
             })
             
@@ -2117,7 +2139,7 @@ def export_crew_attendance_excel(session_id: int, user: User = Depends(require_r
                 "Crew ID": s.id,
                 "Crew Name": s.name,
                 "Role": s.role,
-                "Attendance Status": (att.status.value if hasattr(att.status, 'value') else str(att.status)) if att else "غائب",
+                "Attendance Status": (att.status.value if hasattr(att.status, 'value') else str(att.status)) if att else "absent",
                 "Notes": att.notes if att else ""
             })
             

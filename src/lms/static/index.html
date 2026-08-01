@@ -1411,18 +1411,24 @@
 
                 <div class="glass-card" style="margin-bottom: 24px;">
                     <h3 style="margin-bottom: 16px;" data-i18n="title_assigned_students">الطلاب المسؤول عنهم</h3>
+                    <div style="margin-bottom: 16px;">
+                        <input type="text" id="supporter-students-search" class="form-group" style="width: 100%; margin: 0; padding: 12px; border-radius: 8px;" placeholder="ابحث بالاسم، الـ ID أو رقم الجلوس..." onkeyup="filterSupporterStudentsTable()">
+                    </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
                                     <th data-i18n="th_student_id">ID الطالب</th>
                                     <th data-i18n="th_student_name">اسم الطالب</th>
+                                    <th>رقم الجلوس</th>
                                     <th data-i18n="th_email">البريد الإلكتروني</th>
+                                    <th>نقاط البونص</th>
                                     <th data-i18n="th_submissions">عدد التسليمات</th>
+                                    <th>إجراء</th>
                                 </tr>
                             </thead>
                             <tbody id="supporter-students-table">
-                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1536,6 +1542,23 @@
                             <input type="url" id="admin-drive-url-input" placeholder="https://drive.google.com/..." style="width: 100%;">
                         </div>
                         <button class="btn btn-primary" onclick="handleSaveDriveUrl()">حفظ الرابط</button>
+                    </div>
+                </div>
+
+                <!-- Admin Attendance Download Settings -->
+                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-emerald);">
+                    <h3 style="margin-bottom: 8px; color: var(--accent-emerald);" data-i18n="admin_att_download_title">📋 تحميل شيت الحضور والغياب (Download Attendance)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                        اختر السيشن لتحميل شيت حضور وغياب جميع الطلاب بصيغة إكسيل.
+                    </p>
+                    <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; margin: 0;">
+                            <label style="font-size: 0.85rem;">اختر السيشن:</label>
+                            <select id="admin-attendance-session-select" style="width: 100%;">
+                                <option value="">جاري التحميل...</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="downloadAdminAttendanceSheet()">تحميل الشيت</button>
                     </div>
                 </div>
 
@@ -1823,6 +1846,33 @@
                     حفظ السيشن
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL: MANAGE POINTS -->
+    <div id="manage-points-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 800px; width: 95%;">
+            <button class="close-btn" onclick="closeModal('manage-points-modal')">&times;</button>
+            <h3 style="color: var(--accent-cyan); margin-bottom: 16px;">🏆 إدارة نقاط البونص للطلاب</h3>
+            <div style="margin-bottom: 16px;">
+                <input type="text" id="manage-points-search" class="form-group" style="width: 100%; margin: 0; padding: 12px; border-radius: 8px;" placeholder="ابحث بالاسم، الـ ID أو رقم الجلوس..." onkeyup="filterManagePointsTable()">
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID الطالب</th>
+                            <th>الاسم</th>
+                            <th>رقم الجلوس</th>
+                            <th>نقاط البونص الحالية</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manage-points-tbody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -3660,6 +3710,38 @@
             } catch (err) { alert(err.message); }
         }
 
+        function renderSupporterStudentsTable(list) {
+            const tbodyStudents = document.getElementById('supporter-students-table');
+            if (!list || list.length === 0) {
+                tbodyStudents.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب مسئول عنهم' : 'No assigned students'}</td></tr>`;
+                return;
+            }
+            tbodyStudents.innerHTML = list.map(s => `
+                <tr>
+                    <td><strong>${s.id}</strong></td>
+                    <td>${s.name}</td>
+                    <td>${s.seat_number || ''}</td>
+                    <td>${s.email}</td>
+                    <td><span style="color: var(--accent-cyan); font-weight: bold;">${s.bonus_points || 0} pt</span></td>
+                    <td>${s.submissions_count} ${currentLang === 'ar' ? 'تسليمات' : 'submissions'}</td>
+                    <td>
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="handleAddBonusPoints('${s.id}')">+ / - نقاط</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterSupporterStudentsTable() {
+            const query = document.getElementById('supporter-students-search').value.toLowerCase();
+            if (!window.supporterStudentsData) return;
+            const filtered = window.supporterStudentsData.filter(s => 
+                s.name.toLowerCase().includes(query) || 
+                s.id.toLowerCase().includes(query) || 
+                (s.seat_number && s.seat_number.toLowerCase().includes(query))
+            );
+            renderSupporterStudentsTable(filtered);
+        }
+
         async function loadSupporterDashboard() {
             try {
                 // Load unassigned students
@@ -3683,15 +3765,8 @@
                 }
 
                 const students = await apiRequest('/api/supporter/assigned-students');
-                const tbodyStudents = document.getElementById('supporter-students-table');
-                tbodyStudents.innerHTML = students.map(s => `
-                    <tr>
-                        <td><strong>${s.id}</strong></td>
-                        <td>${s.name}</td>
-                        <td>${s.email}</td>
-                        <td>${s.submissions_count} ${currentLang === 'ar' ? 'تسليمات' : 'submissions'}</td>
-                    </tr>
-                `).join('');
+                window.supporterStudentsData = students;
+                filterSupporterStudentsTable();
 
                 window.currentSubmissionsMap = {};
                 const subs = await apiRequest('/api/supporter/submissions');
@@ -3846,6 +3921,19 @@
                     if (document.getElementById('admin-stat-teams')) document.getElementById('admin-stat-teams').innerText = c.teams || 0;
                     if (document.getElementById('admin-stat-certificates')) document.getElementById('admin-stat-certificates').innerText = c.certificates || 0;
                     renderAdminRolesChart(c);
+                } catch (e) { console.error(e); }
+
+                // Fetch sessions for attendance download
+                try {
+                    const sessions = await apiRequest('/api/sessions');
+                    const sessSelect = document.getElementById('admin-attendance-session-select');
+                    if (sessSelect) {
+                        if (sessions.length === 0) {
+                            sessSelect.innerHTML = '<option value="">لا توجد سيشنز متاحة</option>';
+                        } else {
+                            sessSelect.innerHTML = sessions.map(s => `<option value="${s.id}">${s.title} (${new Date(s.date_time).toLocaleDateString()})</option>`).join('');
+                        }
+                    }
                 } catch (e) { console.error(e); }
 
                 const teamSettings = await apiRequest('/api/system/team-settings');
@@ -4423,6 +4511,83 @@
             } catch (err) {
                 alert(err.message);
             }
+        }
+
+        function downloadAdminAttendanceSheet() {
+            const sessId = document.getElementById('admin-attendance-session-select').value;
+            if (!sessId) {
+                alert(currentLang === 'ar' ? 'الرجاء اختيار سيشن أولاً' : 'Please select a session first');
+                return;
+            }
+            window.open(`/api/hr/attendance/export-excel/${sessId}?token=${localStorage.getItem('lms_token') || ''}`);
+        }
+
+        async function handleAddBonusPoints(studentId) {
+            const pointsStr = prompt(currentLang === 'ar' ? 'أدخل عدد النقاط لإضافتها أو خصمها (مثال: 10 أو -5):' : 'Enter points to add/subtract (e.g. 10 or -5):');
+            if (!pointsStr) return;
+            const points = parseFloat(pointsStr);
+            if (isNaN(points)) {
+                alert(currentLang === 'ar' ? 'الرجاء إدخال رقم صحيح.' : 'Please enter a valid number.');
+                return;
+            }
+            try {
+                const res = await apiRequest('/api/points/add', 'POST', { student_id: studentId, points_to_add: points });
+                alert(res.message);
+                
+                const pointsModal = document.getElementById('manage-points-modal');
+                if (pointsModal && pointsModal.classList.contains('active')) {
+                    openManagePointsModal();
+                } else {
+                    try { loadSupporterDashboard(); } catch(e) {}
+                    try { loadLeaderboard(); } catch(e) {}
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        async function openManagePointsModal() {
+            document.getElementById('manage-points-modal').classList.add('active');
+            try {
+                const list = await apiRequest('/api/student/leaderboard');
+                window.managePointsData = list;
+                filterManagePointsTable();
+            } catch (err) {
+                alert(err.message);
+                closeModal('manage-points-modal');
+            }
+        }
+
+        function renderManagePointsTable(list) {
+            const tbody = document.getElementById('manage-points-tbody');
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">لا يوجد طلاب.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(s => `
+                <tr>
+                    <td><strong>${s.id}</strong></td>
+                    <td>${s.name}</td>
+                    <td>${s.seat_number}</td>
+                    <td><span style="color: var(--accent-cyan); font-weight: bold;">${s.bonus_points || 0} pt</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="handleAddBonusPoints('${s.id}')">
+                            + / - نقاط
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterManagePointsTable() {
+            const query = document.getElementById('manage-points-search').value.toLowerCase();
+            if (!window.managePointsData) return;
+            const filtered = window.managePointsData.filter(s => 
+                s.name.toLowerCase().includes(query) || 
+                s.id.toLowerCase().includes(query) || 
+                (s.seat_number && s.seat_number.toLowerCase().includes(query))
+            );
+            renderManagePointsTable(filtered);
         }
 
         function downloadSampleExcel() { window.location.href = '/api/download-sample-excel'; }
