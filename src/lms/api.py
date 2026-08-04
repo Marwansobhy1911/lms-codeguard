@@ -1715,7 +1715,44 @@ def export_hr_attendance_excel(session_id: int, user: User = Depends(require_rol
         headers={"Content-Disposition": f"attachment; filename=session_{session_id}_attendance.xlsx"}
     )
 
+
+@app.get("/api/admin/attendance/export-excel/{session_id}")
+def export_admin_student_attendance_excel(session_id: int, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    sess = db.query(SessionSchedule).filter(SessionSchedule.id == session_id).first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="السيشن غير موجودة")
+    
+    all_users = db.query(User).all()
+    attendances = db.query(Attendance).filter(Attendance.session_id == session_id).all()
+    att_map = {str(a.student_id): (a.status.value if hasattr(a.status, 'value') else str(a.status)) for a in attendances}
+    
+    data = []
+    for u in all_users:
+        if "student" not in get_user_roles(u):
+            continue
+        status = att_map.get(str(u.id), "absent")
+        data.append({
+            "ID": u.id,
+            "الاسم": u.name,
+            "رقم الجلوس": u.seat_number or "",
+            "الإيميل الأكاديمي": u.official_email or "",
+            "حالة الحضور": status
+        })
+    
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Attendance')
+    output.seek(0)
+    filename = f"student_attendance_{sess.title.replace(' ', '_')}_{session_id}.xlsx"
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 @app.get("/api/admin/crew-attendance/export-excel/{session_id}")
+
 def export_crew_attendance_excel(session_id: int, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     sess = db.query(SessionSchedule).filter(SessionSchedule.id == session_id).first()
     if not sess:

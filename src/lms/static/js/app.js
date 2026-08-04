@@ -937,11 +937,11 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     password
                 });
                 alert(currentLang === 'ar'
-                    ? `✅ تم إنشاء حسابك بنجاح!\nالـ ID الخاص بك: ${res.id}\nاحتفظ بهذا الرقم للدخول.`
-                    : `✅ Account created successfully!\nYour ID: ${res.id}\nSave this ID to log in.`
+                    ? `✅ تم إنشاء حسابك بنجاح!\nالـ ID الخاص بك: ${res.user.id}\nاحتفظ بهذا الرقم للدخول.`
+                    : `✅ Account created successfully!\nYour ID: ${res.user.id}\nSave this ID to log in.`
                 );
                 switchAuthTab('login');
-                document.getElementById('login-id').value = res.id;
+                document.getElementById('login-id').value = res.user.id;
             } catch (err) {
                 alert(err.message || (currentLang === 'ar' ? 'حدث خطأ أثناء التسجيل.' : 'Registration failed.'));
             }
@@ -1851,6 +1851,22 @@ let currentToken = localStorage.getItem('lms_token') || '';
             } catch (err) { alert(err.message); }
         }
 
+
+        async function downloadAdminAttendanceSheet() {
+            const sessId = document.getElementById('admin-download-session-select').value;
+            if (!sessId) {
+                alert('يرجى اختيار السيشن أولاً.');
+                return;
+            }
+            const token = localStorage.getItem('lms_token');
+            const a = document.createElement('a');
+            a.href = `/api/admin/attendance/export-excel/${sessId}?token=${token}`;
+            a.download = '';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
         function renderAdminStudentsTable(students) {
             const tbody = document.getElementById('admin-students-table');
             if (!tbody) return;
@@ -1979,10 +1995,12 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     renderAdminStudentsTable(adminStudents);
 
                     const sessionsForAdmin = await apiRequest('/api/sessions');
+                    const sessionOptions = '<option value="">-- اختر السيشن --</option>' +
+                        sessionsForAdmin.map(s => `<option value="${s.id}">${s.title} (${new Date(s.date_time).toLocaleDateString()})</option>`).join('');
+
                     const adminSessSelect = document.getElementById('admin-student-session-select');
                     if (adminSessSelect) {
-                        adminSessSelect.innerHTML = '<option value="">-- اختر السيشن --</option>' +
-                            sessionsForAdmin.map(s => `<option value="${s.id}">${s.title} (${new Date(s.date_time).toLocaleDateString()})</option>`).join('');
+                        adminSessSelect.innerHTML = sessionOptions;
                         adminSessSelect.addEventListener('change', async function() {
                             const sid = this.value;
                             window.adminSessionAttendanceMap = {};
@@ -1994,6 +2012,11 @@ let currentToken = localStorage.getItem('lms_token') || '';
                             }
                             filterAdminStudentsTable();
                         });
+                    }
+
+                    const adminDownloadSelect = document.getElementById('admin-download-session-select');
+                    if (adminDownloadSelect) {
+                        adminDownloadSelect.innerHTML = sessionOptions;
                     }
                 } catch (e) { console.error(e); }
 

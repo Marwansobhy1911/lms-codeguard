@@ -102,6 +102,22 @@
                     </div>
                 </div>
 
+                <!-- Admin Student Attendance Download -->
+                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-emerald);">
+                    <h3 style="margin-bottom: 8px; color: var(--accent-emerald);">📥 تحميل شيت حضور الطلاب (Download Attendance Excel)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                        اختر السيشن لتحميل شيت حضور وغياب جميع الطلاب بصيغة إكسيل.
+                    </p>
+                    <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; margin: 0;">
+                            <label style="font-size: 0.85rem;">اختر السيشن:</label>
+                            <select id="admin-download-session-select" style="width: 100%;">
+                                <option value="">-- اختر السيشن --</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="downloadAdminAttendanceSheet()">📥 تحميل الشيت</button>
+                    </div>
+                </div>
 
                 <!-- Admin Crew Attendance Control -->
                 <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-indigo);">
