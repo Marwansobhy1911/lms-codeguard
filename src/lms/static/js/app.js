@@ -911,6 +911,42 @@ let currentToken = localStorage.getItem('lms_token') || '';
             }
         }
 
+        async function handleRegisterStudent(e) {
+            e.preventDefault();
+            const name = (document.getElementById('reg-name').value || '').trim();
+            const officialEmail = (document.getElementById('reg-official-email').value || '').trim();
+            const email = (document.getElementById('reg-email').value || '').trim();
+            const phone = (document.getElementById('reg-phone').value || '').trim();
+            const seatNumber = (document.getElementById('reg-seat').value || '').trim();
+            const level = (document.getElementById('reg-level').value || '').trim();
+            const program = (document.getElementById('reg-program').value || '').trim();
+            const password = (document.getElementById('reg-password').value || '').trim();
+
+            if (!name) { alert(currentLang === 'ar' ? 'الاسم مطلوب.' : 'Name is required.'); return; }
+            if (!password || password.length < 4) { alert(currentLang === 'ar' ? 'كلمة المرور يجب أن تكون 4 خانات على الأقل.' : 'Password must be at least 4 characters.'); return; }
+
+            try {
+                const res = await apiRequest('/api/auth/register', 'POST', {
+                    name,
+                    official_email: officialEmail || null,
+                    email: email || null,
+                    phone: phone || null,
+                    seat_number: seatNumber || null,
+                    academic_level: level || null,
+                    program: program || null,
+                    password
+                });
+                alert(currentLang === 'ar'
+                    ? `✅ تم إنشاء حسابك بنجاح!\nالـ ID الخاص بك: ${res.id}\nاحتفظ بهذا الرقم للدخول.`
+                    : `✅ Account created successfully!\nYour ID: ${res.id}\nSave this ID to log in.`
+                );
+                switchAuthTab('login');
+                document.getElementById('login-id').value = res.id;
+            } catch (err) {
+                alert(err.message || (currentLang === 'ar' ? 'حدث خطأ أثناء التسجيل.' : 'Registration failed.'));
+            }
+        }
+
         window.adminCrewList = [];
         window.adminCrewSessionAttendanceMap = {};
 
