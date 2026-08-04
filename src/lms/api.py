@@ -172,6 +172,9 @@ class TaskCreateRequest(BaseModel):
     deadline: str # ISO format string (e.g. 2026-07-30T23:59:00)
     reference_link: Optional[str] = None
     max_score: float = 100.0
+
+class TaskDeadlineUpdateRequest(BaseModel):
+    new_deadline: str
     allowed_languages: str = "python,c,cpp,javascript"
 
 class TaskSubmitRequest(BaseModel):
@@ -1220,7 +1223,16 @@ def delete_task(task_id: int, user: User = Depends(require_role([RoleEnum.SUPPOR
     db.query(PlagiarismReport).filter(PlagiarismReport.task_id == task_id).delete()
     db.delete(task)
     db.commit()
-    return {"success": True, "message": "تم حذف المهمة وجميع تسليماتها بنجاح"}
+    return {"success": True, "message": "تم مسح المهمة وكافة التسليمات المرتبطة بها"}
+
+@app.put("/api/instructor/tasks/{task_id}/deadline")
+def update_task_deadline(task_id: int, req: TaskDeadlineUpdateRequest, user: User = Depends(require_role([RoleEnum.SUPPORTER, RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="المهمة غير موجودة")
+    task.deadline = datetime.fromisoformat(req.new_deadline)
+    db.commit()
+    return {"success": True, "message": "تم تحديث موعد الديدلاين بنجاح"}
 
 @app.delete("/api/instructor/sessions/{session_id}")
 def delete_session(session_id: int, user: User = Depends(require_role([RoleEnum.INSTRUCTOR, RoleEnum.ADMIN, RoleEnum.HR])), db: Session = Depends(get_db)):

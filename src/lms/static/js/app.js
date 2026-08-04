@@ -1952,9 +1952,14 @@ let currentToken = localStorage.getItem('lms_token') || '';
                                 ${t.reference_link ? `<div style="margin-top: 4px;"><a href="${t.reference_link}" target="_blank" style="color: var(--accent-cyan); text-decoration: underline; font-size: 0.85rem;">🔗 الرابط المرجعي</a></div>` : ''}
                                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">⏱️ ${currentLang === 'ar' ? 'الديدلاين:' : 'Deadline:'} ${t.deadline.replace('T', ' ')} | 📥 ${currentLang === 'ar' ? 'التسليمات:' : 'Submissions:'} ${t.submissions_count}</div>
                             </div>
-                            <button class="btn btn-danger" style="padding: 4px 12px; font-size: 0.8rem;" onclick="handleDeleteTask(${t.id})">
-                                🗑️ ${currentLang === 'ar' ? 'حذف المهمة' : 'Delete Task'}
-                            </button>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.8rem;" onclick="handleEditDeadline(${t.id}, '${t.deadline}')">
+                                    ✏️ ${currentLang === 'ar' ? 'تعديل الموعد' : 'Edit Deadline'}
+                                </button>
+                                <button class="btn btn-danger" style="padding: 4px 12px; font-size: 0.8rem;" onclick="handleDeleteTask(${t.id})">
+                                    🗑️ ${currentLang === 'ar' ? 'حذف المهمة' : 'Delete Task'}
+                                </button>
+                            </div>
                         </div>
                     `).join('');
                 }
@@ -2867,3 +2872,27 @@ let currentToken = localStorage.getItem('lms_token') || '';
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         function escapeCode(str) { return (str || '').replace(/`/g, '\\`'); }
         function escapeHtml(str) { return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+        async function handleEditDeadline(id, currentDeadline) {
+            let defaultVal = currentDeadline;
+            if (defaultVal.includes('Z')) {
+                defaultVal = defaultVal.replace('Z', '');
+            }
+            if (defaultVal.length === 19) {
+                // Remove seconds
+                defaultVal = defaultVal.substring(0, 16);
+            }
+            const newDateStr = prompt(currentLang === 'ar' ? 'أدخل موعد التسليم الجديد (YYYY-MM-DDTHH:MM):' : 'Enter new deadline (YYYY-MM-DDTHH:MM):', defaultVal);
+            if (!newDateStr) return;
+            
+            // Format check
+            if (!newDateStr.includes('T')) {
+                alert(currentLang === 'ar' ? 'صيغة التاريخ غير صحيحة. استخدم YYYY-MM-DDTHH:MM' : 'Invalid format. Use YYYY-MM-DDTHH:MM');
+                return;
+            }
+
+            try {
+                const res = await apiRequest(`/api/instructor/tasks/${id}/deadline`, 'PUT', { new_deadline: newDateStr + ':00' });
+                alert(res.message);
+                loadInstructorDashboard();
+            } catch (err) { alert(err.message); }
+        }
