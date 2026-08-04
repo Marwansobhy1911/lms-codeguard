@@ -1,0 +1,19 @@
+<!-- INSTRUCTOR VIEW -->
+            <div id="instructor-view" class="view-section">
+                <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="openCreateTaskModal()" data-i18n="btn_add_task">+ إضافة مهمة جديدة (Task)</button>
+                    <button class="btn btn-success" onclick="openCreateSessionModal()" data-i18n="btn_add_session">+ إضافة سيشن جديدة</button>
+                </div>
+
+                <div class="grid-2">
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 16px;" data-i18n="title_instructor_tasks">قائمة التاسكات والديدلاين</h3>
+                        <div id="instructor-tasks-list">جاري التحميل...</div>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 16px;" data-i18n="title_instructor_sessions">جدول السيشنات</h3>
+                        <div id="instructor-sessions-list">جاري التحميل...</div>
+                    </div>
+                </div>
+            </div>

@@ -1,0 +1,98 @@
+<!-- STUDENT VIEW -->
+            <div id="student-view" class="view-section active">
+                <div class="grid-4" style="margin-bottom: 28px;">
+                    <div class="glass-card stat-card" id="st-ta-card" onclick="openTAContactModal()" style="cursor: pointer; transition: transform 0.2s;" title="اضغط لعرض بيانات التواصل مع المساعد">
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">👤</div>
+                        <div>
+                            <div class="stat-label" data-i18n="stat_supporter">المساعد (TA) المسئول</div>
+                            <div class="stat-value" id="st-supporter-name" style="font-size: 1.15rem;">---</div>
+                            <div style="font-size: 0.72rem; color: #60a5fa; margin-top: 2px;" data-i18n="st_ta_sub">📞 اضغط لمعاينة البيانات</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card" id="st-hr-card" onclick="openHrContactModal()" style="cursor: pointer; transition: transform 0.2s;" title="اضغط لعرض بيانات التواصل مع مسئول الـ HR">
+                        <div class="stat-icon" style="background: rgba(244, 63, 94, 0.2); color: #fb7185;">👔</div>
+                        <div>
+                            <div class="stat-label" data-i18n="stat_hr">مسؤول الغياب (HR)</div>
+                            <div class="stat-value" id="st-hr-name" style="font-size: 1.15rem;">---</div>
+                            <div style="font-size: 0.72rem; color: #fb7185; margin-top: 2px;" data-i18n="st_hr_sub">📞 اضغط لمعاينة البيانات</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card" onclick="openAttendanceModal()" style="cursor: pointer; transition: transform 0.2s;" title="اضغط لعرض تفاصيل الحضور والسيشنات">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">📊</div>
+                        <div>
+                            <div class="stat-label" data-i18n="stat_attendance">نسبة الحضور</div>
+                            <div class="stat-value" id="st-attendance-rate">100%</div>
+                            <div style="font-size: 0.72rem; color: #34d399; margin-top: 2px;" data-i18n="st_att_sub">🔍 اضغط لمعاينة التفاصيل</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card" onclick="openSubmissionsModal()" style="cursor: pointer; transition: transform 0.2s;" title="اضغط لعرض التاسكات المسلمة">
+                        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">📝</div>
+                        <div>
+                            <div class="stat-label" data-i18n="stat_submissions">التاسكات المسلمة</div>
+                            <div class="stat-value" id="st-submissions-count">0</div>
+                            <div style="font-size: 0.72rem; color: #c084fc; margin-top: 2px;" data-i18n="st_sub_sub">🔍 اضغط لمعاينة التسليمات</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <a href="https://drive.google.com/" id="student-drive-link-btn" target="_blank" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem; justify-content: center; background: linear-gradient(45deg, var(--accent-cyan), var(--accent-blue)); border: none; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);">
+                        📚 الدخول لملف الماتيريال (Course Material Drive)
+                    </a>
+                </div>
+
+                <div class="grid-2" style="margin-bottom: 24px;">
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 16px;" data-i18n="title_student_tasks">التاسكات والواجبات المطلوب تسليمها</h3>
+                        <div id="student-tasks-list">
+                            <p style="color: var(--text-muted);" data-i18n="loading_tasks">...جاري تحميل التاسكات</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 16px;" data-i18n="title_student_sessions">مواعيد السيشنات والغياب</h3>
+                        <div id="student-sessions-list">
+                            <p style="color: var(--text-muted);" data-i18n="loading_sessions">...جاري تحميل المواعيد</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STUDENT TEAM & CERTIFICATES -->
+                <div class="grid-2">
+                    <div class="glass-card" style="border: 1px solid var(--accent-purple);">
+                        <h3 style="margin-bottom: 12px; color: var(--accent-purple);" data-i18n="title_my_team">👥 فريقي ومجموعة العمل (My Team)</h3>
+                        <div id="student-team-container">
+                            <p style="color: var(--text-muted);" data-i18n="loading_team">...جاري جلب معلومات الفريق</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card" style="border: 1px solid var(--accent-cyan);">
+                        <h3 style="margin-bottom: 12px; color: var(--accent-cyan);" data-i18n="title_my_certificates">🎓 شهاداتي المستحقة (My Certificates)</h3>
+                        <div id="student-certificates-container">
+                            <p style="color: var(--text-muted);" data-i18n="loading_certificates">...جاري جلب الشهادات</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STUDENT LEADERBOARD & BADGES -->
+                <div class="glass-card" style="margin-top: 24px; border: 1px solid var(--accent-amber);">
+                    <h3 style="margin-bottom: 12px; color: var(--accent-amber);" data-i18n="leaderboard_title">🏆 لوحة الطلاب المتميزين والأوسمة (Top Performers Leaderboard)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;" data-i18n="leaderboard_sub">يتم تجميع وتحديث الترتيب آلياً بناءً على تقييمات التاسكات ونسبة حضور السيشنات.</p>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_rank">الترتيب</th>
+                                    <th data-i18n="th_student_name">اسم الطالب</th>
+                                    <th data-i18n="th_seat_no">رقم الجلوس</th>
+                                    <th data-i18n="th_total_assignments">مجموع الواجبات</th>
+                                    <th data-i18n="th_attendance_rate">نسبة الحضور</th>
+                                    <th data-i18n="th_badges">الأوسمة المستحقة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-leaderboard-tbody">
+                                <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري تحميل قائمة المتفوقين...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>

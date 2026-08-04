@@ -1,0 +1,72 @@
+<!-- SUPPORTER VIEW -->
+            <div id="supporter-view" class="view-section">
+                <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="openCreateTaskModal()" data-i18n="btn_add_task">+ إضافة مهمة جديدة (Task)</button>
+                </div>
+
+                <!-- Unassigned Students Section -->
+                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-cyan);">
+                    <h3 style="margin-bottom: 8px; color: var(--accent-cyan);" data-i18n="title_unassigned_students">الطلاب المتاحين للإسناد (Unassigned Students - Max 20 Limit)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="unassigned_students_sub">يمكنك إسناد أي طالب غير مخصص لمساعد حتى يصل إجمالي طلابك المسندين إلى 20 طالب كحد أقصى.</p>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_student_id">ID الطالب</th>
+                                    <th data-i18n="th_student_name">اسم الطالب</th>
+                                    <th data-i18n="th_email">البريد الإلكتروني</th>
+                                    <th data-i18n="th_actions">إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supporter-unassigned-table">
+                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 16px;" data-i18n="title_assigned_students">الطلاب المسؤول عنهم</h3>
+                    <div style="margin-bottom: 16px;">
+                        <input type="text" id="supporter-students-search" class="form-group" style="width: 100%; margin: 0; padding: 12px; border-radius: 8px;" placeholder="ابحث بالاسم، الـ ID أو رقم الجلوس..." onkeyup="filterSupporterStudentsTable()">
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_student_id">ID الطالب</th>
+                                    <th data-i18n="th_student_name">اسم الطالب</th>
+                                    <th>رقم الجلوس</th>
+                                    <th data-i18n="th_email">البريد الإلكتروني</th>
+                                    <th>نقاط البونص</th>
+                                    <th data-i18n="th_submissions">عدد التسليمات</th>
+                                    <th>إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supporter-students-table">
+                                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 16px;" data-i18n="title_submissions_review">تسليمات الأكواد والمراجعة</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_student">الطالب</th>
+                                    <th data-i18n="th_task">المهمة</th>
+                                    <th data-i18n="th_submit_date">تاريخ التسليم</th>
+                                    <th data-i18n="th_score">الدرجة المرصودة</th>
+                                    <th data-i18n="th_actions">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supporter-submissions-table">
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>

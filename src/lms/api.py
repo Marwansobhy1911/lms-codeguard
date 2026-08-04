@@ -2175,3 +2175,15 @@ def export_crew_attendance_excel(session_id: int, user: User = Depends(require_r
 # Mount static files LAST (after all API routes)
 if os.path.isdir(_STATIC_DIR):
     app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+    
+    # Mount subdirectories to serve them from the root as requested by index.html
+    css_dir = os.path.join(_STATIC_DIR, "css")
+    js_dir = os.path.join(_STATIC_DIR, "js")
+    includes_dir = os.path.join(_STATIC_DIR, "includes")
+    
+    if os.path.isdir(css_dir):
+        app.mount("/css", StaticFiles(directory=css_dir), name="css")
+    if os.path.isdir(js_dir):
+        app.mount("/js", StaticFiles(directory=js_dir), name="js")
+    if os.path.isdir(includes_dir):
+        app.mount("/includes", StaticFiles(directory=includes_dir), name="includes")

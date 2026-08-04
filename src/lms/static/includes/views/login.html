@@ -1,0 +1,94 @@
+<!-- LOGIN & REGISTER VIEW -->
+        <div id="login-view" class="view-section active">
+            <div style="max-width: 480px; margin: 30px auto;" class="glass-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <!-- Auth Mode Toggle Buttons -->
+                    <div style="display: flex; gap: 8px; background: rgba(15,23,42,0.6); padding: 4px; border-radius: 10px; border: 1px solid var(--border-card);">
+                        <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" id="auth-tab-login-btn" onclick="switchAuthTab('login')" data-i18n="btn_tab_login">🔑 تسجيل الدخول</button>
+                        <button class="btn btn-outline" style="padding: 6px 14px; font-size: 0.85rem;" id="auth-tab-reg-btn" onclick="switchAuthTab('register')" data-i18n="btn_tab_register">✨ حساب طالب جديد</button>
+                    </div>
+                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.85rem;" onclick="toggleLanguage()" id="login-lang-btn">🌐 English</button>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="/logo.jpeg" alt="Logo" style="width: 70px; height: 70px; border-radius: 18px; object-fit: cover; box-shadow: 0 0 25px rgba(6, 182, 212, 0.4); margin: 0 auto 12px; border: 2px solid var(--accent-cyan);">
+                    <h2 id="auth-box-title" data-i18n="login_title">تسجيل الدخول إلى LMS</h2>
+                    <p id="auth-box-sub" style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;" data-i18n="login_sub">أدخل الـ ID الخاص بك للوصول لمنصة التعلم</p>
+                </div>
+
+                <div id="login-alert" class="alert alert-danger" style="display: none;"></div>
+
+                <!-- LOGIN FORM -->
+                <form id="auth-login-form" onsubmit="handleLogin(event)" autocomplete="off">
+                    <div class="form-group">
+                        <label data-i18n="label_id">الرقم التعريفي (ID)</label>
+                        <input type="text" id="login-id" placeholder="مثال: 2024001 أو 2023170570" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_password">كلمة المرور</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="login-password" placeholder="كلمة المرور الافتراضية هي الـ ID نفسه" required autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-password', this)">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;" data-i18n="btn_login">
+                        تسجيل الدخول
+                    </button>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="auth-register-form" onsubmit="handleRegisterStudent(event)" autocomplete="off" style="display: none;">
+                    <div class="form-group">
+                        <label data-i18n="label_reg_name">الاسم الكامل (ثلاثي أو رباعي بالعربية)</label>
+                        <input type="text" id="reg-name" placeholder="مثال: أحمد محمد علي" required autocomplete="name">
+                    </div>
+                    <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_official_email">البريد الأكاديمي الرسمي</label>
+                            <input type="email" id="reg-official-email" placeholder="2025XXXXXX@cis.asu.edu.eg">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_personal_email">البريد الإلكتروني الشخصي</label>
+                            <input type="email" id="reg-email" placeholder="xxx@gmail.com">
+                        </div>
+                    </div>
+                    <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_phone_no">رقم الموبايل</label>
+                            <input type="text" id="reg-phone" placeholder="010XXXXXXXX">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_seat_no">رقم الجلوس / الرقم الجامعي</label>
+                            <input type="text" id="reg-seat" placeholder="مثال: 20251700588">
+                        </div>
+                    </div>
+                    <div class="grid-2" style="gap: 10px; margin-bottom: 10px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_level">المستوى الدراسي / الفرقة</label>
+                            <input type="text" id="reg-level" value="Level 1" placeholder="Level 1">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_program">البرنامج / التخصص</label>
+                            <input type="text" id="reg-program" value="General" placeholder="General أو CS">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_reg_password">كلمة المرور للحساب</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-password" minlength="4" required placeholder="اختر كلمة مرور حسابك (4 خانات على الأقل)" autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reg-password', this)">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center; margin-top: 10px;" data-i18n="btn_register_submit">
+                        ✨ إنشاء الحساب وتوليد الـ ID والدخول فوراً
+                    </button>
+                </form>
+
+                <div style="margin-top: 20px; text-align: center; border-top: 1px solid var(--border-card); padding-top: 14px; font-size: 0.85rem; color: var(--text-muted);" data-i18n="login_note">
+                    تنويه: عند إنشاء حساب طالب جديد، سيتم إنشاء الـ ID الخاص بك آلياً برقم الطالب التالي.
+                </div>
+                <div style="margin-top: 12px; text-align: center; font-weight: 700; color: var(--accent-cyan); font-size: 0.95rem; letter-spacing: 0.5px;">
+                    ⚡ Powered by SFE FCIS
+                </div>
+            </div>
+        </div>

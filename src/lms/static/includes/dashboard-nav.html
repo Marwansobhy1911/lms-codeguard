@@ -1,0 +1,16 @@
+            <!-- Incomplete Data Alert Banner -->
+            <div id="incomplete-profile-banner" class="alert alert-warning" style="display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <span data-i18n="incomplete_banner_msg">⚠️ تنبيه: بعض بياناتك الشخصية (كالبريد أو الهاتف) غير مكتملة. يمكنك استكمالها الآن!</span>
+                <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" onclick="openProfileModal()" data-i18n="btn_complete_profile">استكمال البيانات</button>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs" id="nav-tabs-bar">
+                <button class="tab-btn active" onclick="switchTab('student-view')" id="tab-student" data-i18n="tab_student">لوحة الطالب</button>
+                <button class="tab-btn" onclick="switchTab('hr-view')" id="tab-hr" data-i18n="tab_hr">👔 لوحة الـ HR</button>
+                <button class="tab-btn" onclick="switchTab('media-view')" id="tab-media" data-i18n="tab_media">🎨 لوحة الميديا (Media)</button>
+                <button class="tab-btn" onclick="switchTab('supporter-view')" id="tab-supporter" data-i18n="tab_supporter">لوحة السابورتر (TA)</button>
+                <button class="tab-btn" onclick="switchTab('instructor-view')" id="tab-instructor" data-i18n="tab_instructor">لوحة الانستراكتور</button>
+                <button class="tab-btn" onclick="switchTab('admin-view')" id="tab-admin" data-i18n="tab_admin">لوحة الأدمن</button>
+                <button class="tab-btn" onclick="switchTab('cheating-view')" id="tab-cheating" data-i18n="tab_cheating">🔍 نظام كشف الغش (CodeGuard Anti-Cheat)</button>
+            </div>

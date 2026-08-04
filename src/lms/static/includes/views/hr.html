@@ -1,0 +1,133 @@
+<!-- HR VIEW -->
+            <div id="hr-view" class="view-section">
+                <!-- HR UNASSIGNED STUDENTS PANEL (Max 50 Capacity) -->
+                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-amber);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h3 style="color: var(--accent-amber);" data-i18n="unassigned_hr_title">📋 الطلاب غير المسندين لـ HR (يمكنك إسنادهم لك حتى 50 طالب)</h3>
+                        <span class="badge badge-hr">Max 50 Limit</span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;" data-i18n="unassigned_hr_sub">
+                        يمكنك اختيار وإسناد أي طالب غير مخصص لمسؤول غياب آخر لمسؤوليتك المباشرة (حتى 50 طالب كحد أقصى).
+                    </p>
+                    <div style="margin-bottom: 12px;">
+                        <input type="text" id="hr-unassigned-search-input" placeholder="🔍 ابحث بالاسم، الرقم التعريفي، أو رقم الجلوس..." oninput="filterHrUnassignedTable()" style="width: 100%; font-size: 0.85rem;">
+                    </div>
+                    <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th data-i18n="th_name">الاسم</th>
+                                    <th data-i18n="label_seat_no">رقم الجلوس</th>
+                                    <th data-i18n="th_email">البريد الأكاديمي</th>
+                                    <th data-i18n="th_actions">إجراء الإسناد</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hr-unassigned-students-tbody">
+                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);" data-i18n="loading">جاري التحميل...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-bottom: 24px;">
+                    <!-- Attendance Management -->
+                    <div class="glass-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                            <h3 style="color: var(--accent-purple);" data-i18n="hr_attendance_title">📊 إدارة حضور وغياب الطلاب</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <span id="hr-students-count-badge" class="badge badge-hr">الطلاب المسندين: --</span>
+                                <span id="hr-present-count-badge" class="badge" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">الحضور: 0</span>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="hr_attendance_sub">قم برصد الحضور والغياب للطلاب المسندين إليك لكل سيشن يدويًا عبر التشيك بوكس، أو عبر رفع شيت الإكسيل.</p>
+
+                        <!-- Excel Attendance Upload Form -->
+                        <div style="background: rgba(15,23,42,0.6); padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--accent-purple);">
+                            <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: #c084fc;" data-i18n="hr_excel_title">📁 رفع شيت إكسيل للغياب (Checkboxes / ID)</h4>
+                            <form onsubmit="handleUploadAttendanceExcel(event)">
+                                <div class="form-group">
+                                    <label data-i18n="label_select_session">اختر السيشن</label>
+                                    <select id="hr-excel-session-select" required>
+                                        <option value="">-- اختر السيشن --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="label_excel_file">ملف الإكسيل / CSV</label>
+                                    <input type="file" id="hr-excel-file" accept=".xlsx, .xls, .csv" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 8px;" data-i18n="btn_upload_attendance_excel">
+                                    📤 قراءة وتأكيد غياب الشيت
+                                </button>
+                            </form>
+                            <a href="/api/hr/download-sample-attendance-excel" target="_blank" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem; width: 100%; justify-content: center;" data-i18n="btn_sample_attendance_excel">
+                                📥 تحميل نموذج شيت الغياب (Sample Excel)
+                            </a>
+                        </div>
+
+                        <!-- Manual Attendance List with Checkboxes -->
+                        <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: var(--accent-cyan);" data-i18n="hr_manual_title">✍️ رصد الغياب يدويًا للسيشن</h4>
+                        
+                        <div class="form-group">
+                            <label data-i18n="label_select_session_manual">اختر السيشن المراد رصد غيابها:</label>
+                            <select id="hr-manual-session-select" style="margin-bottom: 12px;">
+                                <option value="">-- اختر السيشن --</option>
+                            </select>
+                        </div>
+
+                        <!-- NEW QUICK ID ATTENDANCE FORM -->
+                        <div style="margin-bottom: 24px; padding: 16px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 12px;">
+                            <h5 style="margin-bottom: 8px; color: var(--accent-blue);">⚡ تسجيل سريع للطالب بالـ ID</h5>
+                            <form onsubmit="handleQuickIdAttendance(event)" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <input type="text" id="hr-quick-id-input" placeholder="اكتب ID الطالب واضغط Enter أو تسجيل..." required style="flex: 1; min-width: 200px; font-size: 0.9rem; padding: 10px; border-radius: 8px; border: 1px solid var(--border-card); background: rgba(0,0,0,0.2); color: white;">
+                                <button type="submit" class="btn btn-primary" style="white-space: nowrap; height: 100%; min-height: 40px; padding: 0 20px;">تسجيل</button>
+                            </form>
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <input type="text" id="hr-students-search-input" placeholder="🔍 ابحث في طلابك بالاسم، الرقم التعريفي، أو رقم الجلوس..." oninput="filterHrStudentsTable()" style="width: 100%; font-size: 0.85rem;">
+                        </div>
+
+                        <div class="table-responsive" style="margin-bottom: 14px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th data-i18n="th_name">اسم الطالب</th>
+                                        <th data-i18n="label_seat_no">رقم الجلوس</th>
+                                        <th data-i18n="th_attendance_check">حالة الحضور</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hr-students-table">
+                                    <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-outline" style="width: 100%; justify-content: center; margin-top: 8px; color: var(--accent-cyan); border-color: var(--accent-cyan);" onclick="exportHrAttendanceSheet()">
+                            📥 تصدير غياب السيشن شيت إكسيل (Export Session Excel)
+                        </button>
+                    </div>
+
+                    <!-- Teams Management -->
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 12px; color: var(--accent-cyan);" data-i18n="hr_teams_title">👥 إنشاء وإدارة التيمات (Team Management)</h3>
+                        
+                        <!-- Create Team Form -->
+                        <form onsubmit="handleCreateTeam(event)" style="margin-bottom: 24px;">
+                            <div class="form-group">
+                                <label data-i18n="label_new_team_name">اسم الفريق الجديد</label>
+                                <input type="text" id="hr-team-name" placeholder="مثال: فريق الابتكار - المجموعه 1" required>
+                            </div>
+                            <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;" data-i18n="btn_create_new_team">
+                                + إنشاء تيم جديد
+                            </button>
+                        </form>
+
+                        <!-- Existing Teams List -->
+                        <h4 style="margin-bottom: 12px;" data-i18n="hr_existing_teams_title">التيمات الحالية وتخصيص الطلاب</h4>
+                        <div id="hr-teams-list">
+                            <p style="color: var(--text-muted);" data-i18n="loading">جاري تحميل التيمات...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>

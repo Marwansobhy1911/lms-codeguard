@@ -1,0 +1,320 @@
+<!-- FORCE CHANGE PASSWORD MODAL -->
+        <div id="force-password-modal" class="modal-overlay">
+            <div class="modal-content">
+                <h3 style="margin-bottom: 12px; color: var(--accent-amber);" data-i18n="force_pass_title">إجراء أمان إجباري: تغيير كلمة المرور</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;" data-i18n="force_pass_sub">
+                    أهلاً بك! نظراً لأن هذا أول تسجيل دخول لك، يجب عليك اختيار كلمة مرور جديدة خاصة بك للاستمرار.
+                </p>
+                <div id="change-pass-alert" class="alert alert-danger" style="display: none;"></div>
+                <form onsubmit="handleForceChangePassword(event)" autocomplete="off">
+                    <div class="form-group">
+                        <label data-i18n="label_current_pass">كلمة المرور الحالية (الافتراضية)</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="cp-current" required autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('cp-current', this)">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_new_pass">كلمة المرور الجديدة</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="cp-new" minlength="4" required placeholder="4 خانات على الأقل" autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('cp-new', this)">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_confirm_pass">تأكيد كلمة المرور الجديدة</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="cp-confirm" minlength="4" required autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('cp-confirm', this)">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_save_pass">
+                        حفظ كلمة المرور والدخول للنظام
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TA CONTACT MODAL -->
+        <div id="ta-contact-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('ta-contact-modal')">&times;</button>
+                <h3 style="margin-bottom: 16px; color: #60a5fa;">👤 بيانات التواصل مع المساعد (TA)</h3>
+                <div style="background: rgba(15,23,42,0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--border-card);">
+                    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; color: #60a5fa;" id="ta-info-name">---</div>
+                    <div style="margin-bottom: 10px; font-size: 0.95rem;">
+                        <strong>📧 البريد الإلكتروني:</strong> <span id="ta-info-email" style="color: #38bdf8;">---</span>
+                    </div>
+                    <div style="margin-bottom: 10px; font-size: 0.95rem;">
+                        <strong>📱 رقم الهاتف:</strong> <span id="ta-info-phone" style="color: #fbbf24;">---</span>
+                    </div>
+                    <div style="margin-top: 14px; font-size: 0.9rem; color: var(--text-muted);">
+                        <strong>📝 ملاحظات وتوجيهات المساعد:</strong>
+                        <div id="ta-info-bio" style="margin-top: 6px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; color: white;">---</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HR CONTACT MODAL -->
+        <div id="hr-contact-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('hr-contact-modal')">&times;</button>
+                <h3 style="margin-bottom: 16px; color: #fb7185;" data-i18n="hr_contact_title">👔 بيانات التواصل مع مسؤول الغياب (HR)</h3>
+                <div style="background: rgba(15,23,42,0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--border-card);">
+                    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; color: #fb7185;" id="hr-info-name">---</div>
+                    <div style="margin-bottom: 10px; font-size: 0.95rem;">
+                        <strong>📧 البريد الرسمي:</strong> <span id="hr-info-email" style="color: #38bdf8;">---</span>
+                    </div>
+                    <div style="margin-bottom: 10px; font-size: 0.95rem;">
+                        <strong>📱 رقم الهاتف:</strong> <span id="hr-info-phone" style="color: #fbbf24;">---</span>
+                    </div>
+                    <div style="margin-top: 14px; font-size: 0.9rem; color: var(--text-muted);">
+                        <strong>📝 نبذة وملاحظات الـ HR:</strong>
+                        <div id="hr-info-bio" style="margin-top: 6px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; color: white;">---</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE EDIT MODAL -->
+        <div id="profile-edit-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 600px;">
+                <button class="close-btn" onclick="closeModal('profile-edit-modal')">&times;</button>
+                <h3 style="margin-bottom: 16px; color: var(--accent-cyan);" data-i18n="edit_profile_title">✏️ تحديث البيانات الشخصية</h3>
+                <form onsubmit="handleUpdateProfile(event)">
+                    <div class="form-group">
+                        <label data-i18n="label_id">الرقم التعريفي (ID)</label>
+                        <input type="text" id="pe-id" readonly disabled style="opacity: 0.6; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_name">الاسم الكامل</label>
+                        <input type="text" id="pe-name" required>
+                    </div>
+                    <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_official_email">البريد الأكاديمي الرسمي</label>
+                            <input type="email" id="pe-official-email" placeholder="xxx@cis.asu.edu.eg">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_personal_email">البريد الإلكتروني الشخصي</label>
+                            <input type="email" id="pe-email">
+                        </div>
+                    </div>
+                    <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_phone_no">رقم الهاتف / الموبايل</label>
+                            <input type="text" id="pe-phone" placeholder="010XXXXXXXX">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_seat_no">رقم الجلوس / الرقم الجامعي</label>
+                            <input type="text" id="pe-seat">
+                        </div>
+                    </div>
+                    <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_level">المستوى الدراسي / الفرقة</label>
+                            <input type="text" id="pe-level" placeholder="مثال: level 3 أو Level 1">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_program">البرنامج / التخصص</label>
+                            <input type="text" id="pe-program" placeholder="مثال: General أو CS">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_bio">نبذة / الملاحظات الشخصية</label>
+                        <textarea id="pe-bio" style="height: 70px;" placeholder="اكتب نبذة عنك..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_save_profile">
+                        💾 حفظ البيانات المعدلة
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ADMIN EDIT USER MODAL -->
+        <div id="admin-edit-user-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 600px;">
+                <button class="close-btn" onclick="closeModal('admin-edit-user-modal')">&times;</button>
+                <h3 style="margin-bottom: 16px; color: var(--accent-amber);" data-i18n="admin_edit_user_title">🛠️ تعديل بيانات ورول الـ ID بصفة أدمن</h3>
+                <form onsubmit="handleAdminUpdateUserProfile(event)">
+                    <input type="hidden" id="ae-original-id">
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label data-i18n="label_id">الرقم التعريفي (ID)</label>
+                        <input type="text" id="ae-id" required style="border: 1px solid var(--accent-cyan);">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label data-i18n="th_role">رولات وصلاحيات الحساب (يمكن اختيار أكثر من رول):</label>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap; background: rgba(15,23,42,0.6); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-card); margin-top: 4px;">
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="student"> 🎓 Student (طالب)</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="hr"> 👔 HR</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="media"> 🎨 Media</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="supporter"> 🛠️ Supporter (TA)</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="instructor"> 👨‍🏫 Instructor</label>
+                            <label style="font-size: 0.85rem; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 4px;"><input type="checkbox" name="ae-role-cb" value="admin"> 👑 Admin</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_name">الاسم الكامل</label>
+                        <input type="text" id="ae-name" required>
+                    </div>
+                    <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_official_email">البريد الأكاديمي الرسمي</label>
+                            <input type="email" id="ae-official-email">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_personal_email">البريد الإلكتروني الشخصي</label>
+                            <input type="email" id="ae-email">
+                        </div>
+                    </div>
+                    <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_phone_no">رقم الهاتف / الموبايل</label>
+                            <input type="text" id="ae-phone">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_seat_no">رقم الجلوس / الرقم الجامعي</label>
+                            <input type="text" id="ae-seat">
+                        </div>
+                    </div>
+                    <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_level">المستوى الدراسي / الفرقة</label>
+                            <input type="text" id="ae-level">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label data-i18n="label_program">البرنامج / التخصص</label>
+                            <input type="text" id="ae-program">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_bio">نبذة / الملاحظات الشخصية</label>
+                        <textarea id="ae-bio" style="height: 70px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_save_profile">
+                        💾 حفظ تعديلات الحساب والـ ID والرول
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ADMIN LIVE CLEAN DATABASE INSPECTOR MODAL -->
+        <div id="admin-database-view-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 1000px; width: 95%;">
+                <button class="close-btn" onclick="closeModal('admin-database-view-modal')">&times;</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h3 style="color: var(--accent-emerald);" data-i18n="admin_db_view_title">📊 معاينة جدول الداتابيز الكاملة (Clean Database View)</h3>
+                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="window.open('/api/admin/database-export-excel?token=' + (localStorage.getItem('lms_token') || ''))" data-i18n="btn_export_db_excel">
+                        📥 تصدير الداتابيز شيت إكسيل (Clean Excel Export)
+                    </button>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">
+                    تنويه: تعرض هذه الشاشة جميع سجلات وبيانات الداتابيز الحقيقية مجمعة وخالية تماماً من كلمات المرور أو الهاش للحفاظ على خصوصية النظام وأمانه.
+                </p>
+                <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr style="position: sticky; top: 0; background: #0f172a; z-index: 10;">
+                                <th>ID</th>
+                                <th data-i18n="th_name">اسم المستخدم</th>
+                                <th data-i18n="th_role">الرول</th>
+                                <th data-i18n="label_official_email">إيميل الكلية الرسمي</th>
+                                <th data-i18n="label_phone_no">رقم الموبايل</th>
+                                <th data-i18n="label_seat_no">رقم الجلوس</th>
+                                <th data-i18n="label_level">المستوى والتخصص</th>
+                                <th data-i18n="th_supporter">المساعد المسند</th>
+                                <th data-i18n="stat_hr">الـ HR المسند</th>
+                                <th data-i18n="stat_card_teams">الفريق</th>
+                                <th>تاريخ الإنشاء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-db-view-tbody">
+                            <tr><td colspan="11" style="text-align: center; color: var(--text-muted);">جاري تحميل بيانات الداتابيز...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN STATS DETAIL DRILLDOWN MODAL -->
+        <div id="admin-stats-detail-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 800px;">
+                <button class="close-btn" onclick="closeModal('admin-stats-detail-modal')">&times;</button>
+                <h3 id="stats-detail-modal-title" style="margin-bottom: 16px; color: var(--accent-cyan);">تفاصيل القائمة</h3>
+                <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr id="stats-detail-modal-thead">
+                                <th>ID</th>
+                                <th data-i18n="th_name">الاسم</th>
+                                <th data-i18n="th_email">البريد الإلكتروني</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-detail-modal-tbody">
+                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">لا توجد بيانات</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- USER MANUAL CHANGE PASSWORD MODAL -->
+        <div id="user-change-password-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('user-change-password-modal')">&times;</button>
+                <h3 style="margin-bottom: 12px; color: var(--accent-cyan);" data-i18n="user_change_pass_title">🔒 تغيير كلمة المرور للحساب</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;" data-i18n="user_change_pass_sub">
+                    يرجى إدخال كلمة المرور الحالية وكلمة المرور الجديدة لحماية حسابك.
+                </p>
+                <div id="user-change-pass-alert" class="alert alert-danger" style="display: none;"></div>
+                <form onsubmit="handleUserManualChangePassword(event)">
+                    <div class="form-group">
+                        <label data-i18n="label_current_pass">كلمة المرور الحالية</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="ucp-current" required autocomplete="current-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('ucp-current', this)">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_new_pass">كلمة المرور الجديدة</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="ucp-new" minlength="4" required placeholder="4 خانات على الأقل" autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('ucp-new', this)">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_confirm_pass">تأكيد كلمة المرور الجديدة</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="ucp-confirm" minlength="4" required autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('ucp-confirm', this)">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_save_pass">
+                        💾 حفظ كلمة المرور الجديدة
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TA CONTACT MODAL -->
+        <div id="ta-contact-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('ta-contact-modal')">&times;</button>
+                <h3 style="margin-bottom: 16px; color: var(--accent-cyan);" data-i18n="ta_contact_title">📞 بيانات التواصل مع المعيد / السابورتر</h3>
+                <div style="background: rgba(15,23,42,0.6); padding: 20px; border-radius: 12px; border: 1px solid var(--border-card);">
+                    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; color: var(--accent-emerald);" id="ta-info-name">---</div>
+                    <div style="margin-bottom: 10px; font-size: 0.95rem;">
+                        <strong>📧 البريد الإلكتروني:</strong> <span id="ta-info-email" style="color: #38bdf8;">---</span>
+                    </div>
+                    <div style="margin-bottom: 10px; font-size: 0.95rem;">
+                        <strong>📱 رقم الهاتف:</strong> <span id="ta-info-phone" style="color: #fbbf24;">---</span>
+                    </div>
+                    <div style="margin-top: 14px; font-size: 0.9rem; color: var(--text-muted);">
+                        <strong>📝 نبذة وملاحظات المساعد:</strong>
+                        <div id="ta-info-bio" style="margin-top: 6px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; color: white;">---</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+

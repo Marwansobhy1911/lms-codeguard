@@ -1,0 +1,220 @@
+<!-- CODEGUARD ANTI-CHEATING SYSTEM VIEW -->
+            <div id="cheating-view" class="view-section">
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <h3 style="color: var(--accent-cyan);" data-i18n="cheating_title">🔍 محرك فحص الغش البرمجي الشامل (CodeGuard System)</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;" data-i18n="cheating_sub">تحليل الخوارزميات (Winnowing Fingerprinting + Token LCS) لمقارنة أكواد كافة التسليمات آلياً.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <select id="cheating-task-select" style="max-width: 240px;" onchange="loadCheatingTaskReports()">
+                                <option value="">اختر المهمة للفحص...</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="runCheatingAnalysisOnSelectedTask()" data-i18n="btn_run_cheating_check">⚡ تشغيل الفحص الآن</button>
+                            <button class="btn btn-outline" style="color: var(--accent-emerald); border-color: var(--accent-emerald);" onclick="exportPlagiarismExcel()">📥 تصدير شيت إكسيل</button>
+                            <button class="btn btn-outline" style="color: var(--accent-amber); border-color: var(--accent-amber);" onclick="window.print()">🖨️ طباعة / PDF</button>
+                        </div>
+                    </div>
+
+                    <div id="cheating-matrix-results">
+                        <p style="color: var(--text-muted);">اختر مهمة من القائمة أعلاه لعرض مصفوفة السرقات والتشابهات البرمجية.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL: SUBMIT TASK CODE -->
+    <div id="submit-task-modal" class="modal-overlay">
+        <div class="modal-content modal-large">
+            <button class="close-btn" onclick="closeModal('submit-task-modal')">&times;</button>
+            <h3 style="margin-bottom: 16px;" data-i18n="modal_submit_title">تسليم المهمة</h3>
+            <div id="submit-modal-task-title" style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 12px;"></div>
+            
+            <form onsubmit="handleCodeSubmission(event)">
+                <input type="hidden" id="sub-task-id">
+                <div class="form-group">
+                    <label data-i18n="label_submission_link">رابط التسليم (URL)</label>
+                    <input type="url" id="sub-link" placeholder="https://..." required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_submit_code">
+                    تسليم المهمة
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ATTENDANCE DETAILS -->
+    <div id="attendance-details-modal" class="modal-overlay">
+        <div class="modal-content modal-large">
+            <button class="close-btn" onclick="closeModal('attendance-details-modal')">&times;</button>
+            <h3 style="margin-bottom: 16px; color: #34d399;">📊 تفاصيل نسبة الحضور والسيشنات</h3>
+            <div id="att-details-summary" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;"></div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>السيشن</th>
+                            <th>التاريخ والوقت</th>
+                            <th>المكان / الرابط</th>
+                            <th>حالة الحضور</th>
+                        </tr>
+                    </thead>
+                    <tbody id="att-details-table">
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SUBMITTED TASKS DETAILS -->
+    <div id="submitted-tasks-modal" class="modal-overlay">
+        <div class="modal-content modal-large">
+            <button class="close-btn" onclick="closeModal('submitted-tasks-modal')">&times;</button>
+            <h3 style="margin-bottom: 16px; color: #c084fc;">📝 قائمة التاسكات التي قمت بتسليمها</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المهمة</th>
+                            <th>اسم الملف</th>
+                            <th>تاريخ التسليم</th>
+                            <th>الدرجة المرصودة</th>
+                            <th>ملاحظات وتوجيهات المدرس</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sub-tasks-details-table">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GRADE SUBMISSION & PLAGIARISM -->
+    <div id="grade-modal" class="modal-overlay">
+        <div class="modal-content modal-large">
+            <button class="close-btn" onclick="closeModal('grade-modal')">&times;</button>
+            <h3 data-i18n="modal_grade_title">تصحيح المهمة وفحص الغش</h3>
+            <div id="grade-student-info" style="color: var(--accent-cyan); margin: 8px 0 16px;"></div>
+
+            <div class="form-group">
+                <label data-i18n="label_submitted_link">رابط تسليم الطالب:</label>
+                <div id="grade-code-display" style="padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid var(--border-card); word-break: break-all;"></div>
+            </div>
+
+            <form onsubmit="handleGradeSubmit(event)">
+                <input type="hidden" id="grade-sub-id">
+                <div style="display: flex; gap: 16px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label data-i18n="label_score">الدرجة المستحقة</label>
+                        <input type="number" step="0.5" id="grade-score" required>
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label data-i18n="label_feedback">الملاحظات والتوجيهات (Feedback)</label>
+                        <input type="text" id="grade-feedback" placeholder="ملاحظاتك للطالب..." required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center; margin-bottom: 20px;" data-i18n="btn_save_grade">
+                    حفظ التقييم ورصد الدرجة
+                </button>
+            </form>
+
+            <hr style="border-color: var(--border-card); margin: 20px 0;">
+
+            <h4 data-i18n="plagiarism_title">تقرير كشف الانتحال والسرقة البرمجية (CodeGuard Anti-Cheating)</h4>
+            <div id="plagiarism-report-container" style="margin-top: 12px;">
+                <p style="color: var(--text-muted);">جاري فحص تقرير الغش والتشابه مع باقي الطلاب...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE TASK -->
+    <div id="create-task-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('create-task-modal')">&times;</button>
+            <h3 data-i18n="modal_create_task">إضافة مهمة / تاسك جديدة</h3>
+            <form onsubmit="handleCreateTask(event)">
+                <div class="form-group">
+                    <label data-i18n="label_task_title">عنوان المهمة</label>
+                    <input type="text" id="ct-title" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label_task_desc">وصف المهمة والمطلوب</label>
+                    <textarea id="ct-desc" required style="height: 100px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label_task_link">رابط مرجعي للمهمة (Link)</label>
+                    <input type="url" id="ct-link" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label_task_deadline">الموعد النهائي للتسليم (Deadline)</label>
+                    <input type="datetime-local" id="ct-deadline" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label_max_score">الدرجة الكلية</label>
+                    <input type="number" id="ct-max-score" value="100" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_publish_task">
+                    إنشاء المهمة ونشرها
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE SESSION -->
+    <div id="create-session-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('create-session-modal')">&times;</button>
+            <h3 data-i18n="modal_create_session">إضافة موعد سيشن جديدة</h3>
+            <form onsubmit="handleCreateSession(event)">
+                <div class="form-group">
+                    <label data-i18n="label_session_title">عنوان السيشن</label>
+                    <input type="text" id="cs-title" placeholder="مثال: السيشن الرابعة - خوارزميات البحث" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label_session_datetime">تاريخ ووقت السيشن</label>
+                    <input type="datetime-local" id="cs-datetime" required>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="label_session_location">المكان أو رابط الاجتماع</label>
+                    <input type="text" id="cs-location" placeholder="مثال: قاعة 3 أو رابط Google Meet">
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;" data-i18n="btn_save_session">
+                    حفظ السيشن
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: MANAGE POINTS -->
+    <div id="manage-points-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 800px; width: 95%;">
+            <button class="close-btn" onclick="closeModal('manage-points-modal')">&times;</button>
+            <h3 style="color: var(--accent-cyan); margin-bottom: 16px;">🏆 إدارة نقاط البونص للطلاب</h3>
+            <div style="margin-bottom: 16px;">
+                <input type="text" id="manage-points-search" class="form-group" style="width: 100%; margin: 0; padding: 12px; border-radius: 8px;" placeholder="ابحث بالاسم، الـ ID أو رقم الجلوس..." onkeyup="filterManagePointsTable()">
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID الطالب</th>
+                            <th>الاسم</th>
+                            <th>رقم الجلوس</th>
+                            <th>نقاط البونص الحالية</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manage-points-tbody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->

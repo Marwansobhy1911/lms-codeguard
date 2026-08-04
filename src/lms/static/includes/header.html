@@ -1,0 +1,35 @@
+<header id="main-header" style="display: none;">
+        <div class="logo">
+            <img src="/logo.jpeg" alt="Logo" style="width: 42px; height: 42px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-card);">
+            <span style="margin-right: 6px;">CodeGuard LMS</span>
+        </div>
+        <div class="user-nav">
+            <!-- Notification Bell Icon -->
+            <div style="position: relative; display: inline-block;">
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 1.1rem; position: relative;" onclick="toggleNotificationDropdown()">
+                    🔔 <span id="notif-badge" style="position: absolute; top: -5px; right: -5px; background: var(--accent-rose); color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold; display: none;">0</span>
+                </button>
+                <div id="notif-dropdown" style="display: none; position: absolute; left: 0; top: 110%; width: 320px; background: #0f172a; border: 1px solid var(--border-card); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 999; padding: 12px;">
+                    <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid var(--border-card); padding-bottom: 6px; color: var(--accent-cyan); display: flex; justify-content: space-between; align-items: center;">
+                        <span data-i18n="notif_header_title">🔔 الإشعارات والتنبيهات</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <small style="color: #f43f5e; cursor: pointer;" onclick="handleClearAllNotifications()" data-i18n="btn_clear_notifs">🗑️ مسح الكل</small>
+                            <small style="color: var(--text-muted); cursor: pointer; font-size: 1rem;" onclick="toggleNotificationDropdown()">&times;</small>
+                        </div>
+                    </div>
+                    <div id="notif-list-container" style="max-height: 300px; overflow-y: auto;">
+                        <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px;">جاري جلب الإشعارات...</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-outline" onclick="toggleLanguage()" id="lang-toggle-btn">🌐 English</button>
+            <button class="btn btn-outline" onclick="openProfileModal()" id="profile-edit-btn" data-i18n="btn_profile">✏️ البيانات الشخصية</button>
+            <button class="btn btn-outline" onclick="openUserChangePasswordModal()" id="change-pass-btn" data-i18n="btn_change_password">🔒 تغيير كلمة المرور</button>
+            <div style="text-align: inherit;">
+                <div id="user-name-display" style="font-weight: 700; font-size: 1.05rem;">اسم المستخدم</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); display: none;" id="user-id-display">ID: ---</div>
+            </div>
+            <span id="user-role-badge" class="badge badge-student">طالب</span>
+            <button class="btn btn-outline" onclick="logout()" data-i18n="logout">تسجيل الخروج</button>
+        </div>
+</header>

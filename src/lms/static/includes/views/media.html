@@ -1,0 +1,53 @@
+<!-- MEDIA VIEW -->
+            <div id="media-view" class="view-section">
+                <div class="grid-2">
+                    <!-- Upload Certificate Form -->
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 12px; color: var(--accent-cyan);" data-i18n="media_upload_cert_title">🎓 رفع شهادة جديدة (Upload Certificate)</h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="media_upload_cert_sub">يمكنك رفع شهادة مخصصة لطالب معين عبر كتابة كوده، أو ترك كود الطالب فارغاً لتكون شهادة عامة للجميع.</p>
+
+                        <form onsubmit="handleUploadCertificate(event)">
+                            <div class="form-group">
+                                <label data-i18n="label_cert_title">عنوان الشهادة / التفاصيل</label>
+                                <input type="text" id="media-cert-title" placeholder="مثال: شهادة إتمام دبلومة البرمجة" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="label_cert_recipient">كود الطالب المستلم (اختر أو اترك فارغاً للعامة)</label>
+                                <select id="media-cert-user-select">
+                                    <option value="" data-i18n="opt_general_cert">-- شهادة عامة للجميع --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="label_cert_file">ملف الشهادة (صورة / PDF / تصميم)</label>
+                                <input type="file" id="media-cert-file" accept="image/*, .pdf" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;" data-i18n="btn_upload_cert">
+                                📤 رفع الشهادة وحفظها
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Certificates List -->
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 16px;" data-i18n="media_certs_list_title">📜 قائمة الشهادات المرفوعة</h3>
+                        <div style="margin-bottom: 12px;">
+                            <input type="text" id="hr-students-search-input" placeholder="🔍 ابحث بالاسم، الرقم التعريفي، أو رقم الجلوس..." oninput="filterHrStudentsTable()" style="width: 100%; font-size: 0.85rem;">
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_title">العنوان</th>
+                                        <th data-i18n="th_recipient">المستلم</th>
+                                        <th data-i18n="th_upload_date">تاريخ الرفع</th>
+                                        <th data-i18n="th_actions">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="media-certs-table">
+                                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted);" data-i18n="loading">جاري التحميل...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
