@@ -1815,9 +1815,105 @@ let currentToken = localStorage.getItem('lms_token') || '';
             } catch (err) { alert(err.message); }
         }
 
+        function renderAdminStudentsTable(students) {
+            const tbody = document.getElementById('admin-students-table');
+            if (!tbody) return;
+            const attMap = window.adminSessionAttendanceMap || {};
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">لا يوجد طلاب مسجلين بالنظام.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = students.map(s => {
+                const status = attMap[s.id] ? attMap[s.id].toLowerCase() : 'absent';
+                return `<tr>
+                    <td><strong>${s.id}</strong></td>
+                    <td>${s.name}</td>
+                    <td>${s.seat_number || '-'}</td>
+                    <td>
+                        <label class="toggle-switch">
+                            <input type="checkbox" ${status === 'present' ? 'checked' : ''} onchange="handleAdminAutoSaveAttendance('${s.id}', this.checked ? 'present' : 'absent')">
+                            <span class="slider"></span>
+                        </label>
+                        <span style="font-size: 0.8rem; margin-left: 8px; color: ${status === 'present' ? '#34d399' : 'var(--text-muted)'}">
+                            ${status === 'present' ? 'حاضر' : 'غائب'}
+                        </span>
+                    </td>
+                </tr>`;
+            }).join('');
+            updateAdminPresentCount();
+        }
+
+        function updateAdminPresentCount() {
+            const attMap = window.adminSessionAttendanceMap || {};
+            const students = window.adminAllStudents || [];
+            let presentCount = 0;
+            students.forEach(s => { if (attMap[s.id] && attMap[s.id].toLowerCase() === 'present') presentCount++; });
+            const pb = document.getElementById('admin-present-count-badge');
+            if (pb) pb.innerText = 'الحضور: ' + presentCount;
+            const tb = document.getElementById('admin-students-count-badge');
+            if (tb) tb.innerText = 'إجمالي الطلاب: ' + students.length;
+        }
+
+        function filterAdminStudentsTable() {
+            const query = (document.getElementById('admin-students-search-input').value || '').toLowerCase().trim();
+            if (!window.adminAllStudents) return;
+            const filtered = window.adminAllStudents.filter(s =>
+                (s.id && String(s.id).toLowerCase().includes(query)) ||
+                (s.name && String(s.name).toLowerCase().includes(query)) ||
+                (s.seat_number && String(s.seat_number).toLowerCase().includes(query)) ||
+                (s.email && String(s.email).toLowerCase().includes(query))
+            );
+            renderAdminStudentsTable(filtered);
+        }
+
+        async function handleAdminQuickIdAttendance(e) {
+            e.preventDefault();
+            const sessId = document.getElementById('admin-student-session-select').value;
+            const inputEl = document.getElementById('admin-quick-id-input');
+            const studentId = inputEl.value.trim();
+            if (!sessId) { alert('يرجى اختيار السيشن أولاً.'); return; }
+            if (!studentId) return;
+            if (window.adminSessionAttendanceMap && window.adminSessionAttendanceMap[studentId] && window.adminSessionAttendanceMap[studentId].toLowerCase() === 'present') {
+                alert('هذا الطالب مسجل حضور بالفعل في هذه السيشن!');
+                inputEl.value = '';
+                inputEl.focus();
+                return;
+            }
+            try {
+                const res = await apiRequest('/api/hr/attendance/manual-id', 'POST', {
+                    session_id: parseInt(sessId),
+                    student_id: studentId
+                });
+                alert(res.message);
+                if (!window.adminSessionAttendanceMap) window.adminSessionAttendanceMap = {};
+                window.adminSessionAttendanceMap[studentId] = 'present';
+                filterAdminStudentsTable();
+                inputEl.value = '';
+                inputEl.focus();
+            } catch (err) { alert(err.message); }
+        }
+
+        async function handleAdminAutoSaveAttendance(studentId, status) {
+            const sessId = document.getElementById('admin-student-session-select').value;
+            if (!sessId) { alert('يرجى اختيار السيشن أولاً.'); return; }
+            try {
+                const res = await apiRequest('/api/hr/attendance/single', 'POST', {
+                    session_id: parseInt(sessId),
+                    student_id: studentId,
+                    status: status
+                });
+                if (!window.adminSessionAttendanceMap) window.adminSessionAttendanceMap = {};
+                window.adminSessionAttendanceMap[studentId] = status.toLowerCase();
+                updateAdminPresentCount();
+                showToast(res.message || 'تم الحفظ بنجاح');
+            } catch (err) { alert(err.message); }
+        }
+
+
         async function loadAdminDashboard() {
             try {
                 try {
+
                     const driveRes = await apiRequest('/api/settings/material-drive');
                     const dInput = document.getElementById('admin-drive-url-input');
                     if(dInput) dInput.value = driveRes.url || '';
@@ -1839,18 +1935,32 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     renderAdminRolesChart(c);
                 } catch (e) { console.error(e); }
 
-                // Fetch sessions for attendance download
+                // Fetch All Students for Admin Attendance Panel
                 try {
-                    const sessions = await apiRequest('/api/sessions');
-                    const sessSelect = document.getElementById('admin-attendance-session-select');
-                    if (sessSelect) {
-                        if (sessions.length === 0) {
-                            sessSelect.innerHTML = '<option value="">لا توجد سيشنز متاحة</option>';
-                        } else {
-                            sessSelect.innerHTML = sessions.map(s => `<option value="${s.id}">${s.title} (${new Date(s.date_time).toLocaleDateString()})</option>`).join('');
-                        }
+                    const adminStudents = await apiRequest('/api/admin/students');
+                    window.adminAllStudents = adminStudents;
+                    window.adminSessionAttendanceMap = {};
+                    renderAdminStudentsTable(adminStudents);
+
+                    const sessionsForAdmin = await apiRequest('/api/sessions');
+                    const adminSessSelect = document.getElementById('admin-student-session-select');
+                    if (adminSessSelect) {
+                        adminSessSelect.innerHTML = '<option value="">-- اختر السيشن --</option>' +
+                            sessionsForAdmin.map(s => `<option value="${s.id}">${s.title} (${new Date(s.date_time).toLocaleDateString()})</option>`).join('');
+                        adminSessSelect.addEventListener('change', async function() {
+                            const sid = this.value;
+                            window.adminSessionAttendanceMap = {};
+                            if (sid) {
+                                try {
+                                    const res = await apiRequest(`/api/hr/attendance/${sid}`);
+                                    if (res && res.success) window.adminSessionAttendanceMap = res.attendance || {};
+                                } catch(e) {}
+                            }
+                            filterAdminStudentsTable();
+                        });
                     }
                 } catch (e) { console.error(e); }
+
 
                 // Fetch Sessions for Admin Control
                 const sessions = await apiRequest('/api/sessions');

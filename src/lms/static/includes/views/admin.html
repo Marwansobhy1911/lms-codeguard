@@ -52,20 +52,53 @@
                     </div>
                 </div>
 
-                <!-- Admin Attendance Download Settings -->
-                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-emerald);">
-                    <h3 style="margin-bottom: 8px; color: var(--accent-emerald);" data-i18n="admin_att_download_title">📋 تحميل شيت الحضور والغياب (Download Attendance)</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
-                        اختر السيشن لتحميل شيت حضور وغياب جميع الطلاب بصيغة إكسيل.
-                    </p>
-                    <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
-                        <div class="form-group" style="flex: 1; margin: 0;">
-                            <label style="font-size: 0.85rem;">اختر السيشن:</label>
-                            <select id="admin-attendance-session-select" style="width: 100%;">
-                                <option value="">جاري التحميل...</option>
-                            </select>
+                <!-- Admin Student Attendance Control -->
+                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-purple);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <h3 style="color: var(--accent-purple);">📊 إدارة حضور وغياب جميع الطلاب (Admin)</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <span id="admin-students-count-badge" class="badge badge-hr">إجمالي الطلاب: --</span>
+                            <span id="admin-present-count-badge" class="badge" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">الحضور: 0</span>
                         </div>
-                        <button class="btn btn-primary" onclick="downloadAdminAttendanceSheet()">تحميل الشيت</button>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">يمكنك رصد حضور وغياب الطلاب يدوياً لأي سيشن. هذه اللوحة لا تتأثر بإعدادات إغلاق التسجيل على الـ HR.</p>
+
+                    <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: var(--accent-cyan);">🎯 تسجيل الحضور يدوياً للطلاب</h4>
+
+                    <div class="form-group">
+                        <label>اختر السيشن المراد رصد غيابها:</label>
+                        <select id="admin-student-session-select" style="margin-bottom: 12px;">
+                            <option value="">-- اختر السيشن --</option>
+                        </select>
+                    </div>
+
+                    <!-- QUICK ID ATTENDANCE FORM FOR ADMIN -->
+                    <div style="margin-bottom: 24px; padding: 16px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 12px;">
+                        <h5 style="margin-bottom: 8px; color: var(--accent-blue);">⚡ تسجيل سريع للطلاب برقم ID</h5>
+                        <form onsubmit="handleAdminQuickIdAttendance(event)" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <input type="text" id="admin-quick-id-input" placeholder="امسح ID الطالب هنا واضغط Enter للرصد..." required style="flex: 1; min-width: 120px; font-size: 0.9rem; padding: 10px; border-radius: 8px; border: 1px solid var(--border-card); background: rgba(0,0,0,0.2); color: white;">
+                            <button type="submit" class="btn btn-primary" style="white-space: nowrap; min-height: 42px; flex: 1; padding: 0 20px;">تسجيل حضور</button>
+                        </form>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <input type="text" id="admin-students-search-input" placeholder="🔍 ابحث عن طالب بالاسم، الكود، الإيميل الأكاديمي أو رقم الجلوس..." oninput="filterAdminStudentsTable()" style="width: 100%; font-size: 0.85rem;">
+                    </div>
+
+                    <div class="table-responsive" style="margin-bottom: 14px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>اسم الطالب</th>
+                                    <th>رقم الجلوس</th>
+                                    <th>حالة الحضور</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-students-table">
+                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">اختر السيشن أولاً لعرض الطلاب</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

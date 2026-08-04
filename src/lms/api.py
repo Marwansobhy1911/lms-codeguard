@@ -584,6 +584,20 @@ def logout(x_session_token: Optional[str] = Header(None)):
     return {"success": True}
 
 # --- ADMIN ENDPOINTS ---
+@app.get("/api/admin/students")
+def get_all_students_for_admin(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    res = []
+    for u in users:
+        if "student" in get_user_roles(u):
+            res.append({
+                "id": u.id,
+                "name": u.name,
+                "email": u.official_email or u.email or "",
+                "seat_number": u.seat_number or ""
+            })
+    return res
+
 @app.get("/api/admin/users")
 def get_all_users(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     users = db.query(User).all()
