@@ -28,10 +28,6 @@
                             <div style="font-size: 1.6rem; font-weight: 800; color: #c084fc;" id="admin-stat-admins">0</div>
                             <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_admins">🔍 الأدمنز 👑</div>
                         </div>
-                        <div onclick="openStatsDetailModal('teams')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8;" id="admin-stat-teams">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_teams">🔍 التيمات 🏆</div>
-                        </div>
                         <div onclick="openStatsDetailModal('certificates')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
                             <div style="font-size: 1.6rem; font-weight: 800; color: #22c55e;" id="admin-stat-certificates">0</div>
                             <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_certificates">🔍 الشهادات 📜</div>
@@ -73,31 +69,6 @@
                     </div>
                 </div>
 
-                <!-- Team Registration Window Settings (Admin) -->
-                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-purple);">
-                    <h3 style="margin-bottom: 8px; color: #c084fc;" data-i18n="admin_team_settings_title">⚙️ إعدادات فترة تسجيل التيمات والديدلاين (Team Registration Window)</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="admin_team_settings_sub">
-                        تحديد فترة الديدلاين لإنشاء وانضمام الطلاب للتيمات، والحد الأقصى لأعضاء الفريق (1 Team per Student constraint enforced automatically).
-                    </p>
-                    <div class="grid-3" style="margin-bottom: 16px;">
-                        <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;" data-i18n="admin_team_status_label">حالة فترة التسجيل:</label>
-                            <select id="admin-team-open-select" onchange="handleSaveTeamSettings(true)">
-                                <option value="true" data-i18n="opt_open">مفتوح للجميع (Open)</option>
-                                <option value="false" data-i18n="opt_closed">مغلق (Closed)</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;" data-i18n="admin_team_deadline_label">الديدلاين وتاريخ الإغلاق:</label>
-                            <input type="datetime-local" id="admin-team-deadline-input" onchange="handleSaveTeamSettings(true)">
-                        </div>
-                        <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;" data-i18n="admin_team_max_label">الحد الأقصى للطلاب في التيم الواحدة:</label>
-                            <input type="number" id="admin-team-max-input" value="5" min="1" max="50" onchange="handleSaveTeamSettings(true)">
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" onclick="handleSaveTeamSettings(false)" data-i18n="btn_save_team_settings">💾 حفظ إعدادات تسجيل التيمات والديدلاين</button>
-                </div>
 
                 <!-- Admin Crew Attendance Control -->
                 <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-indigo);">

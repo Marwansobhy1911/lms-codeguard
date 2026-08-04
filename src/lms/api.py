@@ -16,8 +16,7 @@ import pandas as pd
 from src.lms.database import init_db, get_db, DB_PATH
 from src.lms.models import (
     User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
-    Task, Submission, PlagiarismReport, Team, Certificate, SystemSetting,
-    TeamInvitation, TeamInvitationStatusEnum
+    Task, Submission, PlagiarismReport, Certificate, SystemSetting,
 )
 from src.lms.auth import (
     hash_password, verify_password, create_session_token,
@@ -218,33 +217,6 @@ class ManualIDAttendanceRequest(BaseModel):
     session_id: int
     student_id: str
 
-class TeamCreateRequest(BaseModel):
-    name: str
-
-class AssignTeamRequest(BaseModel):
-    team_id: int
-    student_ids: List[str]
-
-class AssignHRRequest(BaseModel):
-    student_id: str
-    hr_id: Optional[str] = None
-
-class TeamSettingsUpdateRequest(BaseModel):
-    is_open: bool
-    deadline: Optional[str] = None # ISO string e.g. 2026-08-01T23:59:00
-    max_members_per_team: int = 5
-
-class StudentJoinTeamRequest(BaseModel):
-    team_id: int
-
-class TeamInviteRequest(BaseModel):
-    invited_student_id: str
-
-class TeamInviteRespondRequest(BaseModel):
-    action: str # "accept" or "decline"
-
-class AssignTeamHRRequest(BaseModel):
-    team_id: int
     hr_id: Optional[str] = None
 
 # --- SYSTEM SETTING HELPERS ---
@@ -540,7 +512,6 @@ def get_clean_database_view(user: User = Depends(require_role([RoleEnum.ADMIN]))
             "program": u.program or "",
             "assigned_supporter": u.assigned_supporter.name if u.assigned_supporter else "غير معين",
             "assigned_hr": u.assigned_hr.name if u.assigned_hr else "غير معين",
-            "team_name": u.team.name if u.team else "بدون فريق",
             "created_at": u.created_at.strftime("%Y-%m-%d %H:%M") if u.created_at else ""
         })
     return {"total": len(records), "records": records}
@@ -562,7 +533,6 @@ def export_clean_database_excel(user: User = Depends(require_role([RoleEnum.ADMI
             "Program": u.program or "",
             "Assigned Supporter (TA)": u.assigned_supporter.name if u.assigned_supporter else "",
             "Assigned HR": u.assigned_hr.name if u.assigned_hr else "",
-            "Team": u.team.name if u.team else "",
             "Created Date": u.created_at.strftime("%Y-%m-%d %H:%M") if u.created_at else ""
         })
     df = pd.DataFrame(data)
@@ -580,8 +550,6 @@ def export_clean_database_excel(user: User = Depends(require_role([RoleEnum.ADMI
 def get_me(user: User = Depends(get_current_user)):
     is_incomplete = not user.email or "@lms.edu" in user.email or not user.phone
     hr_user = user.assigned_hr
-    if not hr_user and user.team and user.team.creator_hr:
-        hr_user = user.team.creator_hr
 
     roles = get_user_roles(user)
     primary_role = roles[0] if roles else "student"
@@ -682,13 +650,6 @@ def get_system_stats(user: User = Depends(require_role([RoleEnum.ADMIN])), db: S
             if r_val in users_by_role:
                 users_by_role[r_val].append(user_info)
 
-    teams = db.query(Team).all()
-    teams_list = [{
-        "id": t.id,
-        "name": t.name,
-        "members_count": len(t.members),
-        "members_names": [m.name for m in t.members]
-    } for t in teams]
 
     certs = db.query(Certificate).all()
     certs_list = [{
@@ -707,11 +668,9 @@ def get_system_stats(user: User = Depends(require_role([RoleEnum.ADMIN])), db: S
             "hr": len(users_by_role["hr"]),
             "media": len(users_by_role["media"]),
             "admins": len(users_by_role["admin"]),
-            "teams": len(teams_list),
             "certificates": len(certs_list)
         },
         "details": users_by_role,
-        "teams": teams_list,
         "certificates": certs_list
     }
 
@@ -764,12 +723,10 @@ def delete_all_users(user: User = Depends(require_role([RoleEnum.ADMIN])), db: S
     db.query(PlagiarismReport).delete()
     db.query(Submission).delete()
     db.query(Attendance).delete()
-    db.query(TeamInvitation).delete()
     db.query(Certificate).delete()
     
     # Nullify foreign keys before deleting users & teams
-    db.query(User).update({"assigned_supporter_id": None, "assigned_hr_id": None, "team_id": None})
-    db.query(Team).delete()
+    db.query(User).update({"assigned_supporter_id": None, "assigned_hr_id": None})
     db.query(SessionSchedule).delete()
     db.query(Task).delete()
 
@@ -815,8 +772,6 @@ def get_student_dashboard(user: User = Depends(require_role([RoleEnum.STUDENT, R
     submissions = db.query(Submission).filter(Submission.student_id == user.id).all()
 
     hr_user = user.assigned_hr
-    if not hr_user and user.team and user.team.creator_hr:
-        hr_user = user.team.creator_hr
 
     return {
         "user_info": {
@@ -981,19 +936,6 @@ def get_unassigned_students(user: User = Depends(require_role([RoleEnum.SUPPORTE
             })
     return res
 
-@app.get("/api/hr/unassigned-students")
-def get_hr_unassigned_students(user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
-    all_users = db.query(User).filter(User.assigned_hr_id == None).all()
-    res = []
-    for s in all_users:
-        if "student" in get_user_roles(s):
-            res.append({
-                "id": s.id,
-                "name": s.name,
-                "email": s.official_email or s.email or "",
-                "seat_number": s.seat_number or ""
-            })
-    return res
 
 @app.post("/api/supporter/self-assign/{student_id}")
 def self_assign_student(student_id: str, user: User = Depends(require_role([RoleEnum.SUPPORTER, RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -1343,10 +1285,7 @@ def get_hr_assigned_students(user: User = Depends(require_role([RoleEnum.HR, Rol
     if user.role == RoleEnum.ADMIN:
         query = db.query(User).filter(User.role == RoleEnum.STUDENT)
     else:
-        query = db.query(User).join(Team, User.team_id == Team.id, isouter=True).filter(
-            User.role == RoleEnum.STUDENT,
-            or_(Team.hr_id == user.id, User.assigned_hr_id == user.id)
-        )
+        query = db.query(User).filter(User.assigned_hr_id == user.id)
     
     students = query.all()
     res = []
@@ -1358,238 +1297,18 @@ def get_hr_assigned_students(user: User = Depends(require_role([RoleEnum.HR, Rol
             "phone": s.phone or "غير مدخل",
             "seat_number": s.seat_number or "",
             "assigned_hr_id": s.assigned_hr_id,
-            "team_id": s.team_id,
-            "team_name": s.team.name if s.team else "لا يوجد فريق",
-            "hr_name": s.team.creator_hr.name if (s.team and s.team.creator_hr) else (s.assigned_hr.name if s.assigned_hr else "غير معين")
+            "hr_name": s.assigned_hr.name if s.assigned_hr else "غير محدد"
         })
     return res
 
 # --- TEAM REGISTRATION & SYSTEM SETTINGS ---
-@app.get("/api/system/team-settings")
-def get_team_settings(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    is_open_setting = get_system_setting("team_registration_open", "true", db).lower() == "true"
-    deadline_str = get_system_setting("team_registration_deadline", (datetime.now() + timedelta(days=7)).isoformat(), db)
-    max_members = int(get_system_setting("max_members_per_team", "5", db))
-    
-    is_open = is_open_setting
-    time_remaining_seconds = 0
-    try:
-        dt = datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
-        if datetime.now() > dt:
-            is_open = False
-        else:
-            time_remaining_seconds = int((dt - datetime.now()).total_seconds())
-    except Exception:
-        pass
 
-    return {
-        "is_open": is_open,
-        "deadline": deadline_str,
-        "time_remaining_seconds": time_remaining_seconds,
-        "max_members_per_team": max_members,
-        "my_team": {
-            "id": user.team.id,
-            "name": user.team.name,
-            "hr_name": user.team.creator_hr.name if (user.team and user.team.creator_hr) else "غير معين"
-        } if user.team else None
-    }
 
-@app.post("/api/admin/team-settings")
-def update_team_settings(req: TeamSettingsUpdateRequest, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
-    set_system_setting("team_registration_open", "true" if req.is_open else "false", db)
-    if req.deadline:
-        set_system_setting("team_registration_deadline", req.deadline, db)
-    set_system_setting("max_members_per_team", str(req.max_members_per_team), db)
-    return {"success": True, "message": "تم تحديث إعدادات مواعيد تسجيل التيمات بنجاح"}
 
-@app.post("/api/student/teams/create")
-def student_create_team(req: TeamCreateRequest, user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
-    is_open = get_system_setting("team_registration_open", "true", db).lower() == "true"
-    deadline_str = get_system_setting("team_registration_deadline", (datetime.now() + timedelta(days=7)).isoformat(), db)
-    try:
-        dt = datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
-        if datetime.now() > dt:
-            is_open = False
-    except Exception:
-        pass
 
-    if not is_open:
-        raise HTTPException(status_code=400, detail="عفواً، انتهت الفترة المتاحة لتسجيل التيمات وتم إغلاق التسجيل.")
 
-    if user.team_id:
-        raise HTTPException(status_code=400, detail=f"عفواً، أنت مسجل بالفعل في فريق '{user.team.name}' ولا يمكنك التسجيل في أكثر من فريق واحد.")
 
-    team_name = req.name.strip()
-    if not team_name:
-        raise HTTPException(status_code=400, detail="اسم الفريق مطلوب")
 
-    existing = db.query(Team).filter(Team.name == team_name).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="اسم الفريق مستخدم بالفعل، اختر اسماً آخر.")
-
-    team = Team(name=team_name)
-    db.add(team)
-    db.commit()
-    db.refresh(team)
-
-    user.team_id = team.id
-    db.commit()
-    return {"success": True, "message": f"تم إنشاء الفريق '{team.name}' والانضمام إليه بنجاح", "team_id": team.id}
-
-@app.post("/api/student/teams/invite")
-def invite_student_to_team(req: TeamInviteRequest, user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
-    is_open = get_system_setting("team_registration_open", "true", db).lower() == "true"
-    deadline_str = get_system_setting("team_registration_deadline", (datetime.now() + timedelta(days=7)).isoformat(), db)
-    try:
-        dt = datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
-        if datetime.now() > dt:
-            is_open = False
-    except Exception:
-        pass
-
-    if not is_open:
-        raise HTTPException(status_code=400, detail="عفواً، تم إغلاق فترة تسجيل التيمات.")
-
-    if not user.team_id:
-        raise HTTPException(status_code=400, detail="عفواً، يجب أن تكون أنشأت فريقاً أولاً لتتمكن من إرسال الدعوات لأصحابك.")
-
-    invited_id = req.invited_student_id.strip()
-    target_student = db.query(User).filter(User.id == invited_id, User.role == RoleEnum.STUDENT).first()
-    if not target_student:
-        raise HTTPException(status_code=404, detail=f"الطالب برقم (ID: {invited_id}) غير موجود.")
-
-    if target_student.team_id:
-        raise HTTPException(status_code=400, detail=f"عفواً، الطالب '{target_student.name}' ينتمي بالفعل إلى فريق آخر.")
-
-    max_members = int(get_system_setting("max_members_per_team", "5", db))
-    current_count = db.query(User).filter(User.team_id == user.team_id).count()
-    if current_count >= max_members:
-        raise HTTPException(status_code=400, detail=f"عفواً، وصل فريقك إلى الحد الأقصى للأعضاء ({max_members} أعضاء).")
-
-    existing_inv = db.query(TeamInvitation).filter(
-        TeamInvitation.team_id == user.team_id,
-        TeamInvitation.invited_student_id == invited_id,
-        TeamInvitation.status == TeamInvitationStatusEnum.PENDING
-    ).first()
-
-    if existing_inv:
-        return {"success": True, "message": f"تم إرسال دعوة من قبل للطالب {target_student.name} وهى في انتظار قبوله."}
-
-    inv = TeamInvitation(
-        team_id=user.team_id,
-        inviter_id=user.id,
-        invited_student_id=invited_id,
-        status=TeamInvitationStatusEnum.PENDING
-    )
-    db.add(inv)
-    db.commit()
-    return {"success": True, "message": f"تم إرسال دعوة الانضمام للطالب {target_student.name} بنجاح!"}
-
-@app.get("/api/student/invitations")
-def get_student_invitations(user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
-    invites = db.query(TeamInvitation).filter(
-        TeamInvitation.invited_student_id == user.id,
-        TeamInvitation.status == TeamInvitationStatusEnum.PENDING
-    ).all()
-
-    res = []
-    for inv in invites:
-        res.append({
-            "id": inv.id,
-            "team_id": inv.team_id,
-            "team_name": inv.team.name if inv.team else "فريق",
-            "inviter_name": inv.inviter.name if inv.inviter else "زميلك",
-            "created_at": inv.created_at.strftime("%Y-%m-%d %H:%M")
-        })
-    return res
-
-@app.post("/api/student/invitations/{inv_id}/respond")
-def respond_to_team_invitation(inv_id: int, req: TeamInviteRespondRequest, user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
-    inv = db.query(TeamInvitation).filter(TeamInvitation.id == inv_id, TeamInvitation.invited_student_id == user.id).first()
-    if not inv:
-        raise HTTPException(status_code=404, detail="الدعوة غير موجودة")
-
-    if inv.status != TeamInvitationStatusEnum.PENDING:
-        raise HTTPException(status_code=400, detail="تم الرد على هذه الدعوة من قبل.")
-
-    if req.action.lower() == "accept":
-        is_open = get_system_setting("team_registration_open", "true", db).lower() == "true"
-        deadline_str = get_system_setting("team_registration_deadline", (datetime.now() + timedelta(days=7)).isoformat(), db)
-        try:
-            dt = datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
-            if datetime.now() > dt:
-                is_open = False
-        except Exception:
-            pass
-
-        if not is_open:
-            raise HTTPException(status_code=400, detail="عفواً، انتهت الفترة المتاحة لتسجيل التيمات.")
-
-        if user.team_id:
-            raise HTTPException(status_code=400, detail=f"عفواً، أنت مسجل بالفعل في فريق '{user.team.name}'.")
-
-        max_members = int(get_system_setting("max_members_per_team", "5", db))
-        current_count = db.query(User).filter(User.team_id == inv.team_id).count()
-        if current_count >= max_members:
-            raise HTTPException(status_code=400, detail=f"عفواً، اكتمل عدد أعضاء الفريق ({max_members} أعضاء).")
-
-        user.team_id = inv.team_id
-        inv.status = TeamInvitationStatusEnum.ACCEPTED
-        db.commit()
-        return {"success": True, "message": f"تم قبول الدعوة والانضمام إلى الفريق '{inv.team.name}' بنجاح!"}
-    else:
-        inv.status = TeamInvitationStatusEnum.DECLINED
-        db.commit()
-        return {"success": True, "message": "تم رفض الدعوة."}
-
-@app.get("/api/student/unassigned-students")
-def get_unassigned_students_for_invite(user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
-    students = db.query(User).filter(
-        User.role == RoleEnum.STUDENT,
-        User.team_id == None,
-        User.id != user.id
-    ).all()
-
-    return [{"id": s.id, "name": s.name} for s in students]
-
-@app.post("/api/student/teams/leave")
-def student_leave_team(user: User = Depends(require_role([RoleEnum.STUDENT])), db: Session = Depends(get_db)):
-    is_open = get_system_setting("team_registration_open", "true", db).lower() == "true"
-    deadline_str = get_system_setting("team_registration_deadline", (datetime.now() + timedelta(days=7)).isoformat(), db)
-    try:
-        dt = datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
-        if datetime.now() > dt:
-            is_open = False
-    except Exception:
-        pass
-
-    if not is_open:
-        raise HTTPException(status_code=400, detail="عفواً، تم إغلاق فترة تغيير التيمات ولا يمكنك المغادرة حالياً.")
-
-    if not user.team_id:
-        raise HTTPException(status_code=400, detail="أنت لست عضواً في أي فريق حالياً.")
-
-    team_name = user.team.name if user.team else ""
-    user.team_id = None
-    db.commit()
-    return {"success": True, "message": f"تمت المغادرة من الفريق '{team_name}' بنجاح"}
-
-@app.post("/api/admin/teams/assign-hr")
-def assign_team_hr(req: AssignTeamHRRequest, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
-    team = db.query(Team).filter(Team.id == req.team_id).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="الفريق غير موجود")
-
-    if req.hr_id:
-        hr_user = db.query(User).filter(User.id == req.hr_id, User.role == RoleEnum.HR).first()
-        if not hr_user:
-            raise HTTPException(status_code=404, detail="مسؤول الـ HR غير موجود")
-        team.hr_id = hr_user.id
-    else:
-        team.hr_id = None
-
-    db.commit()
-    return {"success": True, "message": f"تم إسناد الفريق '{team.name}' لـ مسؤول الـ HR بنجاح"}
 
 
 @app.post("/api/hr/attendance/single")
@@ -1706,53 +1425,9 @@ def mark_manual_id_attendance(req: ManualIDAttendanceRequest, user: User = Depen
     return {"success": True, "message": f"تم تسجيل حضور الطالب {st.name} بنجاح"}
 
 
-@app.post("/api/hr/teams/create")
-def create_team(req: TeamCreateRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
-    team = Team(name=req.name.strip(), hr_id=user.id)
-    db.add(team)
-    db.commit()
-    db.refresh(team)
-    return {"success": True, "message": f"تم إنشاء الفريق '{team.name}' بنجاح", "team_id": team.id}
 
-@app.get("/api/hr/teams")
-def list_teams(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    teams = db.query(Team).all()
-    res = []
-    for t in teams:
-        members = db.query(User).filter(User.team_id == t.id).all()
-        res.append({
-            "id": t.id,
-            "name": t.name,
-            "hr_id": t.hr_id,
-            "members": [{"id": m.id, "name": m.name, "email": m.email, "phone": m.phone} for m in members]
-        })
-    return res
 
-@app.post("/api/hr/teams/assign")
-def assign_students_to_team(req: AssignTeamRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
-    team = db.query(Team).filter(Team.id == req.team_id).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="الفريق غير موجود")
 
-    for sid in req.student_ids:
-        st = db.query(User).filter(User.id == sid).first()
-        if st:
-            st.team_id = team.id
-
-    db.commit()
-    return {"success": True, "message": f"تم إضافة {len(req.student_ids)} طالب إلى الفريق بنجاح"}
-
-@app.delete("/api/hr/teams/{team_id}")
-def delete_team(team_id: int, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
-    team = db.query(Team).filter(Team.id == team_id).first()
-    if not team:
-        raise HTTPException(status_code=404, detail="الفريق غير موجود")
-    
-    # Unassign students
-    db.query(User).filter(User.team_id == team_id).update({"team_id": None})
-    db.delete(team)
-    db.commit()
-    return {"success": True, "message": "تم حذف الفريق بنجاح"}
 
 @app.post("/api/admin/assign-hr")
 def assign_hr_to_student(req: AssignHRRequest, user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.HR])), db: Session = Depends(get_db)):
@@ -1772,24 +1447,6 @@ def assign_hr_to_student(req: AssignHRRequest, user: User = Depends(require_role
     db.commit()
     return {"success": True, "message": "تم تعيين مسئول الـ HR للطالب بنجاح"}
 
-@app.post("/api/hr/self-assign/{student_id}")
-def self_assign_student_hr(student_id: str, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
-    user_roles = get_user_roles(user)
-    if "hr" in user_roles and "admin" not in user_roles:
-        current_count = db.query(User).filter(User.assigned_hr_id == user.id).count()
-        if current_count >= 50:
-            raise HTTPException(status_code=400, detail="عذراً! لقد وصلت للحد الأقصى لعدد الطلاب المسندين لـ HR واحد (50 طالب كحد أقصى).")
-
-    student = db.query(User).filter(User.id == student_id).first()
-    if not student or "student" not in get_user_roles(student):
-        raise HTTPException(status_code=404, detail="الطالب غير موجود")
-
-    if student.assigned_hr_id and student.assigned_hr_id != user.id and "admin" not in user_roles:
-        raise HTTPException(status_code=400, detail="هذا الطالب مخصص بالفعل لمسؤول HR آخر")
-
-    student.assigned_hr_id = user.id
-    db.commit()
-    return {"success": True, "message": f"تم إسناد الطالب ({student.name}) لقائمتك بنجاح"}
 
 # --- MEDIA & CERTIFICATES ENDPOINTS ---
 import os
@@ -1883,36 +1540,7 @@ def delete_certificate(cert_id: int, user: User = Depends(require_role([RoleEnum
     return {"success": True, "message": "تم حذف الشهادة بنجاح"}
 
 # --- STUDENT TEAM & PORTAL ENDPOINTS ---
-@app.get("/api/student/team")
-def get_student_team(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not user.team_id:
-        return {"has_team": False, "message": "لم يتم إضافة الطالب إلى تيم بعد."}
-    
-    team = db.query(Team).filter(Team.id == user.team_id).first()
-    if not team:
-        return {"has_team": False, "message": "الفريق غير موجود."}
-        
-    members = db.query(User).filter(User.team_id == team.id).all()
-    members_data = []
-    for m in members:
-        members_data.append({
-            "id": m.id,
-            "name": m.name,
-            "role": m.role,
-            "email": m.email or "غير مدخل",
-            "phone": m.phone or "غير مدخل",
-            "is_me": m.id == user.id
-        })
-        
-    return {
-        "has_team": True,
-        "team_id": team.id,
-        "team_name": team.name,
-        "hr_id": team.hr_id,
-        "members": members_data
-    }
 
-# --- POINTS MANAGEMENT ---
 @app.post("/api/points/add")
 def add_bonus_points(req: PointAddRequest, user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])), db: Session = Depends(get_db)):
     student = db.query(User).filter(User.id == req.student_id).first()
@@ -1952,8 +1580,6 @@ def get_leaderboard(db: Session = Depends(get_db)):
                 badges.append("🌟 Perfect Attendance")
             if total_task_score >= 100:
                 badges.append("⚡ Code Master")
-            if u.team_id:
-                badges.append("🏆 Team Captain")
                 
             student_scores.append({
                 "id": u.id,
@@ -2000,17 +1626,6 @@ def get_user_notifications(user: User = Depends(get_current_user), db: Session =
             "time": t.created_at.strftime("%Y-%m-%d %H:%M")
         })
         
-    # 3. Team invites for student
-    if "student" in get_user_roles(user):
-        invites = db.query(TeamInvitation).filter(TeamInvitation.invited_student_id == user.id, TeamInvitation.status == "pending").all()
-        for inv in invites:
-            notifications.append({
-                "id": f"inv-{inv.id}",
-                "type": "team",
-                "title": f"✉️ دعوة انضمام لفريق: {inv.team.name}",
-                "body": f"قام الطالب {inv.sender.name} بدعوتك للانضمام لقريقه.",
-                "time": inv.created_at.strftime("%Y-%m-%d %H:%M")
-            })
             
     return notifications
 

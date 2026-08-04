@@ -1356,106 +1356,6 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     `;}).join('');
                 }
 
-                // Load Student Team & Invitations & Registration Settings
-                try {
-                    const teamSettings = await apiRequest('/api/system/team-settings');
-                    const teamInfo = await apiRequest('/api/student/team');
-                    const invites = await apiRequest('/api/student/invitations');
-                    const unassignedStudents = await apiRequest('/api/student/unassigned-students');
-                    const teamContainer = document.getElementById('student-team-container');
-
-                    let deadlineText = teamSettings.deadline ? teamSettings.deadline.replace('T', ' ') : (currentLang === 'ar' ? 'غير محدد' : 'Not specified');
-                    let statusBadge = teamSettings.is_open ? 
-                        `<span class="badge badge-supporter">⏳ ${currentLang === 'ar' ? 'تسجيل التيمات مفتوح حتى:' : 'Team registration open until:'} ${deadlineText}</span>` : 
-                        `<span class="badge badge-admin">⛔ ${currentLang === 'ar' ? 'فترة تسجيل التيمات مغلقة' : 'Team registration window is closed'}</span>`;
-
-                    let invSectionHtml = '';
-                    if (invites.length > 0) {
-                        invSectionHtml = `
-                            <div style="background: rgba(192, 132, 252, 0.15); padding: 14px; border-radius: 10px; border: 1px solid #c084fc; margin-bottom: 16px;">
-                                <h5 style="color: #c084fc; margin-bottom: 8px;">📩 ${currentLang === 'ar' ? 'لديك دعوة انضمام جديدة لتيم!' : 'You have a new team invitation!'}</h5>
-                                ${invites.map(inv => `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.6); padding: 10px 14px; border-radius: 8px; margin-top: 6px;">
-                                        <div>
-                                            <strong>${currentLang === 'ar' ? 'فريق:' : 'Team:'} ${inv.team_name}</strong>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);">${currentLang === 'ar' ? 'بواسطة زميلك:' : 'Invited by:'} ${inv.inviter_name} (${inv.created_at})</div>
-                                        </div>
-                                        <div style="display: flex; gap: 6px;">
-                                            <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.85rem;" onclick="handleRespondInvite(${inv.id}, 'accept')">✅ ${currentLang === 'ar' ? 'قبول' : 'Accept'}</button>
-                                            <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.85rem;" onclick="handleRespondInvite(${inv.id}, 'decline')">❌ ${currentLang === 'ar' ? 'رفض' : 'Decline'}</button>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                    }
-
-                    if (teamInfo.has_team) {
-                        teamContainer.innerHTML = `
-                            ${invSectionHtml}
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                <div style="font-weight: bold; font-size: 1.1rem; color: #c084fc;">🏆 ${teamInfo.team_name}</div>
-                                <span class="badge badge-student">${currentLang === 'ar' ? 'تيم محدد (1/1 Limit)' : 'Assigned Team (1/1 Limit)'}</span>
-                            </div>
-                            <div style="font-size: 0.9rem; margin-bottom: 10px; color: var(--text-muted);">${currentLang === 'ar' ? 'أعضاء الفريق ووسائل التواصل:' : 'Team Members & Contacts:'}</div>
-                            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
-                                ${teamInfo.members.map(m => `
-                                    <div style="background: rgba(15,23,42,0.6); padding: 10px 14px; border-radius: 8px; border: 1px solid ${m.is_me ? 'var(--accent-purple)' : 'var(--border-card)'}; display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <strong style="color: ${m.is_me ? '#c084fc' : 'white'};">${m.name} ${m.is_me ? (currentLang === 'ar' ? '(أنت)' : '(You)') : ''}</strong>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);">✉️ ${m.email} | 📞 ${m.phone}</div>
-                                        </div>
-                                        <span class="badge badge-${m.role}">${translateRole(m.role)}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-
-                            ${teamSettings.is_open ? `
-                                <div style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 10px; border: 1px solid var(--border-card); margin-bottom: 14px;">
-                                    <h5 style="color: var(--accent-cyan); margin-bottom: 8px;">✉️ ${currentLang === 'ar' ? 'إرسال دعوة لزميل غير مسجل لتيمكم:' : 'Send invitation to an unassigned teammate:'}</h5>
-                                    <div style="display: flex; gap: 8px;">
-                                        <select id="student-invite-select" style="flex: 1; font-size: 0.85rem;">
-                                            <option value="">-- ${currentLang === 'ar' ? 'اختر الطالب غير المسجل في تيم' : 'Select unassigned student'} --</option>
-                                            ${unassignedStudents.map(st => `<option value="${st.id}">${st.name} (${st.id})</option>`).join('')}
-                                        </select>
-                                        <button class="btn btn-primary" style="font-size: 0.85rem;" onclick="handleSendInvite()">${currentLang === 'ar' ? 'إرسال دعوة' : 'Send Invite'}</button>
-                                    </div>
-                                </div>
-                                <button class="btn btn-outline" style="color: #f43f5e; border-color: rgba(244,63,94,0.4); width: 100%; justify-content: center; font-size: 0.85rem;" onclick="handleStudentLeaveTeam()">
-                                    🚪 ${currentLang === 'ar' ? 'مغادرة الفريق الحالي' : 'Leave Current Team'}
-                                </button>
-                            ` : ''}
-                        `;
-                    } else {
-                        if (teamSettings.is_open) {
-                            teamContainer.innerHTML = `
-                                ${invSectionHtml}
-                                <div style="margin-bottom: 14px;">
-                                    ${statusBadge}
-                                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-                                        ⚠️ ${currentLang === 'ar' ? 'تنبيه: الانضمام للتيمات يكون إما عبر قبول دعوة من صديق أو إنشاء فريق جديد وإرسال الدعوات لأصحابك أو عبر إسناد الـ HR.' : 'Notice: Join a team by accepting an invite, creating a new team, or HR assignment.'}
-                                    </p>
-                                </div>
-                                <div style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 10px; border: 1px solid var(--border-card);">
-                                    <h5 style="color: #c084fc; margin-bottom: 8px;">➕ ${currentLang === 'ar' ? 'إنشاء فريق جديد وتوجيه الدعوات لأصحابك:' : 'Create a new team & invite members:'}</h5>
-                                    <div style="display: flex; gap: 8px;">
-                                        <input type="text" id="student-new-team-name" placeholder="${currentLang === 'ar' ? 'اسم الفريق الجديد...' : 'New team name...'}" style="flex: 1; font-size: 0.9rem;">
-                                        <button class="btn btn-primary" style="background: #c084fc;" onclick="handleStudentCreateTeam()">${currentLang === 'ar' ? 'إنشاء الفريق' : 'Create Team'}</button>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            teamContainer.innerHTML = `
-                                ${invSectionHtml}
-                                <div style="margin-bottom: 10px;">${statusBadge}</div>
-                                <p style="color: var(--text-muted); font-size: 0.9rem;">
-                                    ${currentLang === 'ar' ? 'عفواً، انتهت الفترة المتاحة لتسجيل التيمات وتم إغلاق التسجيل. إذا لم تسجل، يرجى التواصل مع مسؤول الـ HR الخاص بك لـ إسنادك.' : 'Team registration window has closed. If unassigned, contact your HR manager.'}
-                                </p>
-                            `;
-                        }
-                    }
-                } catch (e) { console.error(e); }
-
                 // Load Student Certificates
                 try {
                     const certs = await apiRequest('/api/certificates');
@@ -1482,12 +1382,6 @@ let currentToken = localStorage.getItem('lms_token') || '';
 
         async function loadHrDashboard() {
             try {
-                // Fetch unassigned students for HR
-                try {
-                    const unassigned = await apiRequest('/api/hr/unassigned-students');
-                    window.hrUnassignedStudents = unassigned;
-                    renderHrUnassignedTable(unassigned);
-                } catch (e) { console.error(e); }
 
                 const allSessions = await apiRequest('/api/sessions');
                 const sessions = allSessions.filter(s => s.is_hr_attendance_open);
@@ -1530,40 +1424,9 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 }
 
                 renderHrStudentsTable(students);
-
-                const teams = await apiRequest('/api/hr/teams');
-                const teamsContainer = document.getElementById('hr-teams-list');
-                if (teams.length === 0) {
-                    teamsContainer.innerHTML = `<p style="color: var(--text-muted);">${currentLang === 'ar' ? 'لم يتم إنشاء تيمات بعد.' : 'No teams created yet.'}</p>`;
-                } else {
-                    teamsContainer.innerHTML = teams.map(t => `
-                        <div class="glass-card" style="margin-bottom: 16px; padding: 16px; border: 1px solid var(--border-card);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <h5 style="font-size: 1.1rem; color: var(--accent-cyan);">🏆 ${t.name} (${currentLang === 'ar' ? 'عدد الأعضاء: ' : 'Members: '}${t.members.length})</h5>
-                                <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="handleDeleteTeam(${t.id})">${currentLang === 'ar' ? 'حذف الفريق' : 'Delete Team'}</button>
-                            </div>
-                            <div style="margin-bottom: 12px;">
-                                <strong>${currentLang === 'ar' ? 'الأعضاء:' : 'Members:'}</strong> ${t.members.length > 0 ? t.members.map(m => m.name).join('، ') : (currentLang === 'ar' ? 'لا يوجد أعضاء بعد.' : 'No members yet.')}
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <select id="team-assign-select-${t.id}" multiple style="height: 70px; font-size: 0.85rem;">
-                                    ${students.map(st => `<option value="${st.id}">${st.name} (${st.id})</option>`).join('')}
-                                </select>
-                                <button class="btn btn-primary" style="font-size: 0.85rem;" onclick="handleAssignStudentsToTeam(${t.id})">${currentLang === 'ar' ? 'إضافة الطلاب المحددين' : 'Add Selected Students'}</button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
             } catch (err) { console.error(err); }
         }
 
-        async function handleHrSelfAssign(studentId) {
-            try {
-                const res = await apiRequest(`/api/hr/self-assign/${studentId}`, 'POST');
-                alert(res.message);
-                loadHrDashboard();
-            } catch (err) { alert(err.message); }
-        }
 
         function renderHrStudentsTable(students) {
             const tbody = document.getElementById('hr-students-table');
@@ -1614,39 +1477,6 @@ let currentToken = localStorage.getItem('lms_token') || '';
             }
         }
 
-        function renderHrUnassignedTable(unassigned) {
-            const tbody = document.getElementById('hr-unassigned-students-tbody');
-            if (!tbody) return;
-            if (unassigned.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب غير مسندين حالياً.' : 'No unassigned students currently.'}</td></tr>`;
-            } else {
-                tbody.innerHTML = unassigned.map(s => `
-                    <tr>
-                        <td><strong>${s.id}</strong></td>
-                        <td>${s.name}</td>
-                        <td>${s.seat_number || '-'}</td>
-                        <td><small style="color:#38bdf8;">${s.email}</small></td>
-                        <td>
-                            <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.8rem; background: var(--accent-rose);" onclick="handleHrSelfAssign('${s.id}')">
-                                ${currentLang === 'ar' ? '➕ إسناد الطالب لي' : '➕ Assign to Me'}
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        function filterHrUnassignedTable() {
-            const query = (document.getElementById('hr-unassigned-search-input').value || '').toLowerCase().trim();
-            if (!window.hrUnassignedStudents) return;
-            const filtered = window.hrUnassignedStudents.filter(s => 
-                (s.id && String(s.id).toLowerCase().includes(query)) ||
-                (s.name && String(s.name).toLowerCase().includes(query)) ||
-                (s.seat_number && String(s.seat_number).toLowerCase().includes(query))
-            );
-            renderHrUnassignedTable(filtered);
-        }
-
         function filterHrStudentsTable() {
             const query = (document.getElementById('hr-students-search-input').value || '').toLowerCase().trim();
             if (!window.hrAssignedStudents) return;
@@ -1670,12 +1500,27 @@ let currentToken = localStorage.getItem('lms_token') || '';
             }
             if (!studentId) return;
 
+            if (window.hrSessionAttendanceMap && window.hrSessionAttendanceMap[studentId] && window.hrSessionAttendanceMap[studentId].toLowerCase() === 'present') {
+                alert(currentLang === 'ar' ? 'هذا الطالب مسجل حضور بالفعل في هذه السيشن!' : 'This student is already marked present in this session!');
+                inputEl.value = '';
+                inputEl.focus();
+                return;
+            }
+
             try {
                 const res = await apiRequest('/api/hr/attendance/manual-id', 'POST', {
                     session_id: parseInt(sessId),
                     student_id: studentId
                 });
                 alert(res.message);
+                
+                if (!window.hrSessionAttendanceMap) {
+                    window.hrSessionAttendanceMap = {};
+                }
+                window.hrSessionAttendanceMap[studentId] = 'present';
+                updateHrPresentCount();
+                filterHrStudentsTable();
+                
                 inputEl.value = ''; 
                 inputEl.focus(); 
             } catch (err) {
@@ -1709,40 +1554,8 @@ let currentToken = localStorage.getItem('lms_token') || '';
         }
 
 
-        async function handleCreateTeam(e) {
-            e.preventDefault();
-            const name = document.getElementById('hr-team-name').value.trim();
-            if (!name) return;
-            try {
-                const res = await apiRequest('/api/hr/teams/create', 'POST', { name });
-                alert(res.message);
-                document.getElementById('hr-team-name').value = '';
-                loadHrDashboard();
-            } catch (err) { alert(err.message); }
-        }
 
-        async function handleAssignStudentsToTeam(teamId) {
-            const select = document.getElementById(`team-assign-select-${teamId}`);
-            const selectedOptions = Array.from(select.selectedOptions).map(opt => opt.value);
-            if (selectedOptions.length === 0) {
-                alert('يرجى تحديد طالب واحد على الأقل من القائمة (اضغط Ctrl للتحديد المتعدد).');
-                return;
-            }
-            try {
-                const res = await apiRequest('/api/hr/teams/assign', 'POST', { team_id: teamId, student_ids: selectedOptions });
-                alert(res.message);
-                loadHrDashboard();
-            } catch (err) { alert(err.message); }
-        }
 
-        async function handleDeleteTeam(teamId) {
-            if (!confirm('هل أنت تأكد من حذف هذا الفريق؟')) return;
-            try {
-                const res = await apiRequest(`/api/hr/teams/${teamId}`, 'DELETE');
-                alert(res.message);
-                loadHrDashboard();
-            } catch (err) { alert(err.message); }
-        }
 
         async function loadMediaDashboard() {
             try {
@@ -2039,18 +1852,6 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     }
                 } catch (e) { console.error(e); }
 
-                const teamSettings = await apiRequest('/api/system/team-settings');
-                const openSelect = document.getElementById('admin-team-open-select');
-                if (openSelect) openSelect.value = teamSettings.is_open ? 'true' : 'false';
-                
-                const deadlineInput = document.getElementById('admin-team-deadline-input');
-                if (deadlineInput && teamSettings.deadline) {
-                    deadlineInput.value = teamSettings.deadline.slice(0, 16);
-                }
-
-                const maxInput = document.getElementById('admin-team-max-input');
-                if (maxInput) maxInput.value = teamSettings.max_members_per_team || 5;
-
                 // Fetch Sessions for Admin Control
                 const sessions = await apiRequest('/api/sessions');
                 const adminSessionsContainer = document.getElementById('admin-sessions-list');
@@ -2342,96 +2143,12 @@ let currentToken = localStorage.getItem('lms_token') || '';
             } catch (err) { alert(err.message); }
         }
 
-        async function handleSaveTeamSettings(isAuto = false) {
-            const isOpen = document.getElementById('admin-team-open-select').value === 'true';
-            const deadline = document.getElementById('admin-team-deadline-input').value;
-            const maxMembers = parseInt(document.getElementById('admin-team-max-input').value) || 5;
 
-            try {
-                const res = await apiRequest('/api/admin/team-settings', 'POST', {
-                    is_open: isOpen,
-                    deadline: deadline ? (deadline.length === 16 ? deadline + ':00' : deadline) : null,
-                    max_members_per_team: maxMembers
-                });
-                if (isAuto) {
-                    showToast(currentLang === 'ar' ? '✓ تم حفظ إعدادات التيم تلقائياً' : '✓ Team settings auto-saved');
-                } else {
-                    alert(res.message);
-                }
-            } catch (err) { 
-                if (!isAuto) alert(err.message); 
-            }
-        }
 
-        async function handleStudentCreateTeam() {
-            const name = document.getElementById('student-new-team-name').value.trim();
-            if (!name) {
-                alert(currentLang === 'ar' ? 'يرجى كتابة اسم الفريق الجديد أولاً.' : 'Please enter team name.');
-                return;
-            }
 
-            try {
-                const res = await apiRequest('/api/student/teams/create', 'POST', { name: name });
-                alert(res.message);
-                loadStudentDashboard();
-            } catch (err) { alert(err.message); }
-        }
 
-        async function handleSendInvite() {
-            const studentId = document.getElementById('student-invite-select').value;
-            if (!studentId) {
-                alert(currentLang === 'ar' ? 'يرجى اختيار الطالب المراد توجيه الدعوة إليه.' : 'Please select a student.');
-                return;
-            }
 
-            try {
-                const res = await apiRequest('/api/student/teams/invite', 'POST', { invited_student_id: studentId });
-                alert(res.message);
-                loadStudentDashboard();
-            } catch (err) { alert(err.message); }
-        }
 
-        async function handleRespondInvite(invId, action) {
-            try {
-                const res = await apiRequest(`/api/student/invitations/${invId}/respond`, 'POST', { action: action });
-                alert(res.message);
-                loadStudentDashboard();
-            } catch (err) { alert(err.message); }
-        }
-
-        async function handleStudentJoinTeam() {
-            const teamId = document.getElementById('student-join-team-select').value;
-            if (!teamId) {
-                alert(currentLang === 'ar' ? 'يرجى اختيار الفريق من القائمة أولاً.' : 'Please select a team.');
-                return;
-            }
-
-            try {
-                const res = await apiRequest('/api/student/teams/join', 'POST', { team_id: parseInt(teamId) });
-                alert(res.message);
-                loadStudentDashboard();
-            } catch (err) { alert(err.message); }
-        }
-
-        async function handleStudentLeaveTeam() {
-            if (!confirm(currentLang === 'ar' ? 'هل أنت تأكد من المغادرة من الفريق الحاضر؟' : 'Are you sure you want to leave your team?')) return;
-            try {
-                const res = await apiRequest('/api/student/teams/leave', 'POST');
-                alert(res.message);
-                loadStudentDashboard();
-            } catch (err) { alert(err.message); }
-        }
-
-        async function handleAssignTeamHR(teamId, hrId) {
-            try {
-                const res = await apiRequest('/api/admin/teams/assign-hr', 'POST', {
-                    team_id: teamId,
-                    hr_id: hrId || null
-                });
-                alert(res.message);
-                loadHrDashboard();
-            } catch (err) { alert(err.message); }
-        }
 
         async function handleAssignSupporter(studentId, supporterId) {
             try {

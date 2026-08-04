@@ -294,7 +294,7 @@
         html[dir="rtl"] .password-toggle-btn { left: 10px; }
         html[dir="ltr"] .password-toggle-btn { right: 10px; }
 
-        input[type="text"], input[type="password"], input[type="number"], input[type="datetime-local"], input[type="email"], select, textarea {
+        input[type="text"], input[type="password"], input[type="number"], input[type="datetime-local"], input[type="email"], input[type="file"], select, textarea {
             width: 100%;
             padding: 12px 16px;
             background: rgba(15, 23, 42, 0.7);
