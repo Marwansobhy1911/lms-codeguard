@@ -1585,11 +1585,12 @@ def get_leaderboard(db: Session = Depends(get_db)):
             
             # Calculate attendance rate
             att_total = db.query(Attendance).filter(Attendance.student_id == u.id).count()
-            att_present = db.query(Attendance).filter(Attendance.student_id == u.id, Attendance.status == "حاضر").count()
+            att_present = db.query(Attendance).filter(Attendance.student_id == u.id, Attendance.status == AttendanceStatusEnum.PRESENT).count()
             att_rate = round((att_present / att_total * 100)) if att_total > 0 else 100
             
-            # Final composite score
-            final_score = total_task_score + (att_rate * 0.5) + (u.bonus_points or 0.0)
+            bonus_pts = u.bonus_points or 0.0
+            total_score = total_task_score + bonus_pts
+            final_score = total_score + (att_rate * 0.5)
             
             badges = []
             if att_rate == 100:
@@ -1601,14 +1602,15 @@ def get_leaderboard(db: Session = Depends(get_db)):
                 "id": u.id,
                 "name": u.name,
                 "seat_number": u.seat_number or "",
-                "total_score": round(total_task_score, 1),
-                "bonus_points": round(u.bonus_points or 0.0, 1),
+                "total_score": round(total_score, 1),
+                "task_score": round(total_task_score, 1),
+                "bonus_points": round(bonus_pts, 1),
                 "attendance_rate": f"{att_rate}%",
                 "final_score": round(final_score, 1),
                 "badges": badges
             })
             
-    student_scores.sort(key=lambda x: x["final_score"], reverse=True)
+    student_scores.sort(key=lambda x: (x["final_score"], x["total_score"]), reverse=True)
     
     # Assign ranks
     for i, s in enumerate(student_scores, 1):
