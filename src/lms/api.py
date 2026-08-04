@@ -165,6 +165,10 @@ class AssignSupporterRequest(BaseModel):
     student_id: str
     supporter_id: Optional[str]
 
+class AssignHRRequest(BaseModel):
+    student_id: str
+    hr_id: Optional[str] = None
+
 class TaskCreateRequest(BaseModel):
     title: str
     description: str
@@ -216,8 +220,6 @@ class BulkAttendanceRequest(BaseModel):
 class ManualIDAttendanceRequest(BaseModel):
     session_id: int
     student_id: str
-
-    hr_id: Optional[str] = None
 
 # --- SYSTEM SETTING HELPERS ---
 def get_system_setting(key: str, default_val: str, db: Session) -> str:
