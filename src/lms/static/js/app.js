@@ -1708,28 +1708,6 @@ let currentToken = localStorage.getItem('lms_token') || '';
             } catch (err) { alert(err.message); }
         }
 
-        async function handleUploadAttendanceExcel(e) {
-            e.preventDefault();
-            const sessId = document.getElementById('hr-excel-session-select').value;
-            const fileInput = document.getElementById('hr-excel-file');
-            if (!sessId || fileInput.files.length === 0) return;
-
-            const formData = new FormData();
-            formData.append('session_id', sessId);
-            formData.append('file', fileInput.files[0]);
-
-            try {
-                const res = await fetch('/api/hr/attendance/excel', {
-                    method: 'POST',
-                    headers: { 'X-Session-Token': currentToken },
-                    body: formData
-                });
-                const result = await res.json();
-                if (!res.ok) throw new Error(result.detail || 'فشل رفع الشيت');
-                alert(result.message);
-                loadHrDashboard();
-            } catch (err) { alert(err.message); }
-        }
 
         async function handleCreateTeam(e) {
             e.preventDefault();
@@ -2595,33 +2573,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
             } catch (err) { alert(err.message); }
         }
 
-        async function uploadExcelDatabase() {
-            const fileInput = document.getElementById('excel-file-input');
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert(currentLang === 'ar' ? 'يرجى اختيار ملف الإكسيل أولاً' : 'Please select an Excel file first');
-                return;
-            }
 
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-
-            const msgDiv = document.getElementById('excel-upload-msg');
-            msgDiv.innerHTML = `<span style="color: var(--accent-cyan);">${currentLang === 'ar' ? 'جاري رفع ومعالجة الملف...' : 'Uploading and processing file...'}</span>`;
-
-            try {
-                const res = await fetch('/api/admin/upload-excel', {
-                    method: 'POST',
-                    headers: { 'X-Session-Token': currentToken },
-                    body: formData
-                });
-                const result = await res.json();
-                if (!res.ok) throw new Error(result.detail || 'Upload failed');
-                msgDiv.innerHTML = `<span style="color: var(--accent-emerald);">${result.message}</span>`;
-                loadAdminDashboard();
-            } catch (err) {
-                msgDiv.innerHTML = `<span style="color: var(--accent-rose);">${err.message}</span>`;
-            }
-        }
 
         async function handleSaveDriveUrl() {
             const url = document.getElementById('admin-drive-url-input').value;
@@ -2709,8 +2661,6 @@ let currentToken = localStorage.getItem('lms_token') || '';
             );
             renderManagePointsTable(filtered);
         }
-
-        function downloadSampleExcel() { window.location.href = '/api/download-sample-excel'; }
 
         function openSubmitModal(taskId, title) {
             document.getElementById('sub-task-id').value = taskId;

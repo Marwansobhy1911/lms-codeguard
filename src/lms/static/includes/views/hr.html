@@ -42,28 +42,7 @@
                         </div>
                         <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="hr_attendance_sub">قم برصد الحضور والغياب للطلاب المسندين إليك لكل سيشن يدويًا عبر التشيك بوكس، أو عبر رفع شيت الإكسيل.</p>
 
-                        <!-- Excel Attendance Upload Form -->
-                        <div style="background: rgba(15,23,42,0.6); padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--accent-purple);">
-                            <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: #c084fc;" data-i18n="hr_excel_title">📁 رفع شيت إكسيل للغياب (Checkboxes / ID)</h4>
-                            <form onsubmit="handleUploadAttendanceExcel(event)">
-                                <div class="form-group">
-                                    <label data-i18n="label_select_session">اختر السيشن</label>
-                                    <select id="hr-excel-session-select" required>
-                                        <option value="">-- اختر السيشن --</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label data-i18n="label_excel_file">ملف الإكسيل / CSV</label>
-                                    <input type="file" id="hr-excel-file" accept=".xlsx, .xls, .csv" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 8px;" data-i18n="btn_upload_attendance_excel">
-                                    📤 قراءة وتأكيد غياب الشيت
-                                </button>
-                            </form>
-                            <a href="/api/hr/download-sample-attendance-excel" target="_blank" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem; width: 100%; justify-content: center;" data-i18n="btn_sample_attendance_excel">
-                                📥 تحميل نموذج شيت الغياب (Sample Excel)
-                            </a>
-                        </div>
+
 
                         <!-- Manual Attendance List with Checkboxes -->
                         <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: var(--accent-cyan);" data-i18n="hr_manual_title">✍️ رصد الغياب يدويًا للسيشن</h4>

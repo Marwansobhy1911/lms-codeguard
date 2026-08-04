@@ -23,7 +23,6 @@ from src.lms.auth import (
     hash_password, verify_password, create_session_token,
     get_session_user, destroy_session
 )
-from src.lms.excel_service import import_users_from_excel_or_csv, import_attendance_from_excel_or_csv
 from src.lms.anti_cheating import check_task_plagiarism
 import re
 
@@ -780,13 +779,6 @@ def delete_all_users(user: User = Depends(require_role([RoleEnum.ADMIN])), db: S
     db.commit()
     return {"success": True, "message": f"تم تفريغ النظام ومسح {count} حساب تجريبي مع الحفاظ التام على حساب الماستر (مروان صبحي)."}
 
-@app.post("/api/admin/upload-excel")
-async def upload_excel(file: UploadFile = File(...), user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
-    contents = await file.read()
-    result = import_users_from_excel_or_csv(contents, file.filename, db)
-    if not result.get("success"):
-        raise HTTPException(status_code=400, detail=result.get("error"))
-    return result
 
 @app.post("/api/admin/assign-supporter")
 def assign_supporter(req: AssignSupporterRequest, user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR])), db: Session = Depends(get_db)):
@@ -1332,31 +1324,6 @@ def get_plagiarism_reports(task_id: int, user: User = Depends(require_role([Role
         })
     return res
 
-# --- SAMPLE EXCEL GENERATION ---
-@app.get("/api/download-sample-excel")
-def download_sample_excel():
-    data = [
-        {"ID": "2024001", "Name": "أحمد محمود علي", "Email": "ahmed@example.com", "Role": "student", "AssignedSupporterID": "SUP-01", "AssignedHRID": "HR-01"},
-        {"ID": "2024002", "Name": "سارة محمد خليل", "Email": "sara@example.com", "Role": "student", "AssignedSupporterID": "SUP-01", "AssignedHRID": "HR-01"},
-        {"ID": "2024003", "Name": "عمر حسن إبراهيم", "Email": "omar@example.com", "Role": "student", "AssignedSupporterID": "SUP-02", "AssignedHRID": "HR-01"},
-        {"ID": "2024004", "Name": "مريم يوسف كمال", "Email": "mariam@example.com", "Role": "student", "AssignedSupporterID": "SUP-02", "AssignedHRID": "HR-01"},
-        {"ID": "HR-01", "Name": "مسؤول الموارد البشرية مريم", "Email": "hr@example.com", "Role": "hr", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "MEDIA-01", "Name": "مسؤول الميديا أحمد عادل", "Email": "media@example.com", "Role": "media", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "SUP-01", "Name": "المساعد طارق سعيد", "Email": "tarek@example.com", "Role": "supporter", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "SUP-02", "Name": "المساعد ياسمين عادل", "Email": "yasmine@example.com", "Role": "supporter", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "INST-01", "Name": "المهندس يوسف (Instructor)", "Email": "yousef@example.com", "Role": "instructor", "AssignedSupporterID": "", "AssignedHRID": ""},
-        {"ID": "ADMIN-01", "Name": "مدير النظام (Admin)", "Email": "admin@example.com", "Role": "admin", "AssignedSupporterID": "", "AssignedHRID": ""},
-    ]
-    df = pd.DataFrame(data)
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Users')
-    output.seek(0)
-    return StreamingResponse(
-        output,
-        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        headers={"Content-Disposition": "attachment; filename=lms_users_database_sample.xlsx"}
-    )
 
 # --- HR ENDPOINTS ---
 @app.get("/api/hr/assigned-students")
@@ -1612,18 +1579,6 @@ def assign_team_hr(req: AssignTeamHRRequest, user: User = Depends(require_role([
     db.commit()
     return {"success": True, "message": f"تم إسناد الفريق '{team.name}' لـ مسؤول الـ HR بنجاح"}
 
-@app.post("/api/hr/attendance/excel")
-async def upload_attendance_excel(
-    session_id: int = Form(...),
-    file: UploadFile = File(...),
-    user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])),
-    db: Session = Depends(get_db)
-):
-    contents = await file.read()
-    res = import_attendance_from_excel_or_csv(contents, file.filename, session_id, db, user)
-    if not res.get("success"):
-        raise HTTPException(status_code=400, detail=res.get("error", "فشل استيراد الحضور"))
-    return res
 
 @app.post("/api/hr/attendance/single")
 def mark_single_attendance(req: AttendanceMarkRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -1738,23 +1693,6 @@ def mark_manual_id_attendance(req: ManualIDAttendanceRequest, user: User = Depen
     db.commit()
     return {"success": True, "message": f"تم تسجيل حضور الطالب {st.name} بنجاح"}
 
-@app.get("/api/hr/download-sample-attendance-excel")
-def download_sample_attendance_excel():
-    data = [
-        {"Student_ID": "2024001", "Student_Name": "أحمد محمود علي", "Attendance": "حاضر"},
-        {"Student_ID": "2024002", "Student_Name": "سارة محمد خليل", "Attendance": "غائب"},
-        {"Student_ID": "2024003", "Student_Name": "عمر حسن إبراهيم", "Attendance": "مستأذن"},
-    ]
-    df = pd.DataFrame(data)
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Attendance')
-    output.seek(0)
-    return StreamingResponse(
-        output,
-        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        headers={"Content-Disposition": "attachment; filename=hr_attendance_sample.xlsx"}
-    )
 
 @app.post("/api/hr/teams/create")
 def create_team(req: TeamCreateRequest, user: User = Depends(require_role([RoleEnum.HR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
