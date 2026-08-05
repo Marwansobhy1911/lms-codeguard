@@ -174,7 +174,12 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 th_recipient: "المستلم",
                 th_upload_date: "تاريخ الرفع",
                 notif_header_title: "🔔 الإشعارات والتنبيهات",
-                btn_clear_notifs: "🗑️ مسح الكل"
+                btn_clear_notifs: "🗑️ مسح الكل",
+                btn_manage_bonus_students: "🏆 إدارة نقاط البونص للطلاب",
+                btn_export_full_grades: "📥 تصدير شيت الدرجات والبونص (Excel Export)",
+                manage_points_title: "🏆 إدارة نقاط البونص للطلاب",
+                th_seat_phone: "رقم الجلوس / التليفون",
+                th_current_bonus: "نقاط البونص الحالية"
             },
             en: {
                 logout: "Logout",
@@ -347,7 +352,12 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 media_certs_list_title: "📜 Uploaded Certificates List",
                 th_title: "Title",
                 th_recipient: "Recipient",
-                th_upload_date: "Upload Date"
+                th_upload_date: "Upload Date",
+                btn_manage_bonus_students: "🏆 Manage Student Bonus Points",
+                btn_export_full_grades: "📥 Export Full Grades & Bonus (Excel)",
+                manage_points_title: "🏆 Manage Student Bonus Points",
+                th_seat_phone: "Seat No. / Phone",
+                th_current_bonus: "Current Bonus Points"
             }
         };
 
@@ -462,6 +472,13 @@ let currentToken = localStorage.getItem('lms_token') || '';
 
             const regPass = document.getElementById('reg-password');
             if (regPass) regPass.placeholder = lang === 'ar' ? 'اختر كلمة مرور حسابك (4 خانات على الأقل)' : 'Choose account password (min 4 chars)';
+
+            const pointsSearch = document.getElementById('manage-points-search');
+            if (pointsSearch) {
+                pointsSearch.placeholder = lang === 'ar'
+                    ? 'ابحث بالاسم، الـ ID أو رقم الجلوس...'
+                    : 'Search by name, ID, or seat number...';
+            }
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -2503,7 +2520,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 alert(res.message);
                 
                 const pointsModal = document.getElementById('manage-points-modal');
-                if (pointsModal && pointsModal.classList.contains('active')) {
+                if (pointsModal && pointsModal.classList.contains('open')) {
                     openManagePointsModal();
                 }
                 try { loadSupporterDashboard(); } catch(e) {}
@@ -2514,7 +2531,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
         }
 
         async function openManagePointsModal() {
-            document.getElementById('manage-points-modal').classList.add('active');
+            openModal('manage-points-modal');
             try {
                 const list = await apiRequest('/api/students/all-bonus-list');
                 window.managePointsData = list;
@@ -2527,8 +2544,8 @@ let currentToken = localStorage.getItem('lms_token') || '';
 
         function renderManagePointsTable(list) {
             const tbody = document.getElementById('manage-points-tbody');
-            if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">لا يوجد طلاب.</td></tr>';
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب.' : 'No students found.'}</td></tr>`;
                 return;
             }
             tbody.innerHTML = list.map(s => `
@@ -2539,7 +2556,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     <td><span style="color: var(--accent-cyan); font-weight: bold;">${s.bonus_points || 0} pt</span></td>
                     <td>
                         <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="handleAddBonusPoints('${s.id}')">
-                            + / - نقاط
+                            + / - ${currentLang === 'ar' ? 'نقاط' : 'Points'}
                         </button>
                     </td>
                 </tr>

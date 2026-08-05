@@ -323,8 +323,8 @@
             <div class="modal-content" style="max-width: 800px; width: 95%;">
                 <button class="close-btn" onclick="closeModal('manage-points-modal')">&times;</button>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                    <h3 style="color: var(--accent-cyan); margin: 0;">🏆 إدارة نقاط البونص للطلاب</h3>
-                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="handleDownloadFullGradesExcel()">
+                    <h3 style="color: var(--accent-cyan); margin: 0;" data-i18n="manage_points_title">🏆 إدارة نقاط البونص للطلاب</h3>
+                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="handleDownloadFullGradesExcel()" data-i18n="btn_export_full_grades">
                         📥 تصدير شيت الدرجات والبونص (Excel Export)
                     </button>
                 </div>
@@ -335,11 +335,11 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>ID الطالب</th>
-                                <th>الاسم</th>
-                                <th>رقم الجلوس / التليفون</th>
-                                <th>نقاط البونص الحالية</th>
-                                <th>إجراء</th>
+                                <th data-i18n="th_student_id">ID الطالب</th>
+                                <th data-i18n="th_student_name">الاسم</th>
+                                <th data-i18n="th_seat_phone">رقم الجلوس / التليفون</th>
+                                <th data-i18n="th_current_bonus">نقاط البونص الحالية</th>
+                                <th data-i18n="th_actions">إجراء</th>
                             </tr>
                         </thead>
                         <tbody id="manage-points-tbody">
