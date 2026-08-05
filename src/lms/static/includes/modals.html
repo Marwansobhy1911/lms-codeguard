@@ -318,3 +318,35 @@
             </div>
         </div>
 
+        <!-- MODAL: MANAGE POINTS -->
+        <div id="manage-points-modal" class="modal-overlay">
+            <div class="modal-content" style="max-width: 800px; width: 95%;">
+                <button class="close-btn" onclick="closeModal('manage-points-modal')">&times;</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h3 style="color: var(--accent-cyan); margin: 0;">🏆 إدارة نقاط البونص للطلاب</h3>
+                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="handleDownloadFullGradesExcel()">
+                        📥 تصدير شيت الدرجات والبونص (Excel Export)
+                    </button>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <input type="text" id="manage-points-search" class="form-group" style="width: 100%; margin: 0; padding: 12px; border-radius: 8px;" placeholder="ابحث بالاسم، الـ ID أو رقم الجلوس..." onkeyup="filterManagePointsTable()">
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID الطالب</th>
+                                <th>الاسم</th>
+                                <th>رقم الجلوس / التليفون</th>
+                                <th>نقاط البونص الحالية</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manage-points-tbody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
