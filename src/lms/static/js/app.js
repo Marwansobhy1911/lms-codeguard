@@ -179,7 +179,8 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 btn_export_full_grades: "📥 تصدير شيت الدرجات والبونص (Excel Export)",
                 manage_points_title: "🏆 إدارة نقاط البونص للطلاب",
                 th_seat_phone: "رقم الجلوس / التليفون",
-                th_current_bonus: "نقاط البونص الحالية"
+                th_current_bonus: "نقاط البونص الحالية",
+                btn_close_modal: "❌ إغلاق النافذة"
             },
             en: {
                 logout: "Logout",
@@ -357,7 +358,8 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 btn_export_full_grades: "📥 Export Full Grades & Bonus (Excel)",
                 manage_points_title: "🏆 Manage Student Bonus Points",
                 th_seat_phone: "Seat No. / Phone",
-                th_current_bonus: "Current Bonus Points"
+                th_current_bonus: "Current Bonus Points",
+                btn_close_modal: "❌ Close Window"
             }
         };
 
@@ -2803,3 +2805,16 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 loadInstructorDashboard();
             } catch (err) { alert(err.message); }
         }
+
+        // Global Event Listeners for smooth modal close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('open');
+            }
+        });
