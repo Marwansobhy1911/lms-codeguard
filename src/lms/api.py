@@ -548,6 +548,66 @@ def export_clean_database_excel(user: User = Depends(require_role([RoleEnum.ADMI
         headers={"Content-Disposition": "attachment; filename=LMS_Clean_Database_Export.xlsx"}
     )
 
+@app.get("/api/admin/grades-export-excel")
+def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])), db: Session = Depends(get_db)):
+    tasks = db.query(Task).order_by(Task.id.asc()).all()
+    users = db.query(User).all()
+    total_sessions = db.query(SessionSchedule).count()
+    
+    data = []
+    for u in users:
+        if "student" in get_user_roles(u):
+            subs = db.query(Submission).filter(Submission.student_id == u.id).all()
+            sub_map = {s.task_id: (s.score if s.score is not None else 0.0) for s in subs}
+            
+            att_total = db.query(Attendance).filter(Attendance.student_id == u.id).count()
+            att_present = db.query(Attendance).filter(Attendance.student_id == u.id, Attendance.status == AttendanceStatusEnum.PRESENT).count()
+            att_rate = round((att_present / total_sessions * 100), 1) if total_sessions > 0 else 100.0
+            
+            row = {
+                "Student ID": u.id,
+                "Student Name": u.name,
+                "Seat Number": u.seat_number or "",
+                "Academic Level": u.academic_level or "",
+                "Program": u.program or "",
+                "Official Email": u.official_email or "",
+                "Personal Email": u.email or "",
+                "Phone": u.phone or "",
+                "Assigned Supporter (TA)": u.assigned_supporter.name if u.assigned_supporter else "غير معين",
+                "Assigned HR": u.assigned_hr.name if u.assigned_hr else "غير معين",
+            }
+            
+            total_task_score = 0.0
+            for t in tasks:
+                t_score = sub_map.get(t.id, 0.0)
+                row[f"Task {t.id}: {t.title}"] = round(t_score, 1)
+                total_task_score += t_score
+                
+            bonus_pts = u.bonus_points or 0.0
+            total_score = total_task_score + bonus_pts
+            final_score = total_score + (att_rate * 0.5)
+            
+            row["Total Tasks Score"] = round(total_task_score, 1)
+            row["Bonus Points"] = round(bonus_pts, 1)
+            row["Attendance Rate (%)"] = f"{att_rate}%"
+            row["Total Score (Tasks + Bonus)"] = round(total_score, 1)
+            row["Final Rank Score"] = round(final_score, 1)
+            
+            data.append(row)
+            
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Full_Grades_Report")
+    output.seek(0)
+    
+    filename = f"LMS_Full_Grades_Report_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    return Response(
+        content=output.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 @app.get("/api/auth/me")
 def get_me(user: User = Depends(get_current_user)):
     is_incomplete = not user.email or "@lms.edu" in user.email or not user.phone
@@ -932,7 +992,8 @@ def get_assigned_students(user: User = Depends(require_role([RoleEnum.SUPPORTER,
         res.append({
             "id": s.id,
             "name": s.name,
-            "email": s.email,
+            "email": s.email or "",
+            "phone": s.phone or "غير مسجل",
             "seat_number": s.seat_number or "",
             "bonus_points": round(s.bonus_points or 0.0, 1),
             "submissions_count": subs_count
@@ -1569,6 +1630,22 @@ def add_bonus_points(req: PointAddRequest, user: User = Depends(require_role([Ro
     student.bonus_points += req.points_to_add
     db.commit()
     return {"success": True, "message": f"تم التعديل بنجاح! نقاط البونص الحالية: {student.bonus_points}"}
+
+@app.get("/api/students/all-bonus-list")
+def get_all_students_bonus_list(user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])), db: Session = Depends(get_db)):
+    all_users = db.query(User).all()
+    res = []
+    for u in all_users:
+        if "student" in get_user_roles(u):
+            res.append({
+                "id": u.id,
+                "name": u.name,
+                "seat_number": u.seat_number or "",
+                "email": u.official_email or u.email or "",
+                "phone": u.phone or "غير مسجل",
+                "bonus_points": round(u.bonus_points or 0.0, 1)
+            })
+    return res
 
 # --- ENHANCEMENTS: LEADERBOARD, NOTIFICATIONS & EXPORTS ---
 

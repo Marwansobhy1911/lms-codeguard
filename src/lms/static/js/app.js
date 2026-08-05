@@ -1660,7 +1660,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
         function renderSupporterStudentsTable(list) {
             const tbodyStudents = document.getElementById('supporter-students-table');
             if (!list || list.length === 0) {
-                tbodyStudents.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب مسئول عنهم' : 'No assigned students'}</td></tr>`;
+                tbodyStudents.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد طلاب مسئول عنهم' : 'No assigned students'}</td></tr>`;
                 return;
             }
             tbodyStudents.innerHTML = list.map(s => `
@@ -1669,6 +1669,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     <td>${s.name}</td>
                     <td>${s.seat_number || ''}</td>
                     <td>${s.email}</td>
+                    <td><span style="color: var(--accent-emerald); font-weight: 500;">${s.phone || 'غير مسجل'}</span></td>
                     <td><span style="color: var(--accent-cyan); font-weight: bold;">${s.bonus_points || 0} pt</span></td>
                     <td>${s.submissions_count} ${currentLang === 'ar' ? 'تسليمات' : 'submissions'}</td>
                     <td>
@@ -2485,6 +2486,10 @@ let currentToken = localStorage.getItem('lms_token') || '';
             window.open(`/api/hr/attendance/export-excel/${sessId}?token=${localStorage.getItem('lms_token') || ''}`);
         }
 
+        function handleDownloadFullGradesExcel() {
+            window.open(`/api/admin/grades-export-excel?token=${encodeURIComponent(localStorage.getItem('lms_token') || '')}`, '_blank');
+        }
+
         async function handleAddBonusPoints(studentId) {
             const pointsStr = prompt(currentLang === 'ar' ? 'أدخل عدد النقاط لإضافتها أو خصمها (مثال: 10 أو -5):' : 'Enter points to add/subtract (e.g. 10 or -5):');
             if (!pointsStr) return;
@@ -2500,10 +2505,9 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 const pointsModal = document.getElementById('manage-points-modal');
                 if (pointsModal && pointsModal.classList.contains('active')) {
                     openManagePointsModal();
-                } else {
-                    try { loadSupporterDashboard(); } catch(e) {}
-                    try { loadLeaderboard(); } catch(e) {}
                 }
+                try { loadSupporterDashboard(); } catch(e) {}
+                try { loadLeaderboard(); } catch(e) {}
             } catch (err) {
                 alert(err.message);
             }
@@ -2512,7 +2516,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
         async function openManagePointsModal() {
             document.getElementById('manage-points-modal').classList.add('active');
             try {
-                const list = await apiRequest('/api/student/leaderboard');
+                const list = await apiRequest('/api/students/all-bonus-list');
                 window.managePointsData = list;
                 filterManagePointsTable();
             } catch (err) {
@@ -2531,7 +2535,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 <tr>
                     <td><strong>${s.id}</strong></td>
                     <td>${s.name}</td>
-                    <td>${s.seat_number}</td>
+                    <td>${s.seat_number || ''} ${s.phone ? `<br><small style="color: var(--accent-emerald);">${s.phone}</small>` : ''}</td>
                     <td><span style="color: var(--accent-cyan); font-weight: bold;">${s.bonus_points || 0} pt</span></td>
                     <td>
                         <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;" onclick="handleAddBonusPoints('${s.id}')">
