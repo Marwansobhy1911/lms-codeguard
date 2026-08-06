@@ -1360,6 +1360,11 @@ let currentToken = localStorage.getItem('lms_token') || '';
                                     <div style="font-size: 0.85rem; color: var(--accent-cyan); margin-bottom: 6px;">
                                         📅 <strong>${currentLang === 'ar' ? 'وقت التسليم الفعلي:' : 'Submitted At:'}</strong> ${t.submission.submitted_at}
                                     </div>
+                                    ${t.submission.code_content ? `
+                                        <div style="font-size: 0.85rem; color: #a78bfa; margin-bottom: 6px; word-break: break-all;">
+                                            🔗 <strong>${currentLang === 'ar' ? 'رابط التسليم الحالي:' : 'Submitted Link:'}</strong> <a href="${t.submission.code_content}" target="_blank" style="color: #38bdf8; text-decoration: underline;">${t.submission.code_content}</a>
+                                        </div>
+                                    ` : ''}
                                     <div><strong>${currentLang === 'ar' ? 'الدرجة المرصودة:' : 'Graded Score:'}</strong> 
                                         <span style="color: ${t.submission.score === 0 ? '#f43f5e' : '#34d399'}; font-weight: bold;">
                                             ${t.submission.score !== null ? t.submission.score + ' / ' + t.max_score : (currentLang === 'ar' ? 'في انتظار التقييم' : 'Pending Evaluation')}
@@ -1367,10 +1372,15 @@ let currentToken = localStorage.getItem('lms_token') || '';
                                     </div>
                                     ${t.submission.feedback ? `<div style="color: ${t.submission.score === 0 ? '#f43f5e' : '#34d399'}; margin-top: 6px;"><strong>${currentLang === 'ar' ? 'ملاحظات:' : 'Feedback:'}</strong> ${t.submission.feedback}</div>` : ''}
                                 </div>
+                                ${!t.is_expired ? `
+                                    <button class="btn btn-outline" style="margin-top: 12px; width: 100%; justify-content: center; color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.4);" onclick="openSubmitModal(${t.id}, '${t.title.replace(/'/g, "\\'")}', '${(t.submission.code_content || '').replace(/'/g, "\\'")}')">
+                                        ✏️ ${currentLang === 'ar' ? 'تعديل رابط التسليم' : 'Edit Submission Link'}
+                                    </button>
+                                ` : ''}
                             ` : ''}
 
                             ${!hasSub && !t.is_expired ? `
-                                <button class="btn btn-primary" style="margin-top: 14px; width: 100%; justify-content: center;" onclick="openSubmitModal(${t.id}, '${t.title}')">
+                                <button class="btn btn-primary" style="margin-top: 14px; width: 100%; justify-content: center;" onclick="openSubmitModal(${t.id}, '${t.title.replace(/'/g, "\\'")}')">
                                     ${currentLang === 'ar' ? 'تقديم وتعميم كود الحل' : 'Submit Code Solution'}
                                 </button>
                             ` : ''}
@@ -2576,10 +2586,10 @@ let currentToken = localStorage.getItem('lms_token') || '';
             renderManagePointsTable(filtered);
         }
 
-        function openSubmitModal(taskId, title) {
+        function openSubmitModal(taskId, title, currentLink = '') {
             document.getElementById('sub-task-id').value = taskId;
-            document.getElementById('sub-link').value = ''; 
-            document.getElementById('submit-modal-task-title').innerText = `${currentLang === 'ar' ? 'تسليم مهمة:' : 'Submit Task:'} ${title}`;
+            document.getElementById('sub-link').value = currentLink || ''; 
+            document.getElementById('submit-modal-task-title').innerText = `${currentLang === 'ar' ? (currentLink ? 'تعديل رابط التسليم:' : 'تسليم مهمة:') : (currentLink ? 'Edit Submission Link:' : 'Submit Task:')} ${title}`;
             openModal('submit-task-modal');
         }
 
