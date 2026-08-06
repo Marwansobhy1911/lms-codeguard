@@ -551,8 +551,15 @@ def export_clean_database_excel(user: User = Depends(require_role([RoleEnum.ADMI
 @app.get("/api/admin/grades-export-excel")
 def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])), db: Session = Depends(get_db)):
     tasks = db.query(Task).order_by(Task.id.asc()).all()
+    sessions = db.query(SessionSchedule).order_by(SessionSchedule.id.asc()).all()
     users = db.query(User).all()
-    total_sessions = db.query(SessionSchedule).count()
+    total_sessions = len(sessions)
+    
+    status_translation = {
+        "present": "حاضر",
+        "absent": "غائب",
+        "excused": "مستأذن"
+    }
     
     data = []
     for u in users:
@@ -560,8 +567,13 @@ def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, 
             subs = db.query(Submission).filter(Submission.student_id == u.id).all()
             sub_map = {s.task_id: (s.score if s.score is not None else 0.0) for s in subs}
             
-            att_total = db.query(Attendance).filter(Attendance.student_id == u.id).count()
-            att_present = db.query(Attendance).filter(Attendance.student_id == u.id, Attendance.status == AttendanceStatusEnum.PRESENT).count()
+            att_records = db.query(Attendance).filter(Attendance.student_id == u.id).all()
+            att_map = {}
+            for a in att_records:
+                st_val = a.status.value if hasattr(a.status, 'value') else str(a.status)
+                att_map[a.session_id] = st_val
+            
+            att_present = sum(1 for st in att_map.values() if st == "present")
             att_rate = round((att_present / total_sessions * 100), 1) if total_sessions > 0 else 100.0
             
             row = {
@@ -589,6 +601,13 @@ def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, 
             
             row["Total Tasks Score"] = round(total_task_score, 1)
             row["Bonus Points"] = round(bonus_pts, 1)
+
+            # Per-session attendance details
+            for sess in sessions:
+                st_raw = att_map.get(sess.id, "absent")
+                row[f"Session {sess.id}: {sess.title}"] = status_translation.get(st_raw, st_raw)
+
+            row["Attended Sessions"] = f"{att_present} من {total_sessions}"
             row["Attendance Rate (%)"] = f"{att_rate}%"
             row["Total Score (Tasks + Bonus)"] = round(total_score, 1)
             row["Final Rank Score"] = round(final_score, 1)

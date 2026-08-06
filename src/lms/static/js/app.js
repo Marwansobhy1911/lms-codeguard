@@ -1882,19 +1882,15 @@ let currentToken = localStorage.getItem('lms_token') || '';
         }
 
 
-        async function downloadAdminAttendanceSheet() {
-            const sessId = document.getElementById('admin-download-session-select').value;
+        function downloadAdminAttendanceSheet() {
+            const selectEl = document.getElementById('admin-download-session-select') || document.getElementById('admin-student-session-select');
+            const sessId = selectEl ? selectEl.value : '';
             if (!sessId) {
-                alert('يرجى اختيار السيشن أولاً.');
+                alert(currentLang === 'ar' ? 'يرجى اختيار السيشن أولاً.' : 'Please select a session first.');
                 return;
             }
-            const token = localStorage.getItem('lms_token');
-            const a = document.createElement('a');
-            a.href = `/api/admin/attendance/export-excel/${sessId}?token=${token}`;
-            a.download = '';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const token = localStorage.getItem('lms_token') || '';
+            window.open(`/api/admin/attendance/export-excel/${sessId}?token=${encodeURIComponent(token)}`, '_blank');
         }
 
         function renderAdminStudentsTable(students) {
@@ -2506,14 +2502,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
             }
         }
 
-        function downloadAdminAttendanceSheet() {
-            const sessId = document.getElementById('admin-attendance-session-select').value;
-            if (!sessId) {
-                alert(currentLang === 'ar' ? 'الرجاء اختيار سيشن أولاً' : 'Please select a session first');
-                return;
-            }
-            window.open(`/api/hr/attendance/export-excel/${sessId}?token=${localStorage.getItem('lms_token') || ''}`);
-        }
+
 
         function handleDownloadFullGradesExcel() {
             window.open(`/api/admin/grades-export-excel?token=${encodeURIComponent(localStorage.getItem('lms_token') || '')}`, '_blank');
