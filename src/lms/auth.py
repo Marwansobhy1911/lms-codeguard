@@ -1,3 +1,4 @@
+import hmac
 import hashlib
 import secrets
 import json
@@ -18,8 +19,11 @@ def hash_password(password: str) -> str:
     return key.hex()
 
 def verify_password(password: str, hashed: str) -> bool:
-    """Verifies a password against a hash."""
-    return hash_password(password) == hashed
+    """Verifies a password against a hash using constant-time comparison."""
+    if not password or not hashed:
+        return False
+    computed = hash_password(password)
+    return hmac.compare_digest(computed.encode('utf-8'), hashed.encode('utf-8'))
 
 # Simple Session Token Store
 _SESSIONS = {}

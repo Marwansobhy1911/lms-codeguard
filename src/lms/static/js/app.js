@@ -2483,8 +2483,17 @@ let currentToken = localStorage.getItem('lms_token') || '';
 
         async function handleClearAllUsers() {
             if (!confirm(currentLang === 'ar' ? '⚠️ تحذير: هل أنت متأكد من حذف كافة حسابات النظام والإبقاء على حساب الأدمن الخاص بك فقط؟' : '⚠️ Warning: Are you sure you want to delete ALL user accounts?')) return;
+            const pwd = prompt(currentLang === 'ar' ? 'تأكيد أمني: يرجى إدخال كلمة المرور الحالية للأدمن للمتابعة:' : 'Security Check: Please enter current admin password to proceed:');
+            if (!pwd) return;
             try {
-                const res = await apiRequest('/api/admin/users/all/clear', 'DELETE');
+                const res = await fetch('/api/admin/users/all/clear', {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Session-Token': currentToken,
+                        'X-Confirm-Password': pwd
+                    }
+                }).then(r => r.json());
+                if (res.detail) throw new Error(res.detail);
                 alert(res.message);
                 loadAdminDashboard();
             } catch (err) { alert(err.message); }

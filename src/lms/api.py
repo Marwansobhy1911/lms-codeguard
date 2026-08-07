@@ -1,9 +1,16 @@
 import io
 import json
 import os
+import sys
 import enum
 from datetime import datetime, timedelta
 from typing import Optional, List
+
+# Ensure project root is in Python path for direct or module execution
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File, Form, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -13,16 +20,32 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 import pandas as pd
 
-from src.lms.database import init_db, get_db, DB_PATH
-from src.lms.models import (
-    User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
-    Task, Submission, PlagiarismReport, Certificate, SystemSetting,
-)
-from src.lms.auth import (
-    hash_password, verify_password, create_session_token,
-    get_session_user, destroy_session
-)
-from src.lms.anti_cheating import check_task_plagiarism
+try:
+    from src.lms.database import init_db, get_db, DB_PATH
+    from src.lms.models import (
+        User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
+        Task, Submission, PlagiarismReport, Certificate, SystemSetting,
+    )
+    from src.lms.auth import (
+        hash_password, verify_password, create_session_token,
+        get_session_user, destroy_session
+    )
+    from src.lms.anti_cheating import check_task_plagiarism
+except ModuleNotFoundError:
+    from database import init_db, get_db, DB_PATH
+    from models import (
+        User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
+        Task, Submission, PlagiarismReport, Certificate, SystemSetting,
+    )
+    from auth import (
+        hash_password, verify_password, create_session_token,
+        get_session_user, destroy_session
+    )
+    try:
+        from anti_cheating import check_task_plagiarism
+    except Exception:
+        check_task_plagiarism = lambda t, d: []
+
 import re
 
 from fastapi.middleware.gzip import GZipMiddleware
@@ -92,12 +115,17 @@ _LOGIN_ATTEMPTS = {}
 
 def check_login_rate_limit(key: str, limit: int = 5, window_sec: int = 60):
     now = datetime.now()
+    if len(_LOGIN_ATTEMPTS) > 1000:
+        for k in list(_LOGIN_ATTEMPTS.keys()):
+            _LOGIN_ATTEMPTS[k] = [t for t in _LOGIN_ATTEMPTS[k] if (now - t).total_seconds() < window_sec]
+            if not _LOGIN_ATTEMPTS[k]:
+                del _LOGIN_ATTEMPTS[k]
     attempts = _LOGIN_ATTEMPTS.get(key, [])
     attempts = [t for t in attempts if (now - t).total_seconds() < window_sec]
     if len(attempts) >= limit:
         raise HTTPException(
             status_code=429,
-            detail="تم تجاوز عدد محاولات الدخول المسموحة. يرجى الانتظار 60 ثانية لحماية حسابك من التخمين."
+            detail="تم تجاوز عدد المحاولات المسموحة. يرجى الانتظار 60 ثانية لحماية النظام من التخمين."
         )
     attempts.append(now)
     _LOGIN_ATTEMPTS[key] = attempts
@@ -303,8 +331,8 @@ def change_password(req: ChangePasswordRequest, user: User = Depends(get_current
     if verify_password(req.new_password, user.password_hash):
         raise HTTPException(status_code=400, detail="كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية")
 
-    if len(req.new_password) < 4:
-        raise HTTPException(status_code=400, detail="كلمة المرور الجديدة يجب أن تكون 4 خانات على الأقل")
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="كلمة المرور الجديدة يجب أن تكون 6 خانات على الأقل لضمان الأمان")
 
     user.password_hash = hash_password(req.new_password)
     user.must_change_password = False
@@ -361,9 +389,11 @@ def register_student(req: RegisterRequest, db: Session = Depends(get_db)):
     if not name:
         raise HTTPException(status_code=400, detail="الاسم الكامل مطلوب للتسجيل")
 
+    check_login_rate_limit(f"register_{req.seat_number or name}", limit=3, window_sec=60)
+
     pwd = req.password.strip()
-    if len(pwd) < 4:
-        raise HTTPException(status_code=400, detail="كلمة المرور يجب أن تكون 4 خانات على الأقل")
+    if len(pwd) < 6:
+        raise HTTPException(status_code=400, detail="كلمة المرور يجب أن تكون 6 خانات على الأقل لضمان الأمان")
 
     # Check Seat Number uniqueness constraint
     seat_no = req.seat_number.strip() if req.seat_number and req.seat_number.strip() else None
@@ -813,7 +843,10 @@ def delete_user(target_id: str, user: User = Depends(require_role([RoleEnum.ADMI
     return {"success": True, "message": f"تم حذف المستخدم {target_id} بنجاح"}
 
 @app.delete("/api/admin/users/all/clear")
-def delete_all_users(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+def delete_all_users(confirm_password: Optional[str] = Header(None, alias="X-Confirm-Password"), user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    if not confirm_password or not verify_password(confirm_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="يلزم تأكيد كلمة المرور الحالية للأدمن لتنفيذ مسح البيانات")
+
     # Clear all test transactional data
     db.query(PlagiarismReport).delete()
     db.query(Submission).delete()
