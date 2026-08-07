@@ -8,14 +8,7 @@ if _PROJECT_ROOT not in sys.path:
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
-
-try:
-    from src.lms.models import Base
-except ModuleNotFoundError:
-    try:
-        from lms.models import Base
-    except ModuleNotFoundError:
-        from models import Base
+from src.lms.models import Base
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "lms_database.db")
 SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DB_PATH}")

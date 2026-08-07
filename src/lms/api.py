@@ -20,31 +20,16 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 import pandas as pd
 
-try:
-    from src.lms.database import init_db, get_db, DB_PATH
-    from src.lms.models import (
-        User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
-        Task, Submission, PlagiarismReport, Certificate, SystemSetting,
-    )
-    from src.lms.auth import (
-        hash_password, verify_password, create_session_token,
-        get_session_user, destroy_session
-    )
-    from src.lms.anti_cheating import check_task_plagiarism
-except ModuleNotFoundError:
-    from database import init_db, get_db, DB_PATH
-    from models import (
-        User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
-        Task, Submission, PlagiarismReport, Certificate, SystemSetting,
-    )
-    from auth import (
-        hash_password, verify_password, create_session_token,
-        get_session_user, destroy_session
-    )
-    try:
-        from anti_cheating import check_task_plagiarism
-    except Exception:
-        check_task_plagiarism = lambda t, d: []
+from src.lms.database import init_db, get_db, DB_PATH
+from src.lms.models import (
+    User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
+    Task, Submission, PlagiarismReport, Certificate, SystemSetting,
+)
+from src.lms.auth import (
+    hash_password, verify_password, create_session_token,
+    get_session_user, destroy_session
+)
+from src.lms.anti_cheating import check_task_plagiarism
 
 import re
 
