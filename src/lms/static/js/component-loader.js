@@ -13,7 +13,7 @@ async function loadComponents() {
         { id: 'cheating-container', url: '/includes/views/cheating.html' }
     ];
 
-    for (let comp of components) {
+    await Promise.all(components.map(async (comp) => {
         const el = document.getElementById(comp.id);
         if (el) {
             try {
@@ -28,5 +28,5 @@ async function loadComponents() {
                 console.error('Error loading ' + comp.url, err);
             }
         }
-    }
+    }));
 }

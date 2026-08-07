@@ -27,6 +27,8 @@ if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
             cursor.execute("PRAGMA journal_mode=WAL")
             cursor.execute("PRAGMA synchronous=NORMAL")
             cursor.execute("PRAGMA busy_timeout=10000")
+            cursor.execute("PRAGMA cache_size=-64000")
+            cursor.execute("PRAGMA foreign_keys=ON")
         except Exception:
             pass
         finally:

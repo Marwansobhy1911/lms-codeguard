@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>CodeGuard LMS - Smart Learning Management System</title>
-    <link rel="icon" type="image/jpeg" href="/logo2.jpeg">
+    <link rel="icon" type="image/jpeg" href="/logo.jpeg">
     <!-- Google Fonts: Cairo & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,6 +44,8 @@
             <!-- CHEATING VIEW -->
             <div id="cheating-container"></div>
         </div>
+        <!-- TOAST CONTAINER -->
+        <div id="auto-save-toast" class="toast" style="display: none; position: fixed; bottom: 20px; right: 20px; background: rgba(15, 23, 42, 0.95); color: #fff; padding: 12px 20px; border-radius: 8px; border: 1px solid var(--accent-cyan); z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
         <script src="/js/component-loader.js"></script>
     <script>
         // Load components before initializing app main logic
@@ -56,15 +58,12 @@
             });
         });
     </script>
-    <!-- Global Footer with Powered by Marwan Sobhy Credit -->
+    <!-- Global Footer -->
     <footer style="text-align: center; padding: 18px 24px; font-size: 0.9rem; color: var(--text-muted); border-top: 1px solid var(--border-card); margin-top: 50px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px);">
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
             <img src="/logo.jpeg" alt="Logo" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;">
             <span style="font-weight: 600; color: var(--text-main);">CodeGuard LMS &copy; 2026</span>
-            <span style="opacity: 0.5;">•</span>
-            <strong style="color: var(--accent-cyan); font-size: 0.95rem;"></strong>
         </div>
-        <H1></H1>
     </footer>
 </body>
 </html>

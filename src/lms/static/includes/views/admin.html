@@ -28,10 +28,22 @@
                             <div style="font-size: 1.6rem; font-weight: 800; color: #c084fc;" id="admin-stat-admins">0</div>
                             <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_admins">🔍 الأدمنز 👑</div>
                         </div>
+                        <div onclick="openStatsDetailModal('teams')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                            <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8;" id="admin-stat-teams">0</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_teams">🔍 التيمات 🏆</div>
+                        </div>
                         <div onclick="openStatsDetailModal('certificates')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
                             <div style="font-size: 1.6rem; font-weight: 800; color: #22c55e;" id="admin-stat-certificates">0</div>
                             <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_certificates">🔍 الشهادات 📜</div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Admin Chart Canvas Container -->
+                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-blue);">
+                    <h3 style="margin-bottom: 16px; color: var(--accent-blue);">📈 توزيع الأدوار والمسارات بالنظام (Roles Distribution)</h3>
+                    <div style="max-height: 320px; position: relative;">
+                        <canvas id="admin-roles-chart" style="width: 100%; max-height: 300px;"></canvas>
                     </div>
                 </div>
 

@@ -6,6 +6,8 @@ import base64
 from typing import Optional
 from datetime import datetime, timedelta
 
+from src.lms.models import get_egypt_now
+
 SALT = b"codeguard_lms_secure_salt_2026"
 
 def hash_password(password: str) -> str:
@@ -33,7 +35,7 @@ def create_session_token(user_id: str, role: str) -> str:
     _SESSIONS[token] = {
         "user_id": user_id,
         "role": role,
-        "created_at": datetime.now()
+        "created_at": get_egypt_now()
     }
     return token
 
@@ -42,7 +44,7 @@ def get_session_user(token: str) -> Optional[dict]:
         return None
     session = _SESSIONS[token]
     # Expire sessions after 24 hours
-    if datetime.now() - session["created_at"] > timedelta(hours=24):
+    if get_egypt_now() - session["created_at"] > timedelta(hours=24):
         del _SESSIONS[token]
         return None
     return session

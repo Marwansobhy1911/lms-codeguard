@@ -23,7 +23,7 @@ import pandas as pd
 from src.lms.database import init_db, get_db, DB_PATH
 from src.lms.models import (
     User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
-    Task, Submission, PlagiarismReport, Certificate, SystemSetting,
+    Task, Submission, PlagiarismReport, Certificate, SystemSetting, get_egypt_now
 )
 from src.lms.auth import (
     hash_password, verify_password, create_session_token,
@@ -90,16 +90,17 @@ async def add_security_headers(request, call_next):
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
+    if request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
     return response
 
 # Rate-Limiting Store (Brute Force Protection)
 _LOGIN_ATTEMPTS = {}
 
 def check_login_rate_limit(key: str, limit: int = 5, window_sec: int = 60):
-    now = datetime.now()
+    now = get_egypt_now()
     if len(_LOGIN_ATTEMPTS) > 1000:
         for k in list(_LOGIN_ATTEMPTS.keys()):
             _LOGIN_ATTEMPTS[k] = [t for t in _LOGIN_ATTEMPTS[k] if (now - t).total_seconds() < window_sec]
@@ -570,6 +571,25 @@ def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, 
     users = db.query(User).all()
     total_sessions = len(sessions)
     
+    # Pre-fetch all submissions and attendances in batch to eliminate N+1 queries
+    all_submissions = db.query(Submission).all()
+    all_attendances = db.query(Attendance).all()
+
+    # Map: student_id -> {task_id: score}
+    user_subs_map = {}
+    for s in all_submissions:
+        if s.student_id not in user_subs_map:
+            user_subs_map[s.student_id] = {}
+        user_subs_map[s.student_id][s.task_id] = (s.score if s.score is not None else 0.0)
+
+    # Map: student_id -> {session_id: status}
+    user_att_map = {}
+    for a in all_attendances:
+        if a.student_id not in user_att_map:
+            user_att_map[a.student_id] = {}
+        st_val = a.status.value if hasattr(a.status, 'value') else str(a.status)
+        user_att_map[a.student_id][a.session_id] = st_val
+
     status_translation = {
         "present": "حاضر",
         "absent": "غائب",
@@ -579,14 +599,8 @@ def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, 
     data = []
     for u in users:
         if "student" in get_user_roles(u):
-            subs = db.query(Submission).filter(Submission.student_id == u.id).all()
-            sub_map = {s.task_id: (s.score if s.score is not None else 0.0) for s in subs}
-            
-            att_records = db.query(Attendance).filter(Attendance.student_id == u.id).all()
-            att_map = {}
-            for a in att_records:
-                st_val = a.status.value if hasattr(a.status, 'value') else str(a.status)
-                att_map[a.session_id] = st_val
+            sub_map = user_subs_map.get(u.id, {})
+            att_map = user_att_map.get(u.id, {})
             
             att_present = sum(1 for st in att_map.values() if st == "present")
             att_rate = round((att_present / total_sessions * 100), 1) if total_sessions > 0 else 100.0
@@ -635,7 +649,7 @@ def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, 
         df.to_excel(writer, index=False, sheet_name="Full_Grades_Report")
     output.seek(0)
     
-    filename = f"LMS_Full_Grades_Report_{datetime.now().strftime('%Y%m%d')}.xlsx"
+    filename = f"LMS_Full_Grades_Report_{get_egypt_now().strftime('%Y%m%d')}.xlsx"
     return Response(
         content=output.getvalue(),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -934,7 +948,7 @@ def get_student_supporter_info(user: User = Depends(get_current_user)):
 def get_student_tasks(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     tasks = db.query(Task).order_by(Task.deadline.desc()).all()
     res = []
-    now = datetime.now()
+    now = get_egypt_now()
 
     for t in tasks:
         sub = db.query(Submission).filter(Submission.task_id == t.id, Submission.student_id == user.id).first()
@@ -983,7 +997,7 @@ def submit_task(req: TaskSubmitRequest, user: User = Depends(get_current_user), 
     if not task:
         raise HTTPException(status_code=404, detail="المهمة غير موجودة")
 
-    now = datetime.now()
+    now = get_egypt_now()
     if now > task.deadline:
         raise HTTPException(status_code=400, detail="عذراً! لقد انتهى الموعد النهائي لتسليم هذه المهمة (Deadline Exceeded).")
 
@@ -1084,7 +1098,7 @@ def get_supporter_submissions(task_id: Optional[int] = None, user: User = Depend
         tasks_query = tasks_query.filter(Task.id == task_id)
     tasks = tasks_query.all()
 
-    now = datetime.now()
+    now = get_egypt_now()
     res = []
 
     # 1. Actual Submissions
@@ -1149,7 +1163,7 @@ def grade_submission(req: GradeSubmissionRequest, user: User = Depends(require_r
     sub.score = req.score
     sub.feedback = req.feedback
     sub.graded_by_id = user.id
-    sub.graded_at = datetime.now()
+    sub.graded_at = get_egypt_now()
     db.commit()
 
     return {"success": True, "message": "تم تقييم التسليم ورصد الدرجة بنجاح"}
@@ -1244,7 +1258,7 @@ def download_database_backup(user: User = Depends(require_role([RoleEnum.ADMIN])
     if not os.path.exists(DB_PATH):
         raise HTTPException(status_code=404, detail="ملف قاعدة البيانات غير موجود")
     
-    filename = f"lms_database_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
+    filename = f"lms_database_backup_{get_egypt_now().strftime('%Y%m%d_%H%M%S')}.db"
     return StreamingResponse(
         open(DB_PATH, "rb"),
         media_type="application/x-sqlite3",
@@ -1588,7 +1602,7 @@ async def upload_certificate(
         )
 
     clean_filename = re.sub(r'[^a-zA-Z0-9_\.-]', '_', base_name)
-    safe_filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{clean_filename}"
+    safe_filename = f"{get_egypt_now().strftime('%Y%m%d%H%M%S')}_{clean_filename}"
     file_path = os.path.join(CERTIFICATES_DIR, safe_filename)
 
     contents = await file.read()
@@ -1689,17 +1703,36 @@ def get_all_students_bonus_list(user: User = Depends(require_role([RoleEnum.ADMI
 @app.get("/api/student/leaderboard")
 def get_leaderboard(db: Session = Depends(get_db)):
     all_users = db.query(User).all()
+
+    # Pre-fetch all submissions and attendances in batch
+    all_submissions = db.query(Submission).all()
+    all_attendances = db.query(Attendance).all()
+
+    # Map: student_id -> sum of scores
+    task_scores = {}
+    for s in all_submissions:
+        if s.score is not None:
+            task_scores[s.student_id] = task_scores.get(s.student_id, 0.0) + s.score
+
+    # Map: student_id -> {total, present}
+    att_stats = {}
+    for a in all_attendances:
+        if a.student_id not in att_stats:
+            att_stats[a.student_id] = {"total": 0, "present": 0}
+        att_stats[a.student_id]["total"] += 1
+        st_val = a.status.value if hasattr(a.status, 'value') else str(a.status)
+        if st_val == "present":
+            att_stats[a.student_id]["present"] += 1
+
     student_scores = []
     
     for u in all_users:
         if "student" in get_user_roles(u):
-            # Calculate total score from submissions
-            subs = db.query(Submission).filter(Submission.student_id == u.id).all()
-            total_task_score = sum(s.score for s in subs if s.score is not None)
+            total_task_score = task_scores.get(u.id, 0.0)
             
-            # Calculate attendance rate
-            att_total = db.query(Attendance).filter(Attendance.student_id == u.id).count()
-            att_present = db.query(Attendance).filter(Attendance.student_id == u.id, Attendance.status == AttendanceStatusEnum.PRESENT).count()
+            att_info = att_stats.get(u.id, {"total": 0, "present": 0})
+            att_total = att_info["total"]
+            att_present = att_info["present"]
             att_rate = round((att_present / att_total * 100)) if att_total > 0 else 100
             
             bonus_pts = u.bonus_points or 0.0

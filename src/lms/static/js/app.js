@@ -1,3 +1,11 @@
+
+// Safe DOM Helper Functions
+function getEl(id) { return document.getElementById(id); }
+function setDisplay(id, display) { const el = getEl(id); if (el) el.style.display = display; }
+function setVal(id, val) { const el = getEl(id); if (el) el.value = val; }
+function getVal(id, defaultVal = '') { const el = getEl(id); return el ? el.value : defaultVal; }
+function setText(id, text) { const el = getEl(id); if (el) el.innerText = text; }
+function setHTML(id, html) { const el = getEl(id); if (el) el.innerHTML = html; }
 let currentToken = localStorage.getItem('lms_token') || '';
         let currentUser = null;
         let currentLang = localStorage.getItem('lms_lang') || 'ar';
@@ -506,10 +514,10 @@ let currentToken = localStorage.getItem('lms_token') || '';
         }
 
         function clearPasswordInputs() {
-            document.getElementById('login-password').value = '';
-            document.getElementById('cp-current').value = '';
-            document.getElementById('cp-new').value = '';
-            document.getElementById('cp-confirm').value = '';
+            setVal('login-password', '');
+            setVal('cp-current', '');
+            setVal('cp-new', '');
+            setVal('cp-confirm', '');
         }
 
         async function apiRequest(endpoint, method = 'GET', data = null) {
@@ -550,10 +558,10 @@ let currentToken = localStorage.getItem('lms_token') || '';
 
         async function handleLogin(e) {
             e.preventDefault();
-            const userId = document.getElementById('login-id').value.trim();
-            const password = document.getElementById('login-password').value;
-            const alertBox = document.getElementById('login-alert');
-            alertBox.style.display = 'none';
+            const userId = getVal('login-id').trim();
+            const password = getVal('login-password');
+            const alertBox = getEl('login-alert');
+            if (alertBox) alertBox.style.display = 'none';
 
             try {
                 const res = await apiRequest('/api/auth/login', 'POST', { user_id: userId, password });
@@ -577,11 +585,11 @@ let currentToken = localStorage.getItem('lms_token') || '';
 
         async function handleForceChangePassword(e) {
             e.preventDefault();
-            const currentPass = document.getElementById('cp-current').value;
-            const newPass = document.getElementById('cp-new').value;
-            const confirmPass = document.getElementById('cp-confirm').value;
-            const alertBox = document.getElementById('change-pass-alert');
-            alertBox.style.display = 'none';
+            const currentPass = getVal('cp-current');
+            const newPass = getVal('cp-new');
+            const confirmPass = getVal('cp-confirm');
+            const alertBox = getEl('change-pass-alert');
+            if (alertBox) alertBox.style.display = 'none';
 
             if (newPass === currentPass) {
                 alertBox.innerText = currentLang === 'ar' ? 'كلمة المرور الجديدة يجب أن تكون مختلفة عن كلمة المرور الحالية' : 'New password must be different from current password';
@@ -630,15 +638,15 @@ let currentToken = localStorage.getItem('lms_token') || '';
             currentUser = null;
             localStorage.removeItem('lms_token');
             clearPasswordInputs();
-            document.getElementById('main-header').style.display = 'none';
-            document.getElementById('app-dashboard').style.display = 'none';
-            document.getElementById('login-view').classList.add('active');
+            setDisplay('main-header', 'none');
+            setDisplay('app-dashboard', 'none');
+            if (getEl('login-view')) getEl('login-view').classList.add('active');
         }
 
         function setupUserUI() {
-            document.getElementById('login-view').classList.remove('active');
-            document.getElementById('main-header').style.display = 'flex';
-            document.getElementById('app-dashboard').style.display = 'block';
+            if (getEl('login-view')) getEl('login-view').classList.remove('active');
+            setDisplay('main-header', 'flex');
+            setDisplay('app-dashboard', 'block');
 
             // Clean display name (remove "(HR)", "(Admin)", "مسؤول الموارد البشرية", etc.)
             let cleanName = currentUser.name
@@ -646,7 +654,7 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 .replace(/مسؤول الموارد البشرية|مسؤول الميديا/gi, '')
                 .trim();
 
-            document.getElementById('user-name-display').innerText = cleanName;
+            setText('user-name-display', cleanName);
             
             const roles = currentUser.roles || (currentUser.role ? currentUser.role.split(',') : ['student']);
             
@@ -679,13 +687,13 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 if (hrElem) hrElem.innerText = currentUser.assigned_hr_name || 'غير معين';
             }
 
-            document.getElementById('tab-student').style.display = (roles.includes('student') || roles.includes('admin')) ? 'block' : 'none';
-            document.getElementById('tab-hr').style.display = (roles.includes('hr') || roles.includes('admin')) ? 'block' : 'none';
-            document.getElementById('tab-media').style.display = (roles.includes('media') || roles.includes('admin')) ? 'block' : 'none';
-            document.getElementById('tab-supporter').style.display = (roles.includes('supporter') || roles.includes('instructor') || roles.includes('admin')) ? 'block' : 'none';
-            document.getElementById('tab-instructor').style.display = (roles.includes('instructor') || roles.includes('admin')) ? 'block' : 'none';
-            document.getElementById('tab-admin').style.display = (roles.includes('admin')) ? 'block' : 'none';
-            document.getElementById('tab-cheating').style.display = (roles.includes('supporter') || roles.includes('instructor') || roles.includes('admin')) ? 'block' : 'none';
+            setDisplay('tab-student', (roles.includes('student') || roles.includes('admin')) ? 'block' : 'none');
+            setDisplay('tab-hr', (roles.includes('hr') || roles.includes('admin')) ? 'block' : 'none');
+            setDisplay('tab-media', (roles.includes('media') || roles.includes('admin')) ? 'block' : 'none');
+            setDisplay('tab-supporter', (roles.includes('supporter') || roles.includes('instructor') || roles.includes('admin')) ? 'block' : 'none');
+            setDisplay('tab-instructor', (roles.includes('instructor') || roles.includes('admin')) ? 'block' : 'none');
+            setDisplay('tab-admin', (roles.includes('admin')) ? 'block' : 'none');
+            setDisplay('tab-cheating', (roles.includes('supporter') || roles.includes('instructor') || roles.includes('admin')) ? 'block' : 'none');
 
             if (roles.includes('admin')) {
                 switchTab('admin-view');

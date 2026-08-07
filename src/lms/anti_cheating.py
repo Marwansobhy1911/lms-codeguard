@@ -45,13 +45,14 @@ def check_task_plagiarism(task_id: int, db: Session) -> list:
     db.query(PlagiarismReport).filter(PlagiarismReport.task_id == task_id).delete()
     db.commit()
 
+    sub_map = {s.id: s for s in submissions_db}
+
     for res in comparison_results:
         sub_a_db_id = int(res.sub_a.id)
         sub_b_db_id = int(res.sub_b.id)
 
-        # Retrieve DB submissions to get student IDs
-        sub_a = db.query(DBSubmission).filter(DBSubmission.id == sub_a_db_id).first()
-        sub_b = db.query(DBSubmission).filter(DBSubmission.id == sub_b_db_id).first()
+        sub_a = sub_map.get(sub_a_db_id)
+        sub_b = sub_map.get(sub_b_db_id)
 
         if not sub_a or not sub_b:
             continue

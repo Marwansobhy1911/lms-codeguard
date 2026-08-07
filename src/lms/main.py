@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from datetime import datetime, timedelta
 from src.lms.api import app
 from src.lms.database import init_db, SessionLocal
-from src.lms.models import User, RoleEnum, Task, SessionSchedule
+from src.lms.models import User, RoleEnum, Task, SessionSchedule, get_egypt_now
 from src.lms.auth import hash_password
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
@@ -129,7 +129,7 @@ def seed_initial_database():
 
             # Tasks
             if db.query(Task).count() == 0:
-                now = datetime.now()
+                now = get_egypt_now()
                 task1 = Task(
                     title="تاسك 1: تطبيق خوارزمية الترتيب الفقاعي (Bubble Sort)",
                     description="قم بكتابة دالة تفاعلية بلغة Python تقوم بترتيب مصفوفة من الأرقام الصحيحة تصاعدياً وترجع المصفوفة المرتّبة.",
@@ -149,7 +149,7 @@ def seed_initial_database():
 
             # Sessions
             if db.query(SessionSchedule).count() == 0:
-                now = datetime.now()
+                now = get_egypt_now()
                 sess1 = SessionSchedule(
                     title="السيشن الأولى: التراكيب الهيكلية والخوارزميات",
                     description="مراجعة شاملة لأساسيات الخوارزميات وتأهيل المجموعات.",
