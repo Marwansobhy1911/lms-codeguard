@@ -2761,7 +2761,11 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     if (supp.ungraded_tasks && supp.ungraded_tasks.length > 0) {
                         tasksHtml = '<ul style="margin-top: 10px; padding-right: 20px; color: var(--text-muted); font-size: 0.9rem;">';
                         supp.ungraded_tasks.forEach(t => {
-                            tasksHtml += `<li style="margin-bottom: 4px;">تاسك: <strong>${t.task_title}</strong> (${t.ungraded_count} تسليم لم يصحح)</li>`;
+                            let studentsList = (t.ungraded_students && t.ungraded_students.length > 0) 
+                                ? t.ungraded_students.map(s => `<div style="margin-bottom: 2px;">• ${s}</div>`).join('') 
+                                : '';
+                            let studentsHtml = studentsList ? `<div style="font-size: 0.85rem; color: var(--accent-rose); margin-top: 4px; padding-right: 10px;">${studentsList}</div>` : '';
+                            tasksHtml += `<li style="margin-bottom: 8px;">تاسك: <strong>${t.task_title}</strong> (${t.ungraded_count} تسليم لم يصحح)${studentsHtml}</li>`;
                         });
                         tasksHtml += '</ul>';
                     } else if (supp.students_count > 0) {

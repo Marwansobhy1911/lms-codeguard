@@ -1219,8 +1219,14 @@ def get_supporters_progress(user: User = Depends(require_role([RoleEnum.INSTRUCT
         for sub in ungraded_subs:
             tid = sub.task_id
             if tid not in tasks_map:
-                tasks_map[tid] = {"task_id": tid, "task_title": sub.task.title if sub.task else "مهمة محذوفة", "ungraded_count": 0}
-            tasks_map[tid]["ungraded_count"] += 1
+                tasks_map[tid] = {"task_id": tid, "task_title": sub.task.title if sub.task else "مهمة محذوفة", "ungraded_students": set()}
+            student_name = sub.student.name if sub.student else "طالب غير معروف"
+            student_entry = f"{student_name} (ID: {sub.student_id})"
+            tasks_map[tid]["ungraded_students"].add(student_entry)
+            
+        for tid in tasks_map:
+            tasks_map[tid]["ungraded_count"] = len(tasks_map[tid]["ungraded_students"])
+            tasks_map[tid]["ungraded_students"] = list(tasks_map[tid]["ungraded_students"])
             
         res.append({
             "supporter_id": supp.id,
