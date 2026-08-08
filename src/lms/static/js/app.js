@@ -2004,6 +2004,16 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     const dInput = document.getElementById('admin-drive-url-input');
                     if(dInput) dInput.value = driveRes.url || '';
                 } catch (e) {}
+
+                try {
+                    const cheatRes = await apiRequest('/api/settings/cheating');
+                    const toggle = document.getElementById('admin-cheating-toggle');
+                    const statusText = document.getElementById('admin-cheating-status-text');
+                    if (toggle) {
+                        toggle.checked = cheatRes.enabled;
+                        if (statusText) statusText.innerText = cheatRes.enabled ? (currentLang === 'ar' ? 'مفعل' : 'Enabled') : (currentLang === 'ar' ? 'معطل' : 'Disabled');
+                    }
+                } catch (e) {}
                 
                 // Fetch System Stats
                 try {
@@ -2515,6 +2525,21 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 const res = await apiRequest('/api/settings/material-drive', 'POST', { url });
                 alert(res.message || 'Saved successfully');
             } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        async function handleToggleCheating() {
+            const toggle = document.getElementById('admin-cheating-toggle');
+            const statusText = document.getElementById('admin-cheating-status-text');
+            const enabled = toggle.checked;
+            
+            try {
+                const res = await apiRequest('/api/settings/cheating', 'POST', { enabled });
+                if (statusText) statusText.innerText = enabled ? (currentLang === 'ar' ? 'مفعل' : 'Enabled') : (currentLang === 'ar' ? 'معطل' : 'Disabled');
+                showToast(res.message || 'Saved successfully');
+            } catch (err) {
+                toggle.checked = !enabled; // revert on error
                 alert(err.message);
             }
         }

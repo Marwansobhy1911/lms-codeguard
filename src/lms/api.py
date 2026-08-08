@@ -213,6 +213,9 @@ class SessionCreateRequest(BaseModel):
 class MaterialDriveRequest(BaseModel):
     url: str
 
+class CheatingSettingRequest(BaseModel):
+    enabled: bool
+
 class PointAddRequest(BaseModel):
     student_id: str
     points_to_add: float
@@ -262,6 +265,16 @@ def get_material_drive(db: Session = Depends(get_db)):
 def set_material_drive(req: MaterialDriveRequest, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     set_system_setting("material_drive_url", req.url, db)
     return {"success": True, "message": "تم تحديث رابط درايف الماتيريال بنجاح"}
+
+@app.get("/api/settings/cheating")
+def get_cheating_setting(db: Session = Depends(get_db)):
+    val = get_system_setting("enable_cheating_system", "true", db)
+    return {"enabled": val == "true"}
+
+@app.post("/api/settings/cheating")
+def set_cheating_setting(req: CheatingSettingRequest, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    set_system_setting("enable_cheating_system", "true" if req.enabled else "false", db)
+    return {"success": True, "message": "تم تحديث حالة نظام كشف الغش بنجاح"}
 
 # --- AUTH ENDPOINTS ---
 from sqlalchemy import text
@@ -1043,7 +1056,8 @@ def submit_task(req: TaskSubmitRequest, user: User = Depends(get_current_user), 
 
     # Trigger Automated Anti-Cheating Plagiarism Analysis across task submissions
     try:
-        check_task_plagiarism(req.task_id, db)
+        if get_system_setting("enable_cheating_system", "true", db) == "true":
+            check_task_plagiarism(req.task_id, db)
     except Exception as e:
         print(f"Anti-cheating error: {e}")
 
