@@ -189,6 +189,7 @@ class TaskCreateRequest(BaseModel):
     deadline: str # ISO format string (e.g. 2026-07-30T23:59:00)
     reference_link: Optional[str] = None
     max_score: float = 100.0
+    allowed_languages: str = "python,c,cpp,javascript"
 
 class TaskDeadlineUpdateRequest(BaseModel):
     new_deadline: str
@@ -809,7 +810,7 @@ def change_role(req: ChangeRoleRequest, user: User = Depends(require_role([RoleE
 
     target_user.role = req.new_role
     db.commit()
-    return {"success": True, "message": f"تم تغيير دور {target_user.name} إلى {req.new_role.value}"}
+    return {"success": True, "message": f"تم تغيير دور {target_user.name} إلى {req.new_role}"}
 
 @app.post("/api/admin/reset-password")
 def reset_password(user_id: str = Form(...), user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
@@ -836,6 +837,25 @@ def delete_user(target_id: str, user: User = Depends(require_role([RoleEnum.ADMI
 
     if is_master_admin(target):
         raise HTTPException(status_code=400, detail="عفواً! حساب الماستر (مروان صبحي) محمي من الحذف نهائياً.")
+
+    # Nullify references in other users
+    db.query(User).filter(User.assigned_supporter_id == target_id).update({"assigned_supporter_id": None})
+    db.query(User).filter(User.assigned_hr_id == target_id).update({"assigned_hr_id": None})
+    
+    # Nullify grader references in submissions
+    db.query(Submission).filter(Submission.graded_by_id == target_id).update({"graded_by_id": None})
+    
+    # Nullify uploader references in certificates
+    db.query(Certificate).filter(Certificate.uploaded_by_id == target_id).update({"uploaded_by_id": None})
+
+    # Delete plagiarism reports involving this user
+    db.query(PlagiarismReport).filter(
+        or_(PlagiarismReport.student_a_id == target_id, PlagiarismReport.student_b_id == target_id)
+    ).delete(synchronize_session=False)
+
+    # Delete instructor content if they were an instructor
+    db.query(SessionSchedule).filter(SessionSchedule.instructor_id == target_id).delete(synchronize_session=False)
+    db.query(Task).filter(Task.instructor_id == target_id).delete(synchronize_session=False)
 
     db.delete(target)
     db.commit()
