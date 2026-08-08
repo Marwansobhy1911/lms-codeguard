@@ -5,6 +5,7 @@
                     <button class="btn btn-success" onclick="openCreateSessionModal()" data-i18n="btn_add_session">+ إضافة سيشن جديدة</button>
                     <button class="btn btn-warning" onclick="openManagePointsModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white;" data-i18n="btn_manage_bonus_students">🏆 إدارة نقاط البونص للطلاب</button>
                     <button class="btn btn-outline" style="color: var(--accent-emerald); border-color: var(--accent-emerald);" onclick="handleDownloadFullGradesExcel()" data-i18n="btn_export_full_grades">📥 تصدير شيت الدرجات Excel</button>
+                    <button class="btn btn-outline" style="color: var(--accent-cyan); border-color: var(--accent-cyan);" onclick="openSupportersProgressModal()">📊 متابعة أداء المساعدين</button>
                 </div>
 
                 <div class="grid-2">
@@ -16,6 +17,17 @@
                     <div class="glass-card">
                         <h3 style="margin-bottom: 16px;" data-i18n="title_instructor_sessions">جدول السيشنات</h3>
                         <div id="instructor-sessions-list">جاري التحميل...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUPPORTERS PROGRESS MODAL -->
+            <div id="supporters-progress-modal" class="modal-overlay">
+                <div class="modal" style="max-width: 800px;">
+                    <button class="close-btn" onclick="closeModal('supporters-progress-modal')">&times;</button>
+                    <h3 style="margin-bottom: 20px; color: var(--accent-cyan); border-bottom: 1px solid var(--border-card); padding-bottom: 10px;">📊 متابعة أداء المساعدين</h3>
+                    <div id="supporters-progress-container" style="max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+                        جاري التحميل...
                     </div>
                 </div>
             </div>

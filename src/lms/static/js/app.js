@@ -2744,6 +2744,50 @@ let currentToken = localStorage.getItem('lms_token') || '';
             } catch (err) { alert(err.message); }
         }
 
+        async function openSupportersProgressModal() {
+            openModal('supporters-progress-modal');
+            const container = document.getElementById('supporters-progress-container');
+            container.innerHTML = 'جاري التحميل...';
+            try {
+                const res = await apiRequest('/api/instructor/supporters-progress');
+                if (res.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">لا يوجد مساعدين مسجلين</p>';
+                    return;
+                }
+                
+                let html = '';
+                res.forEach(supp => {
+                    let tasksHtml = '';
+                    if (supp.ungraded_tasks && supp.ungraded_tasks.length > 0) {
+                        tasksHtml = '<ul style="margin-top: 10px; padding-right: 20px; color: var(--text-muted); font-size: 0.9rem;">';
+                        supp.ungraded_tasks.forEach(t => {
+                            tasksHtml += `<li style="margin-bottom: 4px;">تاسك: <strong>${t.task_title}</strong> (${t.ungraded_count} تسليم لم يصحح)</li>`;
+                        });
+                        tasksHtml += '</ul>';
+                    } else if (supp.students_count > 0) {
+                        tasksHtml = '<p style="margin-top: 10px; color: var(--accent-emerald); font-size: 0.9rem;">✅ جميع التاسكات مصححة</p>';
+                    } else {
+                        tasksHtml = '<p style="margin-top: 10px; color: var(--text-muted); font-size: 0.9rem;">لا يوجد طلاب مع هذا المساعد</p>';
+                    }
+                    
+                    html += `
+                    <div style="background: rgba(15, 23, 42, 0.5); padding: 16px; border-radius: 8px; border: 1px solid var(--border-card);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="color: var(--text-main); margin: 0;">${supp.supporter_name}</h4>
+                            <span style="background: var(--accent-cyan); color: #000; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
+                                ${supp.students_count} طالب
+                            </span>
+                        </div>
+                        ${tasksHtml}
+                    </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = `<p style="color: var(--accent-rose); text-align: center;">خطأ: ${err.message}</p>`;
+            }
+        }
+
         function openCreateTaskModal() {
             document.getElementById('ct-title').value = '';
             document.getElementById('ct-desc').value = '';

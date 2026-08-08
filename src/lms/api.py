@@ -1189,6 +1189,47 @@ def grade_submission(req: GradeSubmissionRequest, user: User = Depends(require_r
     return {"success": True, "message": "تم تقييم التسليم ورصد الدرجة بنجاح"}
 
 # --- INSTRUCTOR & SESSIONS ENDPOINTS ---
+@app.get("/api/instructor/supporters-progress")
+def get_supporters_progress(user: User = Depends(require_role([RoleEnum.INSTRUCTOR, RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    supporters = db.query(User).filter(User.role.like("%supporter%")).all()
+    res = []
+    
+    for supp in supporters:
+        if "supporter" not in get_user_roles(supp):
+            continue
+            
+        student_ids = [s.id for s in db.query(User).filter(User.assigned_supporter_id == supp.id).all()]
+        if not student_ids:
+            res.append({
+                "supporter_id": supp.id,
+                "supporter_name": supp.name,
+                "students_count": 0,
+                "ungraded_count": 0,
+                "ungraded_tasks": []
+            })
+            continue
+            
+        ungraded_subs = db.query(Submission).filter(
+            Submission.student_id.in_(student_ids),
+            Submission.score == None
+        ).all()
+        
+        tasks_map = {}
+        for sub in ungraded_subs:
+            tid = sub.task_id
+            if tid not in tasks_map:
+                tasks_map[tid] = {"task_id": tid, "task_title": sub.task.title if sub.task else "مهمة محذوفة", "ungraded_count": 0}
+            tasks_map[tid]["ungraded_count"] += 1
+            
+        res.append({
+            "supporter_id": supp.id,
+            "supporter_name": supp.name,
+            "students_count": len(student_ids),
+            "ungraded_count": len(ungraded_subs),
+            "ungraded_tasks": list(tasks_map.values())
+        })
+        
+    return res
 @app.get("/api/instructor/tasks")
 def get_instructor_tasks(db: Session = Depends(get_db)):
     tasks = db.query(Task).order_by(Task.created_at.desc()).all()
