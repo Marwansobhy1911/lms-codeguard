@@ -235,6 +235,7 @@ class BulkAttendanceRequest(BaseModel):
 class ManualIDAttendanceRequest(BaseModel):
     session_id: int
     student_id: str
+    status: Optional[AttendanceStatusEnum] = AttendanceStatusEnum.PRESENT
 
 # --- SYSTEM SETTING HELPERS ---
 def get_system_setting(key: str, default_val: str, db: Session) -> str:
@@ -1599,19 +1600,19 @@ def mark_manual_id_attendance(req: ManualIDAttendanceRequest, user: User = Depen
     att = db.query(Attendance).filter(Attendance.session_id == req.session_id, Attendance.student_id == st.id).first()
     
     if att:
-        att.status = AttendanceStatusEnum.PRESENT
-        att.notes = "حضور يدوي بالـ ID"
+        att.status = req.status
+        att.notes = f"تسجيل سريع بالـ ID - {req.status.value}"
     else:
         att = Attendance(
             session_id=req.session_id,
             student_id=st.id,
-            status=AttendanceStatusEnum.PRESENT,
-            notes="حضور يدوي بالـ ID"
+            status=req.status,
+            notes=f"تسجيل سريع بالـ ID - {req.status.value}"
         )
         db.add(att)
 
     db.commit()
-    return {"success": True, "message": f"تم تسجيل حضور الطالب {st.name} بنجاح"}
+    return {"success": True, "message": f"تم تسجيل حالة الطالب {st.name} ({req.status.value}) بنجاح"}
 
 
 

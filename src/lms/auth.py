@@ -43,8 +43,8 @@ def get_session_user(token: str) -> Optional[dict]:
     if not token or token not in _SESSIONS:
         return None
     session = _SESSIONS[token]
-    # Expire sessions after 24 hours
-    if get_egypt_now() - session["created_at"] > timedelta(hours=24):
+    # Expire sessions after 30 minutes
+    if get_egypt_now() - session["created_at"] > timedelta(minutes=30):
         del _SESSIONS[token]
         return None
     return session

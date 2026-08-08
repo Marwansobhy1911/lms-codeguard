@@ -29,9 +29,10 @@
                         <!-- NEW QUICK ID ATTENDANCE FORM -->
                         <div style="margin-bottom: 24px; padding: 16px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 12px;">
                             <h5 style="margin-bottom: 8px; color: var(--accent-blue);">⚡ تسجيل سريع للطالب بالـ ID</h5>
-                            <form onsubmit="handleQuickIdAttendance(event)" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <form onsubmit="handleQuickIdAttendance(event, 'present')" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                                 <input type="text" id="hr-quick-id-input" placeholder="اكتب ID الطالب واضغط Enter أو تسجيل..." required style="flex: 1; min-width: 120px; font-size: 0.9rem; padding: 10px; border-radius: 8px; border: 1px solid var(--border-card); background: rgba(0,0,0,0.2); color: white;">
-                                <button type="submit" class="btn btn-primary" style="white-space: nowrap; min-height: 42px; flex: 1; padding: 0 20px;">تسجيل</button>
+                                <button type="submit" class="btn btn-primary" style="white-space: nowrap; min-height: 42px; padding: 0 20px;">حضور</button>
+                                <button type="button" class="btn btn-warning" onclick="handleQuickIdAttendance(event, 'excused')" style="white-space: nowrap; min-height: 42px; padding: 0 20px; color: #fff; background: #f59e0b; border: none; border-radius: 8px;">مستأذن</button>
                             </form>
                         </div>
 
