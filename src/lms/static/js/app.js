@@ -2499,6 +2499,44 @@ let currentToken = localStorage.getItem('lms_token') || '';
             } catch (err) { alert(err.message); }
         }
 
+        async function fetchAdminStudentSubmissions() {
+            const studentId = document.getElementById('admin-student-id-input').value.trim();
+            if (!studentId) return;
+            const tbody = document.getElementById('admin-student-submissions-tbody');
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'جاري التحميل...' : 'Loading...'}</td></tr>`;
+            try {
+                const subs = await apiRequest(`/api/admin/student-submissions/${studentId}`);
+                if (subs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد تسليمات لهذا الطالب' : 'No submissions found'}</td></tr>`;
+                } else {
+                    tbody.innerHTML = subs.map(s => `
+                        <tr>
+                            <td>${escapeHtml(s.task_title)}</td>
+                            <td><span style="font-size: 0.85rem; color: var(--text-muted);">${s.submitted_at}</span></td>
+                            <td><span class="badge ${s.score === 'لم يتم التقييم' ? '' : 'badge-hr'}">${s.score}</span></td>
+                            <td>
+                                <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="deleteAdminStudentSubmission(${s.id})">🗑️ مسح</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--accent-red);">${err.message}</td></tr>`;
+            }
+        }
+
+        async function deleteAdminStudentSubmission(subId) {
+            if (!confirm(currentLang === 'ar' ? 'هل أنت متأكد من مسح هذا التسليم نهائياً؟' : 'Are you sure you want to delete this submission?')) return;
+            try {
+                const res = await apiRequest(`/api/admin/submissions/${subId}`, 'DELETE');
+                showToast(res.message);
+                fetchAdminStudentSubmissions();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+
         async function handleClearAllUsers() {
             if (!confirm(currentLang === 'ar' ? '⚠️ تحذير: هل أنت متأكد من حذف كافة حسابات النظام والإبقاء على حساب الأدمن الخاص بك فقط؟' : '⚠️ Warning: Are you sure you want to delete ALL user accounts?')) return;
             const pwd = prompt(currentLang === 'ar' ? 'تأكيد أمني: يرجى إدخال كلمة المرور الحالية للأدمن للمتابعة:' : 'Security Check: Please enter current admin password to proceed:');

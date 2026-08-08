@@ -1346,6 +1346,40 @@ def toggle_session_hr_attendance(session_id: int, user: User = Depends(require_r
     status_str = "مفتوح" if sess.is_hr_attendance_open else "مغلق"
     return {"success": True, "message": f"تم تغيير حالة تسجيل الحضور للـ HR إلى {status_str}", "is_hr_attendance_open": sess.is_hr_attendance_open}
 
+@app.get("/api/admin/student-submissions/{student_id}")
+def get_student_submissions_admin(student_id: str, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    subs = db.query(Submission).filter(Submission.student_id == student_id).order_by(Submission.submitted_at.desc()).all()
+    res = []
+    for sub in subs:
+        res.append({
+            "id": sub.id,
+            "task_title": sub.task.title if sub.task else "مهمة محذوفة",
+            "submitted_at": sub.submitted_at.strftime("%Y-%m-%d %I:%M %p") if sub.submitted_at else "",
+            "score": sub.score if sub.score is not None else "لم يتم التقييم"
+        })
+    return res
+
+@app.delete("/api/admin/submissions/{submission_id}")
+def delete_submission_admin(submission_id: int, user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    try:
+        sub = db.query(Submission).filter(Submission.id == submission_id).first()
+        if not sub:
+            raise HTTPException(status_code=404, detail="التسليم غير موجود")
+        
+        db.query(PlagiarismReport).filter(
+            or_(
+                PlagiarismReport.submission_a_id == submission_id,
+                PlagiarismReport.submission_b_id == submission_id
+            )
+        ).delete(synchronize_session=False)
+        
+        db.delete(sub)
+        db.commit()
+        return {"success": True, "message": "تم مسح التسليم بنجاح"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/admin/backup-db")
 def download_database_backup(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     if not os.path.exists(DB_PATH):

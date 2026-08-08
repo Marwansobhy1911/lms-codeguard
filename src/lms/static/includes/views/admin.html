@@ -207,6 +207,34 @@
                     <div id="admin-sessions-list">جاري التحميل...</div>
                 </div>
 
+                <!-- Admin Student Submissions Management -->
+                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-purple);">
+                    <h3 style="margin-bottom: 16px; color: var(--accent-purple);">📝 عرض ومسح تسليمات طالب (Admin)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">أدخل كود الطالب (ID) لعرض جميع تسليماته للمهام وإمكانية مسح أي منها.</p>
+                    <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px;">
+                        <div class="form-group" style="flex: 1; margin: 0;">
+                            <label style="font-size: 0.85rem;">كود الطالب (ID):</label>
+                            <input type="text" id="admin-student-id-input" placeholder="مثال: 2024001" style="width: 100%;">
+                        </div>
+                        <button class="btn btn-primary" onclick="fetchAdminStudentSubmissions()">🔍 عرض التسليمات</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>اسم المهمة</th>
+                                    <th>تاريخ التسليم</th>
+                                    <th>الدرجة المرصودة</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-student-submissions-tbody">
+                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">أدخل كود الطالب لعرض التسليمات</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- User Management Table -->
                 <div class="glass-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
