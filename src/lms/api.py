@@ -276,6 +276,17 @@ def set_cheating_setting(req: CheatingSettingRequest, user: User = Depends(requi
     set_system_setting("enable_cheating_system", "true" if req.enabled else "false", db)
     return {"success": True, "message": "تم تحديث حالة نظام كشف الغش بنجاح"}
 
+@app.delete("/api/settings/cheating/reports")
+def delete_all_plagiarism_reports(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
+    try:
+        count = db.query(PlagiarismReport).count()
+        db.query(PlagiarismReport).delete()
+        db.commit()
+        return {"success": True, "message": f"تم مسح {count} تقرير غش بنجاح."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 # --- AUTH ENDPOINTS ---
 from sqlalchemy import text
 

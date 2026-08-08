@@ -2544,7 +2544,17 @@ let currentToken = localStorage.getItem('lms_token') || '';
             }
         }
 
-
+        async function handleDeleteAllCheatingReports() {
+            if (!confirm(currentLang === 'ar' ? 'هل أنت متأكد من رغبتك في مسح كافة تقارير الغش؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete all cheating reports? This cannot be undone.')) {
+                return;
+            }
+            try {
+                const res = await apiRequest('/api/settings/cheating/reports', 'DELETE');
+                showToast(res.message || 'Deleted successfully');
+            } catch (err) {
+                alert(err.message);
+            }
+        }
 
         function handleDownloadFullGradesExcel() {
             window.open(`/api/admin/grades-export-excel?token=${encodeURIComponent(localStorage.getItem('lms_token') || '')}`, '_blank');
@@ -2725,30 +2735,6 @@ let currentToken = localStorage.getItem('lms_token') || '';
             document.getElementById('grade-feedback').value = s.feedback || '';
 
             openModal('grade-modal');
-
-            const repDiv = document.getElementById('plagiarism-report-container');
-            repDiv.innerHTML = `<p style="color: var(--text-muted);">${currentLang === 'ar' ? 'جاري فحص وتوليد تقرير التشابه البرمجي...' : 'Generating plagiarism report...'}</p>`;
-            
-            apiRequest(`/api/plagiarism/reports/${s.task_id}`).then(reports => {
-                if (reports.length === 0) {
-                    repDiv.innerHTML = `<div class="alert alert-success">${currentLang === 'ar' ? 'لم يتم العثور على أية انتحالات أو تشابهات ملحوظة بين الطلاب لهذه المهمة.' : 'No plagiarism detected for this task.'}</div>`;
-                } else {
-                    repDiv.innerHTML = reports.map(r => `
-                        <div style="background: rgba(15,23,42,0.7); border: 1px solid ${r.similarity_score > 50 ? 'var(--accent-rose)' : 'var(--border-card)'}; border-radius: 10px; padding: 14px; margin-bottom: 12px;">
-                            <div style="display: flex; justify-content: space-between; font-weight: bold;">
-                                <span>${r.student_a.name} ⚡ ${r.student_b.name}</span>
-                                <span style="color: ${r.similarity_score > 50 ? '#f43f5e' : '#fbbf24'};">${currentLang === 'ar' ? 'نسبة التشابه:' : 'Similarity:'} ${r.similarity_score}%</span>
-                            </div>
-                            <div class="code-split">
-                                <div class="code-box"><strong>${r.student_a.name}:</strong><br>${escapeHtml(r.code_a)}</div>
-                                <div class="code-box"><strong>${r.student_b.name}:</strong><br>${escapeHtml(r.code_b)}</div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            }).catch(err => {
-                repDiv.innerHTML = `<div class="alert alert-warning">${err.message}</div>`;
-            });
         }
 
         async function handleGradeSubmit(e) {
