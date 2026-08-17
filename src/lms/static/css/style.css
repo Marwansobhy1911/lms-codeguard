@@ -569,10 +569,36 @@
             }
 
             .modal-content {
-                padding: 20px 16px;
+                padding: 18px 14px;
                 width: 96%;
-                max-height: 85vh;
+                max-height: 90vh;
                 border-radius: 16px;
+            }
+
+            .project-grading-modal-content {
+                padding: 16px 12px !important;
+                width: 98% !important;
+                max-height: 94vh !important;
+            }
+
+            .mobile-scroll-hint {
+                display: block !important;
+            }
+
+            .project-modal-actions {
+                flex-direction: column !important;
+                width: 100% !important;
+                gap: 10px !important;
+            }
+
+            .project-modal-actions button {
+                width: 100% !important;
+                justify-content: center !important;
+                padding: 12px !important;
+            }
+
+            .project-table-responsive {
+                border-radius: 8px !important;
             }
 
             .stat-card {
@@ -591,7 +617,7 @@
             }
 
             th, td {
-                padding: 10px 12px;
+                padding: 8px 10px;
                 font-size: 0.85rem;
             }
         }

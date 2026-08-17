@@ -3145,30 +3145,30 @@ let currentToken = localStorage.getItem('lms_token') || '';
                         const indivVal = isAtt ? ((m.individual_score !== undefined && m.individual_score !== null) ? m.individual_score : 0) : 0;
                         return `
                         <tr class="project-member-row" data-student-id="${m.student_id}">
-                            <td style="text-align: center; font-weight: bold;">${m.no || (idx + 1)}</td>
-                            <td>
-                                <strong style="color: #60a5fa;">${m.name}</strong>
-                                <div style="font-size: 0.78rem; color: var(--text-muted);">${m.level || ''} | ${m.program || ''}</div>
+                            <td style="text-align: center; font-weight: bold; font-size: 0.9rem; padding: 8px 6px;">${m.no || (idx + 1)}</td>
+                            <td style="padding: 8px 10px;">
+                                <strong style="color: #60a5fa; font-size: 0.95rem; display: block;">${m.name}</strong>
+                                <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${m.level || ''} | ${m.program || ''}</div>
                             </td>
-                            <td><code style="color: #34d399; font-size: 0.9rem;">${m.student_id}</code></td>
-                            <td style="text-align: center;">
-                                <input type="number" class="member-indiv-score" min="0" max="30" step="0.5" value="${indivVal}" ${isAtt ? '' : 'disabled'} oninput="calculateProjectPreviewTotals()" style="width: 80px; text-align: center; font-weight: bold; padding: 6px; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border-card); ${isAtt ? '' : 'opacity: 0.35; cursor: not-allowed;'}" title="${isAtt ? 'أدخل درجة الفردي (0-30)' : 'الطالب غائب - لا يمكن رصد درجات فردية إلا بعد تفعيل الحضور'}">
+                            <td style="text-align: center; padding: 8px 6px;"><code style="color: #34d399; font-size: 0.88rem; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">${m.student_id}</code></td>
+                            <td style="text-align: center; padding: 8px 6px;">
+                                <input type="number" class="member-indiv-score" min="0" max="30" step="0.5" value="${indivVal}" ${isAtt ? '' : 'disabled'} oninput="calculateProjectPreviewTotals()" style="width: 75px; min-width: 70px; text-align: center; font-weight: bold; font-size: 1rem; padding: 6px 4px; border-radius: 6px; background: rgba(0,0,0,0.4); color: #fff; border: 1px solid var(--border-card); ${isAtt ? '' : 'opacity: 0.35; cursor: not-allowed;'}" title="${isAtt ? 'درجة الفردي (0-30)' : 'الطالب غائب'}">
                             </td>
-                            <td style="text-align: center;">
-                                <label style="margin: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,0.2);">
+                            <td style="text-align: center; padding: 8px 6px;">
+                                <label style="margin: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.3); min-height: 36px;">
                                     <input type="checkbox" class="member-att-check" ${isAtt ? 'checked' : ''} onchange="calculateProjectPreviewTotals()" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span class="member-att-label" style="font-size: 0.85rem; font-weight: bold; color: ${isAtt ? '#34d399' : '#f43f5e'};">
+                                    <span class="member-att-label" style="font-size: 0.82rem; font-weight: bold; white-space: nowrap; color: ${isAtt ? '#34d399' : '#f43f5e'};">
                                         ${isAtt ? (currentLang === 'ar' ? 'حاضر (✓)' : 'Present') : (currentLang === 'ar' ? 'غائب (✗)' : 'Absent')}
                                     </span>
                                 </label>
                             </td>
-                            <td style="text-align: center;">
-                                <span class="member-total-score-badge" style="font-weight: 800; font-size: 0.95rem; color: var(--accent-cyan);">
+                            <td style="text-align: center; padding: 8px 6px;">
+                                <span class="member-total-score-badge" style="font-weight: 800; font-size: 0.92rem; color: var(--accent-cyan); white-space: nowrap; display: inline-block; padding: 4px 6px;">
                                     0 / 135
                                 </span>
                             </td>
-                            <td>
-                                <input type="text" class="member-notes-input" value="${(m.notes || '').replace(/"/g, '&quot;')}" placeholder="${currentLang === 'ar' ? 'ملاحظات المناقشة...' : 'Discussion notes...'}" style="width: 100%; font-size: 0.85rem; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.2); color: #fff; border: 1px solid var(--border-card);">
+                            <td style="padding: 8px 10px;">
+                                <input type="text" class="member-notes-input" value="${(m.notes || '').replace(/"/g, '&quot;')}" placeholder="${currentLang === 'ar' ? 'ملاحظات...' : 'Notes...'}" style="width: 100%; min-width: 140px; font-size: 0.85rem; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border-card);">
                             </td>
                         </tr>
                     `}).join('');

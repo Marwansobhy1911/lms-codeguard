@@ -17,7 +17,7 @@ async function loadComponents() {
         const el = document.getElementById(comp.id);
         if (el) {
             try {
-                const response = await fetch(comp.url + '?v=1.1');
+                const response = await fetch(comp.url + '?v=2.2_mobile_ready');
                 if (response.ok) {
                     const html = await response.text();
                     el.innerHTML = html;
