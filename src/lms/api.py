@@ -23,13 +23,16 @@ import pandas as pd
 from src.lms.database import init_db, get_db, DB_PATH
 from src.lms.models import (
     User, RoleEnum, SessionSchedule, Attendance, AttendanceStatusEnum,
-    Task, Submission, PlagiarismReport, Certificate, SystemSetting, get_egypt_now
+    Task, Submission, PlagiarismReport, Certificate, SystemSetting, ProjectGrade, get_egypt_now
 )
 from src.lms.auth import (
     hash_password, verify_password, create_session_token,
     get_session_user, destroy_session
 )
 from src.lms.anti_cheating import check_task_plagiarism
+from src.lms.sfe_excel_generator import (
+    build_sfe_grades_workbook, build_final_submission_workbook, get_all_project_teams
+)
 
 import re
 
@@ -128,11 +131,19 @@ def sanitize_text(text: Optional[str]) -> Optional[str]:
 def startup_event():
     init_db()
 
-from fastapi import Query
+from fastapi import Query, Cookie
 
 # --- Helper Dependencies ---
-def get_current_user(x_session_token: Optional[str] = Header(None), token: Optional[str] = Query(None), db: Session = Depends(get_db)) -> User:
-    actual_token = x_session_token or token
+def get_current_user(
+    x_session_token: Optional[str] = Header(None),
+    authorization: Optional[str] = Header(None),
+    session_token: Optional[str] = Cookie(None),
+    token: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+) -> User:
+    actual_token = x_session_token or session_token or token
+    if not actual_token and authorization and authorization.startswith("Bearer "):
+        actual_token = authorization.split("Bearer ")[1].strip()
     if not actual_token:
         raise HTTPException(status_code=401, detail="غير مصرح: يلزم تسجيل الدخول")
     session = get_session_user(actual_token)
@@ -563,10 +574,11 @@ def get_clean_database_view(user: User = Depends(require_role([RoleEnum.ADMIN]))
 @app.get("/api/admin/database-export-excel")
 def export_clean_database_excel(user: User = Depends(require_role([RoleEnum.ADMIN])), db: Session = Depends(get_db)):
     users = db.query(User).all()
+    users.sort(key=lambda u: int(u.id) if str(u.id).isdigit() else 999999)
     data = []
     for u in users:
         data.append({
-            "ID": u.id,
+            "Student ID / User Code": u.seat_number or u.id,
             "Full Name": u.name,
             "Role": u.role.value if hasattr(u.role, 'value') else str(u.role or "student"),
             "Official FCIS Email": u.official_email or "",
@@ -595,6 +607,7 @@ def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, 
     tasks = db.query(Task).order_by(Task.id.asc()).all()
     sessions = db.query(SessionSchedule).order_by(SessionSchedule.id.asc()).all()
     users = db.query(User).all()
+    users.sort(key=lambda u: int(u.id) if str(u.id).isdigit() else 999999)
     total_sessions = len(sessions)
     
     # Pre-fetch all submissions and attendances in batch to eliminate N+1 queries
@@ -632,7 +645,7 @@ def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, 
             att_rate = round((att_present / total_sessions * 100), 1) if total_sessions > 0 else 100.0
             
             row = {
-                "Student ID": u.id,
+                "Student ID": u.seat_number or str(u.id),
                 "Student Name": u.name,
                 "Seat Number": u.seat_number or "",
                 "Academic Level": u.academic_level or "",
@@ -681,6 +694,225 @@ def export_full_grades_excel(user: User = Depends(require_role([RoleEnum.ADMIN, 
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+@app.get("/api/admin/sfe-model-export-excel")
+@app.get("/api/grades/sfe-model-export-excel")
+def export_sfe_grades_calculation_model_excel(
+    user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])),
+    db: Session = Depends(get_db)
+):
+    """
+    Exports the comprehensive SFE Grades Calculation Model with all 5 sheets:
+    Instructions, Source_Grades (with live Tasks, Attendance, Bonus, Formulas & Top 15 Scoreboard),
+    Project_Scores (with team grading cells), Project_Teams (with team groupings, assigned discussion supporters, lookups, final %, pass status & Top 10 Scoreboard),
+    and Team_Summary (with team pass rate and average calculations).
+    """
+    output = build_sfe_grades_workbook(db)
+    filename = f"SFE_Grades_Calculation_Model_{get_egypt_now().strftime('%Y%m%d_%H%M')}.xlsx"
+    return Response(
+        content=output.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@app.get("/api/admin/final-submission-export-excel")
+def export_final_submission_excel(
+    user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])),
+    db: Session = Depends(get_db)
+):
+    """
+    Exports the Official Final Delivery Submission Sheet.
+    Includes student info, 6 sessions attendance, 3 tasks scores, project scores (Individual Max 30, Full Project Max 80, Bonus Max 25),
+    Attendance %, Tasks %, Project %, Final Grade %, and Success Status (ناجح / لم ينجح).
+    Sorted numerically by exact database order (1 to 192).
+    """
+    output = build_final_submission_workbook(db)
+    filename = f"Final_Official_Submission_Sheet_{get_egypt_now().strftime('%Y%m%d_%H%M')}.xlsx"
+    return Response(
+        content=output.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+class MemberProjectGrade(BaseModel):
+    student_id: str
+    individual_score: float = 0.0
+    attendance: bool = False
+    notes: Optional[str] = None
+
+class SaveTeamProjectGradesRequest(BaseModel):
+    team_name: str
+    full_project_score: float = 0.0
+    project_bonus: float = 0.0
+    members: List[MemberProjectGrade]
+
+@app.get("/api/project/teams")
+def get_project_teams(
+    user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])),
+    db: Session = Depends(get_db)
+):
+    teams_data = get_all_project_teams(db)
+    
+    # Load all ProjectGrade records
+    all_pgs = db.query(ProjectGrade).all()
+    pg_map = {}
+    for pg in all_pgs:
+        pg_map[(pg.team_name.lower().strip(), str(pg.student_id).strip())] = pg
+
+    user_name_lower = (user.name or "").lower().strip()
+    is_lead = user.role == RoleEnum.ADMIN or user.role == RoleEnum.INSTRUCTOR or "admin" in get_user_roles(user) or "instructor" in get_user_roles(user)
+
+    result_teams = []
+    for t in teams_data:
+        t_name = t["team"]
+        supp_name = t["supporter"] or ""
+        supp_lower = supp_name.lower().strip()
+        
+        # Check if this supporter is matched
+        is_my_team = is_lead
+        if not is_lead:
+            if supp_lower and (supp_lower in user_name_lower or user_name_lower in supp_lower or any(part in user_name_lower for part in supp_lower.split() if len(part) > 2)):
+                is_my_team = True
+
+        members_list = []
+        team_full_proj = 0.0
+        team_bonus = 0.0
+
+        for m in t["members"]:
+            stu_id = str(m["id"]).strip()
+            pg = pg_map.get((t_name.lower().strip(), stu_id))
+            
+            indiv = pg.individual_score if pg else 0.0
+            if pg:
+                if pg.full_project_score:
+                    team_full_proj = pg.full_project_score
+                if pg.project_bonus:
+                    team_bonus = pg.project_bonus
+            att = pg.attendance if pg else False
+            notes = pg.notes if pg else ""
+
+            members_list.append({
+                "no": m["no"],
+                "student_id": stu_id,
+                "name": m["name"],
+                "level": m["level"],
+                "program": m["program"],
+                "phone": m.get("mobile", ""),
+                "email": m.get("email", ""),
+                "individual_score": indiv,
+                "attendance": att,
+                "notes": notes
+            })
+
+        result_teams.append({
+            "team_name": t_name,
+            "supporter": supp_name,
+            "is_my_team": is_my_team,
+            "full_project_score": team_full_proj,
+            "project_bonus": team_bonus,
+            "members": members_list
+        })
+
+    return {
+        "success": True,
+        "is_lead": is_lead,
+        "current_user_name": user.name,
+        "total_teams": len(result_teams),
+        "teams": result_teams
+    }
+
+@app.post("/api/project/grades/save")
+def save_team_project_grades(
+    req: SaveTeamProjectGradesRequest,
+    user: User = Depends(require_role([RoleEnum.ADMIN, RoleEnum.INSTRUCTOR, RoleEnum.SUPPORTER])),
+    db: Session = Depends(get_db)
+):
+    team_clean = req.team_name.strip()
+    full_proj = max(0.0, min(80.0, float(req.full_project_score)))
+    proj_bonus = max(0.0, min(25.0, float(req.project_bonus)))
+
+    # Auto-ensure Session 6 exists in DB for Project Discussion
+    sess6 = db.query(SessionSchedule).filter(or_(SessionSchedule.id == 6, SessionSchedule.title.like("%Session 6%"), SessionSchedule.title.like("%مناقشة%"))).first()
+    if not sess6:
+        first_instructor = db.query(User).filter(User.role.like("%instructor%")).first() or user
+        sess6 = SessionSchedule(
+            id=6 if not db.query(SessionSchedule).filter(SessionSchedule.id == 6).first() else None,
+            title="Session 6 - مناقشة المشاريع النهائية (Project Discussion)",
+            description="جلسة مناقشة وتقييم مشاريع الفرق النهائية",
+            instructor_id=first_instructor.id,
+            date_time=get_egypt_now(),
+            location_or_link="قاعة المناقشات / Online",
+            is_hr_attendance_open=True
+        )
+        db.add(sess6)
+        db.flush()
+
+    for m in req.members:
+        stu_id_clean = m.student_id.strip()
+        # If student is absent from discussion, individual score is strictly 0.0
+        if not m.attendance:
+            indiv = 0.0
+        else:
+            indiv = max(0.0, min(30.0, float(m.individual_score)))
+
+        # Find or create ProjectGrade
+        pg = db.query(ProjectGrade).filter(
+            ProjectGrade.team_name.ilike(team_clean),
+            ProjectGrade.student_id == stu_id_clean
+        ).first()
+
+        if not pg:
+            pg = ProjectGrade(
+                team_name=team_clean,
+                student_id=stu_id_clean,
+                individual_score=indiv,
+                full_project_score=full_proj,
+                project_bonus=proj_bonus,
+                attendance=m.attendance,
+                notes=m.notes or "",
+                graded_by_id=user.id,
+                updated_at=get_egypt_now()
+            )
+            db.add(pg)
+        else:
+            pg.individual_score = indiv
+            pg.full_project_score = full_proj
+            pg.project_bonus = proj_bonus
+            pg.attendance = m.attendance
+            pg.notes = m.notes or ""
+            pg.graded_by_id = user.id
+            pg.updated_at = get_egypt_now()
+
+        # Synchronize Session 6 Attendance in DB
+        u_obj = db.query(User).filter(or_(User.id == stu_id_clean, User.seat_number == stu_id_clean)).first()
+        actual_stu_id = u_obj.id if u_obj else stu_id_clean
+
+        att_status = AttendanceStatusEnum.PRESENT if m.attendance else AttendanceStatusEnum.ABSENT
+        att_rec = db.query(Attendance).filter(
+            Attendance.session_id == sess6.id,
+            Attendance.student_id == actual_stu_id
+        ).first()
+
+        if not att_rec:
+            att_rec = Attendance(
+                session_id=sess6.id,
+                student_id=actual_stu_id,
+                status=att_status,
+                notes="حضور مناقشة المشروع (Session 6 Project Discussion)"
+            )
+            db.add(att_rec)
+        else:
+            att_rec.status = att_status
+            att_rec.notes = "حضور مناقشة المشروع (Session 6 Project Discussion)"
+
+    db.commit()
+    return {
+        "success": True,
+        "message": f"تم حفظ درجات {team_clean} وتسجيل حضور السيشن الـ 6 بنجاح!"
+    }
+
+
 
 @app.get("/api/auth/me")
 def get_me(user: User = Depends(get_current_user)):
@@ -810,18 +1042,117 @@ def get_system_stats(user: User = Depends(require_role([RoleEnum.ADMIN])), db: S
         "created_at": c.created_at.strftime("%Y-%m-%d %H:%M") if c.created_at else ""
     } for c in certs]
 
+    # Calculate Project Discussion Attendance Statistics (Session 6)
+    all_pgs = db.query(ProjectGrade).all()
+    pg_attendance_map = {}
+    for pg in all_pgs:
+        pg_attendance_map[str(pg.student_id).strip()] = {
+            "attendance": pg.attendance,
+            "individual_score": pg.individual_score,
+            "full_project_score": pg.full_project_score,
+            "project_bonus": pg.project_bonus,
+            "team_name": pg.team_name,
+            "notes": pg.notes or ""
+        }
+
+    # Also query Session 6 attendance from Attendance table
+    sess6 = db.query(SessionSchedule).filter(or_(SessionSchedule.id == 6, SessionSchedule.title.like("%Session 6%"), SessionSchedule.title.like("%مناقشة%"))).first()
+    s6_attendance_student_ids = set()
+    if sess6:
+        s6_atts = db.query(Attendance).filter(Attendance.session_id == sess6.id, Attendance.status == AttendanceStatusEnum.PRESENT).all()
+        for a in s6_atts:
+            s6_attendance_student_ids.add(str(a.student_id).strip())
+
+    total_students = len(users_by_role["student"])
+
+    # Detailed discussion students and teams summary
+    from .sfe_excel_generator import get_all_project_teams
+    teams_data = get_all_project_teams(db)
+    
+    stu_team_map = {}
+    for t in teams_data:
+        t_name = t.get("team") or t.get("team_name") or ""
+        for m in t.get("members", []):
+            stu_team_map[str(m.get("id", "")).strip()] = {
+                "team_name": t_name,
+                "supporter": t.get("supporter", "")
+            }
+
+    discussion_students_list = []
+    discussion_present_count = 0
+
+    for st in users_by_role["student"]:
+        s_id = str(st["id"]).strip()
+        seat = str(st["seat_number"]).strip()
+        
+        pg_data = pg_attendance_map.get(s_id) or (pg_attendance_map.get(seat) if seat else None)
+        is_present = False
+        if pg_data and pg_data.get("attendance"):
+            is_present = True
+        elif s_id in s6_attendance_student_ids or (seat and seat in s6_attendance_student_ids):
+            is_present = True
+
+        if is_present:
+            discussion_present_count += 1
+
+        t_info = stu_team_map.get(s_id) or (stu_team_map.get(seat) if seat else None) or {}
+        
+        discussion_students_list.append({
+            "id": s_id,
+            "name": st["name"],
+            "seat_number": seat,
+            "team_name": (pg_data.get("team_name") if pg_data else None) or t_info.get("team_name", "غير محدد"),
+            "supporter": t_info.get("supporter", "المشرف العام"),
+            "attendance": is_present,
+            "status_text": "حاضر" if is_present else "غائب",
+            "individual_score": pg_data.get("individual_score", 0.0) if (pg_data and is_present) else 0.0,
+            "full_project_score": pg_data.get("full_project_score", 0.0) if pg_data else 0.0,
+            "project_bonus": pg_data.get("project_bonus", 0.0) if pg_data else 0.0,
+            "notes": pg_data.get("notes", "") if pg_data else ""
+        })
+
+    discussion_absent_count = max(0, total_students - discussion_present_count)
+    discussion_rate = round((discussion_present_count / total_students * 100.0), 1) if total_students > 0 else 0.0
+
+    # Teams summary for discussion
+    teams_discussion_summary = []
+    for t in teams_data:
+        t_name = t.get("team") or t.get("team_name") or ""
+        t_members = t.get("members", [])
+        m_total = len(t_members)
+        m_present = 0
+        for m in t_members:
+            m_id = str(m.get("id", "")).strip()
+            pg_info = pg_attendance_map.get(m_id)
+            if (pg_info and pg_info.get("attendance")) or m_id in s6_attendance_student_ids:
+                m_present += 1
+        teams_discussion_summary.append({
+            "team_name": t_name,
+            "supporter": t.get("supporter", ""),
+            "total_members": m_total,
+            "present_count": m_present,
+            "absent_count": max(0, m_total - m_present),
+            "rate": round((m_present / m_total * 100.0), 1) if m_total > 0 else 0.0
+        })
+
     return {
         "counts": {
-            "students": len(users_by_role["student"]),
+            "students": total_students,
             "supporters": len(users_by_role["supporter"]),
             "instructors": len(users_by_role["instructor"]),
             "hr": len(users_by_role["hr"]),
             "media": len(users_by_role["media"]),
             "admins": len(users_by_role["admin"]),
-            "certificates": len(certs_list)
+            "certificates": len(certs_list),
+            "discussion_present": discussion_present_count,
+            "discussion_absent": discussion_absent_count,
+            "discussion_total": total_students,
+            "discussion_rate": discussion_rate
         },
         "details": users_by_role,
-        "certificates": certs_list
+        "certificates": certs_list,
+        "discussion_students": discussion_students_list,
+        "discussion_teams_summary": teams_discussion_summary
     }
 
 @app.post("/api/admin/change-role")
@@ -1933,11 +2264,11 @@ def export_plagiarism_excel(task_id: int, user: User = Depends(require_role([Rol
             "Report ID": r.id,
             "Task ID": r.task_id,
             "Similarity Match %": f"{r.similarity_score}%",
-            "Student A ID": st_a.id if st_a else "",
+            "Student A ID / Seat No": (st_a.seat_number or str(st_a.id)) if st_a else "",
             "Student A Name": st_a.name if st_a else "",
             "Student A TA": st_a.assigned_supporter.name if (st_a and st_a.assigned_supporter) else "غير معين",
             "Student A HR": st_a.assigned_hr.name if (st_a and st_a.assigned_hr) else "غير معين",
-            "Student B ID": st_b.id if st_b else "",
+            "Student B ID / Seat No": (st_b.seat_number or str(st_b.id)) if st_b else "",
             "Student B Name": st_b.name if st_b else "",
             "Student B TA": st_b.assigned_supporter.name if (st_b and st_b.assigned_supporter) else "غير معين",
             "Student B HR": st_b.assigned_hr.name if (st_b and st_b.assigned_hr) else "غير معين"
@@ -1965,6 +2296,7 @@ def export_hr_attendance_excel(session_id: int, user: User = Depends(require_rol
         students = db.query(User).all()
     else:
         students = db.query(User).filter(User.assigned_hr_id == user.id).all()
+    students.sort(key=lambda u: int(u.id) if str(u.id).isdigit() else 999999)
         
     data = []
     for s in students:
@@ -1973,7 +2305,7 @@ def export_hr_attendance_excel(session_id: int, user: User = Depends(require_rol
             data.append({
                 "Session Title": sess.title,
                 "Session Date": sess.date_time.strftime("%Y-%m-%d %H:%M"),
-                "Student ID": s.id,
+                "Student ID": s.seat_number or str(s.id),
                 "Student Name": s.name,
                 "Seat Number": s.seat_number or "",
                 "Academic Level": s.academic_level or "",
@@ -2001,6 +2333,7 @@ def export_admin_student_attendance_excel(session_id: int, user: User = Depends(
         raise HTTPException(status_code=404, detail="السيشن غير موجودة")
     
     all_users = db.query(User).all()
+    all_users.sort(key=lambda u: int(u.id) if str(u.id).isdigit() else 999999)
     attendances = db.query(Attendance).filter(Attendance.session_id == session_id).all()
     att_map = {str(a.student_id): (a.status.value if hasattr(a.status, 'value') else str(a.status)) for a in attendances}
     
@@ -2010,7 +2343,7 @@ def export_admin_student_attendance_excel(session_id: int, user: User = Depends(
             continue
         status = att_map.get(str(u.id), "absent")
         data.append({
-            "ID": u.id,
+            "كود الطالب / رقم الجلوس": u.seat_number or str(u.id),
             "الاسم": u.name,
             "رقم الجلوس": u.seat_number or "",
             "الإيميل الأكاديمي": u.official_email or "",

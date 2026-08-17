@@ -2,8 +2,25 @@
             <div id="supporter-view" class="view-section">
                 <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
                     <button class="btn btn-primary" onclick="openCreateTaskModal()" data-i18n="btn_add_task">+ إضافة مهمة جديدة (Task)</button>
+                    <button class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: none; color: white; font-weight: bold;" onclick="openProjectGradingModal()">⭐ 🏆 تسجيل درجات المشاريع للتيمات</button>
                     <button class="btn btn-warning" onclick="openManagePointsModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white;" data-i18n="btn_manage_bonus_students">🏆 إدارة نقاط البونص للطلاب</button>
+                    <button class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: none; color: white; font-weight: bold;" onclick="handleDownloadSfeGradesModelExcel()" data-i18n="btn_export_sfe_model">⭐ 📥 تصدير نموذج درجات SFE والمشاريع</button>
                     <button class="btn btn-outline" style="color: var(--accent-emerald); border-color: var(--accent-emerald);" onclick="handleDownloadFullGradesExcel()" data-i18n="btn_export_full_grades">📥 تصدير شيت الدرجات Excel</button>
+                </div>
+
+                <!-- Project Grading Banner for Supporters -->
+                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(15, 23, 42, 0.6));">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3 style="margin-bottom: 6px; color: #a78bfa;">🏆 تقييم ومناقشة درجات المشاريع للتيمات (Project Evaluation & Grading)</h3>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                                يمكنك من هنا رصد الدرجات الفردية، درجات المشروع الجماعية، بونص التيم، وتسجيل حضور وغياب مناقشة المشروع للفرق المسندة إليك.
+                            </p>
+                        </div>
+                        <button class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: none; color: white; padding: 10px 20px; font-weight: bold;" onclick="openProjectGradingModal()">
+                            🏆 فتح شاشة رصد درجات المشاريع
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Unassigned Students Section -->

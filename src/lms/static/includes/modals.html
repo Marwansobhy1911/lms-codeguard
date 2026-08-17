@@ -324,9 +324,14 @@
                 <button class="close-btn" onclick="closeModal('manage-points-modal')">&times;</button>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                     <h3 style="color: var(--accent-cyan); margin: 0;" data-i18n="manage_points_title">🏆 إدارة نقاط البونص للطلاب</h3>
-                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="handleDownloadFullGradesExcel()" data-i18n="btn_export_full_grades">
-                        📥 تصدير شيت الدرجات والبونص (Excel Export)
-                    </button>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: bold;" onclick="handleDownloadSfeGradesModelExcel()" data-i18n="btn_export_sfe_model">
+                            ⭐ 📥 تصدير نموذج حساب درجات SFE والمشاريع
+                        </button>
+                        <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="handleDownloadFullGradesExcel()" data-i18n="btn_export_full_grades">
+                            📥 تصدير شيت الدرجات والبونص (Excel Export)
+                        </button>
+                    </div>
                 </div>
                 <div style="margin-bottom: 16px;">
                     <input type="text" id="manage-points-search" class="form-group" style="width: 100%; margin: 0; padding: 12px; border-radius: 8px;" placeholder="ابحث بالاسم، الـ ID أو رقم الجلوس..." onkeyup="filterManagePointsTable()">
@@ -354,4 +359,90 @@
                 </div>
             </div>
         </div>
+
+        <!-- MODAL: PROJECT EVALUATION & GRADING -->
+        <div id="project-grading-modal" class="modal-overlay" onclick="if(event.target === this) closeModal('project-grading-modal')">
+            <div class="modal-content" style="max-width: 950px; width: 95%;">
+                <button class="close-btn" onclick="closeModal('project-grading-modal')">&times;</button>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border-card); padding-bottom: 12px;">
+                    <div>
+                        <h3 style="color: var(--accent-cyan); margin: 0 0 4px 0;">🏆 تسجيل وتقييم درجات ومناقشة المشاريع</h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">رصد الدرجة الفردية، درجة المشروع الجماعية، البونص، وحضور مناقشة التيم.</p>
+                    </div>
+                    <button class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: bold; font-size: 0.85rem;" onclick="handleDownloadSfeGradesModelExcel()">
+                        ⭐ 📥 تصدير نموذج SFE الإكسيل
+                    </button>
+                </div>
+
+                <!-- Team Selector and Info Box -->
+                <div style="background: rgba(15,23,42,0.6); padding: 16px; border-radius: 12px; border: 1px solid var(--border-card); margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-weight: bold; color: var(--accent-cyan);">اختر الفريق (Team):</label>
+                        <select id="project-grading-team-select" onchange="handleSelectProjectTeam(this.value)" style="width: 100%; font-size: 1rem; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: white; border: 1px solid var(--border-card);">
+                            <option value="">-- جاري تحميل الفرق --</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">المشرف المسئول عن المناقشة: </span>
+                            <strong id="project-grading-supporter-name" style="color: #38bdf8;">--</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">عدد أفراد التيم: </span>
+                            <strong id="project-grading-members-count" style="color: var(--accent-emerald);">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team-Level Shared Scores (Project + Bonus) -->
+                <div class="grid-2" style="gap: 16px; margin-bottom: 20px;">
+                    <div style="background: rgba(14, 165, 233, 0.08); padding: 14px; border-radius: 10px; border: 1px solid rgba(14, 165, 233, 0.3);">
+                        <label style="font-weight: bold; font-size: 0.9rem; color: #38bdf8; display: block; margin-bottom: 6px;">
+                            📦 درجة المشروع الجماعية للتيم ككل (Full Project Score - Max 80):
+                        </label>
+                        <input type="number" id="project-grading-team-score" min="0" max="80" step="0.5" value="0" oninput="calculateProjectPreviewTotals()" style="width: 100%; font-size: 1.1rem; font-weight: bold; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4);">
+                    </div>
+
+                    <div style="background: rgba(245, 158, 11, 0.08); padding: 14px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.3);">
+                        <label style="font-weight: bold; font-size: 0.9rem; color: #fbbf24; display: block; margin-bottom: 6px;">
+                            ⭐ بونص المشروع الإضافي للتيم (Project Bonus - Max 25):
+                        </label>
+                        <input type="number" id="project-grading-team-bonus" min="0" max="25" step="0.5" value="0" oninput="calculateProjectPreviewTotals()" style="width: 100%; font-size: 1.1rem; font-weight: bold; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">
+                    </div>
+                </div>
+
+                <!-- Team Members Individual Table -->
+                <div class="table-responsive" style="max-height: 420px; overflow-y: auto; margin-bottom: 20px;">
+                    <table>
+                        <thead>
+                            <tr style="position: sticky; top: 0; background: #0f172a; z-index: 5;">
+                                <th style="width: 40px; text-align: center;">م</th>
+                                <th>اسم الطالب</th>
+                                <th>رقم الجلوس</th>
+                                <th style="min-width: 130px; text-align: center;">🎯 درجة الفردي (Max 30)</th>
+                                <th style="min-width: 110px; text-align: center;">📅 حضور المناقشة</th>
+                                <th style="min-width: 120px; text-align: center;">🧮 إجمالي المشروع (135)</th>
+                                <th style="min-width: 160px;">💬 ملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="project-team-members-tbody">
+                            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">اختر فريقاً لعرض أعضائه ورصد درجاتهم</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Actions / Buttons -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('project-grading-modal')">
+                        ❌ إغلاق
+                    </button>
+                    <button type="button" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: bold; padding: 12px 28px; font-size: 1rem; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);" onclick="handleSaveProjectTeamGrades()">
+                        💾 حفظ درجات التيم في الداتابيز
+                    </button>
+                </div>
+            </div>
+        </div>
+
 

@@ -156,3 +156,19 @@ class SystemSetting(Base):
     value = Column(String, nullable=False)
 
 
+class ProjectGrade(Base):
+    __tablename__ = "project_grades"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    team_name = Column(String, nullable=False, index=True) # e.g. "team 1"
+    student_id = Column(String, nullable=False, index=True)
+    individual_score = Column(Float, default=0.0) # Max 30
+    full_project_score = Column(Float, default=0.0) # Max 80
+    project_bonus = Column(Float, default=0.0) # Max 25
+    attendance = Column(Boolean, default=False)
+    notes = Column(Text, nullable=True)
+    graded_by_id = Column(String, nullable=True, index=True)
+    updated_at = Column(DateTime, default=get_egypt_now, onupdate=get_egypt_now)
+
+
+

@@ -185,6 +185,9 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 btn_clear_notifs: "🗑️ مسح الكل",
                 btn_manage_bonus_students: "🏆 إدارة نقاط البونص للطلاب",
                 btn_export_full_grades: "📥 تصدير شيت الدرجات والبونص (Excel Export)",
+                btn_export_sfe_model: "📥 تصدير نموذج حساب درجات SFE والمشاريع (SFE Model)",
+                title_sfe_grades_model: "📊 نموذج حساب وتوزيع درجات SFE وتقييم المشاريع",
+                desc_sfe_grades_model: "يتضمن الشيت بيانات الطلاب، درجات كل تاسك، الحضور لكل السيشنات، رصد درجات المشروع، توزيع التيمات والمشرفين على المناقشة، حساب المعدل النهائي الموزون، والـ Score Board.",
                 manage_points_title: "🏆 إدارة نقاط البونص للطلاب",
                 th_seat_phone: "رقم الجلوس / التليفون",
                 th_current_bonus: "نقاط البونص الحالية",
@@ -364,6 +367,9 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 th_upload_date: "Upload Date",
                 btn_manage_bonus_students: "🏆 Manage Student Bonus Points",
                 btn_export_full_grades: "📥 Export Full Grades & Bonus (Excel)",
+                btn_export_sfe_model: "📥 Export SFE Grades & Project Model (Excel)",
+                title_sfe_grades_model: "📊 SFE Grades Calculation & Project Evaluation Model",
+                desc_sfe_grades_model: "Export full SFE grading Excel model with live student data, tasks, attendance, project scores, team discussion supervisors, final weighted formula, and scoreboards.",
                 manage_points_title: "🏆 Manage Student Bonus Points",
                 th_seat_phone: "Seat No. / Phone",
                 th_current_bonus: "Current Bonus Points",
@@ -1996,6 +2002,43 @@ let currentToken = localStorage.getItem('lms_token') || '';
         }
 
 
+        function switchAdminTab(tabId) {
+            const panels = document.querySelectorAll('.admin-sub-panel');
+            panels.forEach(p => {
+                p.style.display = 'none';
+                p.classList.remove('active');
+            });
+
+            const targetPanel = document.getElementById(tabId);
+            if (targetPanel) {
+                targetPanel.style.display = 'block';
+                targetPanel.classList.add('active');
+            }
+
+            const buttons = document.querySelectorAll('.admin-tab-btn');
+            buttons.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'rgba(15, 23, 42, 0.6)';
+                b.style.borderColor = 'var(--border-card)';
+                b.style.color = 'var(--text-color)';
+                b.style.boxShadow = 'none';
+            });
+
+            const activeBtn = document.querySelector(`[data-tab-target="${tabId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
+                activeBtn.style.borderColor = 'var(--accent-cyan)';
+                activeBtn.style.color = '#ffffff';
+                activeBtn.style.boxShadow = '0 4px 14px rgba(2, 132, 199, 0.4)';
+            }
+
+            if (tabId === 'admin-panel-charts' && window.latestSystemStats) {
+                renderAdminRolesChart(window.latestSystemStats.counts || {});
+            }
+        }
+        window.switchAdminTab = switchAdminTab;
+
         async function loadAdminDashboard() {
             try {
                 try {
@@ -2028,6 +2071,22 @@ let currentToken = localStorage.getItem('lms_token') || '';
                     if (document.getElementById('admin-stat-admins')) document.getElementById('admin-stat-admins').innerText = c.admins || 0;
                     if (document.getElementById('admin-stat-teams')) document.getElementById('admin-stat-teams').innerText = c.teams || 0;
                     if (document.getElementById('admin-stat-certificates')) document.getElementById('admin-stat-certificates').innerText = c.certificates || 0;
+
+                    // Discussion Attendance Stats (Session 6)
+                    const discPres = c.discussion_present || 0;
+                    const discTotal = c.discussion_total || (c.students || 0);
+                    const discRate = c.discussion_rate || (discTotal > 0 ? Math.round((discPres/discTotal*100)*10)/10 : 0);
+                    const discAbsent = c.discussion_absent || Math.max(0, discTotal - discPres);
+
+                    if (document.getElementById('admin-stat-discussion-present')) {
+                        document.getElementById('admin-stat-discussion-present').innerHTML = `${discPres} <span style="font-size: 0.85rem; color: #94a3b8;">/ ${discTotal} (${discRate}%)</span>`;
+                    }
+                    if (document.getElementById('admin-disc-present-count')) document.getElementById('admin-disc-present-count').innerText = `${discPres} طالب`;
+                    if (document.getElementById('admin-disc-absent-count')) document.getElementById('admin-disc-absent-count').innerText = `${discAbsent} طالب`;
+                    if (document.getElementById('admin-disc-rate')) document.getElementById('admin-disc-rate').innerText = `${discRate}%`;
+                    if (document.getElementById('admin-disc-total-count')) document.getElementById('admin-disc-total-count').innerText = `${discTotal} طالب`;
+
+                    renderAdminDiscTeamsTable(stats.discussion_teams_summary || []);
                     renderAdminRolesChart(c);
                 } catch (e) { console.error(e); }
 
@@ -2117,8 +2176,72 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 renderAdminCrewTable();
 
                 renderAdminUsersTable(users);
+                if (!document.querySelector('.admin-sub-panel.active')) {
+                    switchAdminTab('admin-panel-users');
+                }
             } catch (err) { console.error(err); }
         }
+
+        function renderAdminDiscTeamsTable(teams) {
+            window.adminDiscTeamsList = teams || [];
+            filterAdminDiscTeamsTable();
+        }
+
+        function filterAdminDiscTeamsTable() {
+            const tbody = document.getElementById('admin-disc-teams-tbody');
+            if (!tbody) return;
+            const searchVal = (document.getElementById('admin-disc-team-search')?.value || '').toLowerCase().trim();
+            const list = (window.adminDiscTeamsList || []).filter(t => {
+                if (!searchVal) return true;
+                return (t.team_name || '').toLowerCase().includes(searchVal) || (t.supporter || '').toLowerCase().includes(searchVal);
+            });
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد نتائج مطابقة.' : 'No matching teams.'}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(t => {
+                const isFull = t.total_members > 0 && t.present_count === t.total_members;
+                const isZero = t.present_count === 0;
+                const badgeColor = isFull ? '#34d399' : (isZero ? '#f43f5e' : '#38bdf8');
+                return `
+                <tr>
+                    <td><strong style="color: #60a5fa;">${t.team_name}</strong></td>
+                    <td>${t.supporter || (currentLang === 'ar' ? 'المشرف العام' : 'General')}</td>
+                    <td style="text-align: center;">
+                        <span class="badge" style="background: rgba(0,0,0,0.3); color: ${badgeColor}; font-size: 0.85rem; font-weight: bold; border: 1px solid ${badgeColor};">
+                            ${t.present_count} / ${t.total_members} حاضر
+                        </span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <div style="flex: 1; max-width: 80px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                                <div style="width: ${t.rate}%; height: 100%; background: ${badgeColor};"></div>
+                            </div>
+                            <span style="font-size: 0.8rem; font-weight: bold; color: ${badgeColor};">${t.rate}%</span>
+                        </div>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-outline" style="padding: 3px 10px; font-size: 0.8rem; border-color: var(--accent-cyan); color: var(--accent-cyan);" onclick="openProjectGradingForTeam('${escapeCode(t.team_name)}')">
+                            ⭐ رصد وتقييم
+                        </button>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+        }
+        window.filterAdminDiscTeamsTable = filterAdminDiscTeamsTable;
+
+        async function openProjectGradingForTeam(teamName) {
+            await openProjectGradingModal();
+            const selectEl = document.getElementById('project-grading-team-select');
+            if (selectEl) {
+                selectEl.value = teamName;
+                handleSelectProjectTeam(teamName);
+            }
+        }
+        window.openProjectGradingForTeam = openProjectGradingForTeam;
 
         function openStatsDetailModal(cat) {
             if (!window.latestSystemStats) return;
@@ -2135,12 +2258,42 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 media: currentLang === 'ar' ? '📸 قائمة مسؤولين الميديا (Media)' : '📸 Media Team List',
                 student: currentLang === 'ar' ? '🎓 قائمة الطلاب (Students)' : '🎓 Students List',
                 teams: currentLang === 'ar' ? '🏆 قائمة التيمات وأعضائها' : '🏆 Teams & Members List',
-                certificates: currentLang === 'ar' ? '📜 قائمة الشهادات الصادرة' : '📜 Issued Certificates List'
+                certificates: currentLang === 'ar' ? '📜 قائمة الشهادات الصادرة' : '📜 Issued Certificates List',
+                discussion: currentLang === 'ar' ? '🎤 قائمة حضور وغياب مناقشة المشاريع (Session 6)' : '🎤 Project Discussion Attendance List'
             };
 
             titleEl.innerText = catTitles[cat] || (currentLang === 'ar' ? 'تفاصيل القائمة' : 'List Details');
 
-            if (cat === 'teams') {
+            if (cat === 'discussion') {
+                theadEl.innerHTML = currentLang === 'ar'
+                    ? '<th>ID / رقم الجلوس</th><th>اسم الطالب</th><th>الفريق (Team)</th><th>المشرف (Supporter)</th><th>حالة الحضور (Session 6)</th><th>الدرجة الفردية</th><th>الملاحظات</th>'
+                    : '<th>ID / Seat No.</th><th>Student Name</th><th>Team</th><th>Supporter</th><th>Discussion Attendance</th><th>Individual Score</th><th>Notes</th>';
+                const discStudents = stats.discussion_students || [];
+                if (discStudents.length === 0) {
+                    tbodyEl.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد بيانات حضور للمناقشة بعد.' : 'No discussion attendance data found.'}</td></tr>`;
+                } else {
+                    tbodyEl.innerHTML = discStudents.map(s => {
+                        const isPres = s.attendance === true;
+                        return `
+                        <tr>
+                            <td><code>${s.seat_number || s.id}</code></td>
+                            <td><strong>${s.name}</strong></td>
+                            <td><span style="color: #60a5fa; font-weight: bold;">${s.team_name}</span></td>
+                            <td>${s.supporter || 'المشرف العام'}</td>
+                            <td style="text-align: center;">
+                                <span class="badge" style="background: ${isPres ? 'rgba(52, 211, 153, 0.2)' : 'rgba(244, 63, 94, 0.2)'}; color: ${isPres ? '#34d399' : '#f43f5e'}; font-weight: bold;">
+                                    ${isPres ? (currentLang === 'ar' ? 'حاضر (✓)' : 'Present') : (currentLang === 'ar' ? 'غائب (✗)' : 'Absent')}
+                                </span>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; color: ${isPres ? '#38bdf8' : '#64748b'};">
+                                ${isPres ? s.individual_score + ' / 40' : '0 (غائب)'}
+                            </td>
+                            <td style="font-size: 0.85rem; color: var(--text-muted);">${s.notes || '-'}</td>
+                        </tr>
+                    `;
+                    }).join('');
+                }
+            } else if (cat === 'teams') {
                 theadEl.innerHTML = currentLang === 'ar'
                     ? '<th>ID الفريق</th><th>اسم الفريق</th><th>عدد الأعضاء</th><th>أسماء الأعضاء</th>'
                     : '<th>Team ID</th><th>Team Name</th><th>Members Count</th><th>Members List</th>';
@@ -2598,6 +2751,13 @@ let currentToken = localStorage.getItem('lms_token') || '';
             window.open(`/api/admin/grades-export-excel?token=${encodeURIComponent(localStorage.getItem('lms_token') || '')}`, '_blank');
         }
 
+        function handleDownloadSfeGradesModelExcel() {
+            window.open(`/api/admin/sfe-model-export-excel?token=${encodeURIComponent(localStorage.getItem('lms_token') || '')}`, '_blank');
+        }
+        window.handleDownloadSfeGradesModelExcel = handleDownloadSfeGradesModelExcel;
+        window.handleDownloadFullGradesExcel = handleDownloadFullGradesExcel;
+
+
         async function handleAddBonusPoints(studentId) {
             const pointsStr = prompt(currentLang === 'ar' ? 'أدخل عدد النقاط لإضافتها أو خصمها (مثال: 10 أو -5):' : 'Enter points to add/subtract (e.g. 10 or -5):');
             if (!pointsStr) return;
@@ -2918,6 +3078,236 @@ let currentToken = localStorage.getItem('lms_token') || '';
                 loadInstructorDashboard();
             } catch (err) { alert(err.message); }
         }
+
+        async function openProjectGradingModal() {
+            try {
+                const res = await apiRequest('/api/project/teams');
+                if (!res || !res.teams || res.teams.length === 0) {
+                    alert(currentLang === 'ar' ? 'لا توجد بيانات للفرق متاحة حالياً.' : 'No project teams data found.');
+                    return;
+                }
+
+                window.allProjectTeamsData = res.teams;
+                const selectEl = document.getElementById('project-grading-team-select');
+                if (!selectEl) return;
+
+                const myTeams = res.teams.filter(t => t.is_my_team);
+                const otherTeams = res.teams.filter(t => !t.is_my_team);
+
+                let html = '';
+                if (myTeams.length > 0 && otherTeams.length > 0) {
+                    html += `<optgroup label="${currentLang === 'ar' ? '⭐ الفرق المسندة لي (My Teams)' : '⭐ My Assigned Teams'}">` +
+                        myTeams.map(t => `<option value="${t.team_name}">${t.team_name} - المشرف: ${t.supporter || 'غير محدد'}</option>`).join('') +
+                        `</optgroup>`;
+                    html += `<optgroup label="${currentLang === 'ar' ? 'باقي الفرق' : 'Other Teams'}">` +
+                        otherTeams.map(t => `<option value="${t.team_name}">${t.team_name} - المشرف: ${t.supporter || 'غير محدد'}</option>`).join('') +
+                        `</optgroup>`;
+                } else {
+                    html = res.teams.map(t => `<option value="${t.team_name}">${t.team_name} - المشرف: ${t.supporter || 'غير محدد'}</option>`).join('');
+                }
+
+                selectEl.innerHTML = html;
+
+                // Pick first team or first of my teams
+                const initialTeam = myTeams.length > 0 ? myTeams[0].team_name : res.teams[0].team_name;
+                selectEl.value = initialTeam;
+                handleSelectProjectTeam(initialTeam);
+
+                openModal('project-grading-modal');
+            } catch (err) {
+                alert(err.message || 'فشل تحميل بيانات فرق المشاريع');
+            }
+        }
+        window.openProjectGradingModal = openProjectGradingModal;
+
+        function handleSelectProjectTeam(teamName) {
+            if (!window.allProjectTeamsData) return;
+            const team = window.allProjectTeamsData.find(t => t.team_name.toLowerCase() === teamName.toLowerCase());
+            if (!team) return;
+
+            const suppNameEl = document.getElementById('project-grading-supporter-name');
+            const countEl = document.getElementById('project-grading-members-count');
+            const teamScoreInput = document.getElementById('project-grading-team-score');
+            const teamBonusInput = document.getElementById('project-grading-team-bonus');
+            const tbody = document.getElementById('project-team-members-tbody');
+
+            if (suppNameEl) suppNameEl.innerText = team.supporter || (currentLang === 'ar' ? 'المشرف العام' : 'General');
+            if (countEl) countEl.innerText = (team.members || []).length;
+            if (teamScoreInput) teamScoreInput.value = (team.full_project_score !== undefined && team.full_project_score !== null) ? team.full_project_score : 0;
+            if (teamBonusInput) teamBonusInput.value = (team.project_bonus !== undefined && team.project_bonus !== null) ? team.project_bonus : 0;
+
+            if (tbody) {
+                if (!team.members || team.members.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">${currentLang === 'ar' ? 'لا يوجد أعضاء مسجلين في هذا الفريق.' : 'No members found in this team.'}</td></tr>`;
+                } else {
+                    tbody.innerHTML = team.members.map((m, idx) => {
+                        const isAtt = m.attendance === true;
+                        const indivVal = isAtt ? ((m.individual_score !== undefined && m.individual_score !== null) ? m.individual_score : 0) : 0;
+                        return `
+                        <tr class="project-member-row" data-student-id="${m.student_id}">
+                            <td style="text-align: center; font-weight: bold;">${m.no || (idx + 1)}</td>
+                            <td>
+                                <strong style="color: #60a5fa;">${m.name}</strong>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">${m.level || ''} | ${m.program || ''}</div>
+                            </td>
+                            <td><code style="color: #34d399; font-size: 0.9rem;">${m.student_id}</code></td>
+                            <td style="text-align: center;">
+                                <input type="number" class="member-indiv-score" min="0" max="30" step="0.5" value="${indivVal}" ${isAtt ? '' : 'disabled'} oninput="calculateProjectPreviewTotals()" style="width: 80px; text-align: center; font-weight: bold; padding: 6px; border-radius: 6px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border-card); ${isAtt ? '' : 'opacity: 0.35; cursor: not-allowed;'}" title="${isAtt ? 'أدخل درجة الفردي (0-30)' : 'الطالب غائب - لا يمكن رصد درجات فردية إلا بعد تفعيل الحضور'}">
+                            </td>
+                            <td style="text-align: center;">
+                                <label style="margin: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,0.2);">
+                                    <input type="checkbox" class="member-att-check" ${isAtt ? 'checked' : ''} onchange="calculateProjectPreviewTotals()" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span class="member-att-label" style="font-size: 0.85rem; font-weight: bold; color: ${isAtt ? '#34d399' : '#f43f5e'};">
+                                        ${isAtt ? (currentLang === 'ar' ? 'حاضر (✓)' : 'Present') : (currentLang === 'ar' ? 'غائب (✗)' : 'Absent')}
+                                    </span>
+                                </label>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="member-total-score-badge" style="font-weight: 800; font-size: 0.95rem; color: var(--accent-cyan);">
+                                    0 / 135
+                                </span>
+                            </td>
+                            <td>
+                                <input type="text" class="member-notes-input" value="${(m.notes || '').replace(/"/g, '&quot;')}" placeholder="${currentLang === 'ar' ? 'ملاحظات المناقشة...' : 'Discussion notes...'}" style="width: 100%; font-size: 0.85rem; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.2); color: #fff; border: 1px solid var(--border-card);">
+                            </td>
+                        </tr>
+                    `}).join('');
+                }
+            }
+
+            calculateProjectPreviewTotals();
+        }
+        window.handleSelectProjectTeam = handleSelectProjectTeam;
+
+        function calculateProjectPreviewTotals() {
+            const teamScoreInput = document.getElementById('project-grading-team-score');
+            const teamBonusInput = document.getElementById('project-grading-team-bonus');
+
+            let teamScore = parseFloat(teamScoreInput ? teamScoreInput.value : 0) || 0;
+            let teamBonus = parseFloat(teamBonusInput ? teamBonusInput.value : 0) || 0;
+
+            if (teamScore > 80) teamScore = 80;
+            if (teamBonus > 25) teamBonus = 25;
+
+            const rows = document.querySelectorAll('.project-member-row');
+            rows.forEach(row => {
+                const attCheck = row.querySelector('.member-att-check');
+                const isChecked = attCheck ? attCheck.checked : false;
+                const indivInput = row.querySelector('.member-indiv-score');
+                const attLabel = row.querySelector('.member-att-label');
+
+                // Enforce lock when absent
+                if (indivInput) {
+                    if (!isChecked) {
+                        indivInput.disabled = true;
+                        indivInput.value = 0;
+                        indivInput.style.opacity = '0.35';
+                        indivInput.style.cursor = 'not-allowed';
+                        indivInput.title = currentLang === 'ar' ? 'الطالب غائب - لا يمكن رصد درجات فردية إلا بعد تفعيل الحضور' : 'Student is absent - cannot grade until marked present';
+                    } else {
+                        indivInput.disabled = false;
+                        indivInput.style.opacity = '1';
+                        indivInput.style.cursor = 'text';
+                        indivInput.title = currentLang === 'ar' ? 'أدخل درجة الفردي (0-30)' : 'Enter individual score (0-30)';
+                    }
+                }
+
+                if (attLabel) {
+                    attLabel.innerText = isChecked ? (currentLang === 'ar' ? 'حاضر (✓)' : 'Present') : (currentLang === 'ar' ? 'غائب (✗)' : 'Absent');
+                    attLabel.style.color = isChecked ? '#34d399' : '#f43f5e';
+                }
+
+                let indiv = isChecked ? (parseFloat(indivInput ? indivInput.value : 0) || 0) : 0;
+                if (indiv > 30) { indiv = 30; if (indivInput) indivInput.value = 30; }
+                if (indiv < 0) { indiv = 0; if (indivInput) indivInput.value = 0; }
+
+                const total = isChecked ? (Math.round((indiv + teamScore + teamBonus) * 10) / 10) : 0;
+                const badge = row.querySelector('.member-total-score-badge');
+                if (badge) {
+                    if (!isChecked) {
+                        badge.innerText = `0 / 135 (${currentLang === 'ar' ? 'غائب' : 'Absent'})`;
+                        badge.style.color = '#f43f5e';
+                    } else {
+                        badge.innerText = `${total} / 135`;
+                        if (total >= 80) {
+                            badge.style.color = '#34d399';
+                        } else if (total >= 50) {
+                            badge.style.color = '#38bdf8';
+                        } else {
+                            badge.style.color = '#f43f5e';
+                        }
+                    }
+                }
+            });
+        }
+        window.calculateProjectPreviewTotals = calculateProjectPreviewTotals;
+
+        function handleDownloadFinalSubmissionExcel() {
+            const token = localStorage.getItem('lms_token') || '';
+            window.open(`/api/admin/final-submission-export-excel?token=${encodeURIComponent(token)}`, '_blank');
+        }
+        window.handleDownloadFinalSubmissionExcel = handleDownloadFinalSubmissionExcel;
+
+        async function handleSaveProjectTeamGrades() {
+            const selectEl = document.getElementById('project-grading-team-select');
+            const teamName = selectEl ? selectEl.value : '';
+            if (!teamName) {
+                alert(currentLang === 'ar' ? 'يرجى اختيار الفريق أولاً' : 'Please select a team first');
+                return;
+            }
+
+            const teamScore = parseFloat(document.getElementById('project-grading-team-score').value) || 0;
+            const teamBonus = parseFloat(document.getElementById('project-grading-team-bonus').value) || 0;
+
+            const rows = document.querySelectorAll('.project-member-row');
+            const membersPayload = [];
+
+            rows.forEach(row => {
+                const stuId = row.getAttribute('data-student-id');
+                const att = row.querySelector('.member-att-check').checked;
+                // If absent, individual score is strictly 0
+                const indiv = att ? (parseFloat(row.querySelector('.member-indiv-score').value) || 0) : 0.0;
+                const notes = row.querySelector('.member-notes-input').value.trim();
+
+                membersPayload.push({
+                    student_id: stuId,
+                    individual_score: indiv,
+                    attendance: att,
+                    notes: notes
+                });
+            });
+
+            try {
+                const res = await apiRequest('/api/project/grades/save', 'POST', {
+                    team_name: teamName,
+                    full_project_score: teamScore,
+                    project_bonus: teamBonus,
+                    members: membersPayload
+                });
+
+                showToast(res.message || (currentLang === 'ar' ? '✓ تم حفظ درجات المشروع بنجاح' : '✓ Project grades saved'));
+
+                // Update local model
+                if (window.allProjectTeamsData) {
+                    const team = window.allProjectTeamsData.find(t => t.team_name.toLowerCase() === teamName.toLowerCase());
+                    if (team) {
+                        team.full_project_score = teamScore;
+                        team.project_bonus = teamBonus;
+                        membersPayload.forEach(mp => {
+                            const tm = (team.members || []).find(m => m.student_id === mp.student_id);
+                            if (tm) {
+                                tm.individual_score = mp.individual_score;
+                                tm.attendance = mp.attendance;
+                                tm.notes = mp.notes;
+                            }
+                        });
+                    }
+                }
+            } catch (err) {
+                alert(err.message || 'فشل حفظ درجات المشروع');
+            }
+        }
+        window.handleSaveProjectTeamGrades = handleSaveProjectTeamGrades;
 
         // Global Event Listeners for smooth modal close
         document.addEventListener('keydown', (e) => {

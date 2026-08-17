@@ -3,7 +3,9 @@
                 <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
                     <button class="btn btn-primary" onclick="openCreateTaskModal()" data-i18n="btn_add_task">+ إضافة مهمة جديدة (Task)</button>
                     <button class="btn btn-success" onclick="openCreateSessionModal()" data-i18n="btn_add_session">+ إضافة سيشن جديدة</button>
+                    <button class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: none; color: white; font-weight: bold;" onclick="openProjectGradingModal()">⭐ 🏆 تسجيل درجات المشاريع والتيمات</button>
                     <button class="btn btn-warning" onclick="openManagePointsModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white;" data-i18n="btn_manage_bonus_students">🏆 إدارة نقاط البونص للطلاب</button>
+                    <button class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: none; color: white; font-weight: bold;" onclick="handleDownloadSfeGradesModelExcel()" data-i18n="btn_export_sfe_model">⭐ 📥 تصدير نموذج حساب درجات SFE والمشاريع</button>
                     <button class="btn btn-outline" style="color: var(--accent-emerald); border-color: var(--accent-emerald);" onclick="handleDownloadFullGradesExcel()" data-i18n="btn_export_full_grades">📥 تصدير شيت الدرجات Excel</button>
                     <button class="btn btn-outline" style="color: var(--accent-cyan); border-color: var(--accent-cyan);" onclick="openSupportersProgressModal()">📊 متابعة أداء المساعدين</button>
                 </div>

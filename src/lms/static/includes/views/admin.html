@@ -1,268 +1,441 @@
 <!-- ADMIN VIEW -->
-            <div id="admin-view" class="view-section">
-                <!-- Admin System Statistics Panel -->
-                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-cyan);">
-                    <h3 style="margin-bottom: 16px; color: var(--accent-cyan);" data-i18n="admin_stats_title">📊 إحصائيات وأعداد النظام الشاملة (System Overview Stats)</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 14px;">
-                        <div onclick="openStatsDetailModal('student')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #60a5fa;" id="admin-stat-students">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_students">🔍 الطلاب 🎓</div>
-                        </div>
-                        <div onclick="openStatsDetailModal('supporter')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #34d399;" id="admin-stat-supporters">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_supporters">🔍 المساعدين 🛠️</div>
-                        </div>
-                        <div onclick="openStatsDetailModal('instructor')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #fbbf24;" id="admin-stat-instructors">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_instructors">🔍 المدربين 👨‍🏫</div>
-                        </div>
-                        <div onclick="openStatsDetailModal('hr')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #f43f5e;" id="admin-stat-hr">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_hr">🔍 الـ HR 📋</div>
-                        </div>
-                        <div onclick="openStatsDetailModal('media')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #a78bfa;" id="admin-stat-media">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_media">🔍 الميديا 📸</div>
-                        </div>
-                        <div onclick="openStatsDetailModal('admin')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #c084fc;" id="admin-stat-admins">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_admins">🔍 الأدمنز 👑</div>
-                        </div>
-                        <div onclick="openStatsDetailModal('teams')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8;" id="admin-stat-teams">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_teams">🔍 التيمات 🏆</div>
-                        </div>
-                        <div onclick="openStatsDetailModal('certificates')" style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 12px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-                            <div style="font-size: 1.6rem; font-weight: 800; color: #22c55e;" id="admin-stat-certificates">0</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_certificates">🔍 الشهادات 📜</div>
-                        </div>
-                    </div>
+<div id="admin-view" class="view-section">
+    <!-- Admin System Statistics Overview Panel -->
+    <div class="glass-card" style="margin-bottom: 20px; border: 1px solid var(--accent-cyan);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <h3 style="margin: 0; color: var(--accent-cyan);" data-i18n="admin_stats_title">📊 إحصائيات وأعداد النظام الشاملة (System Overview Stats)</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">💡 اضغط على أي بطاقة لعرض تفاصيل القائمة</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr)); gap: 12px;">
+            <div onclick="openStatsDetailModal('student')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #60a5fa;" id="admin-stat-students">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_students">🔍 الطلاب 🎓</div>
+            </div>
+            <div onclick="openStatsDetailModal('supporter')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #34d399;" id="admin-stat-supporters">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_supporters">🔍 المساعدين 🛠️</div>
+            </div>
+            <div onclick="openStatsDetailModal('instructor')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #fbbf24;" id="admin-stat-instructors">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_instructors">🔍 المدربين 👨‍🏫</div>
+            </div>
+            <div onclick="openStatsDetailModal('hr')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #f43f5e;" id="admin-stat-hr">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_hr">🔍 الـ HR 📋</div>
+            </div>
+            <div onclick="openStatsDetailModal('media')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #a78bfa;" id="admin-stat-media">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_media">🔍 الميديا 📸</div>
+            </div>
+            <div onclick="openStatsDetailModal('admin')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #c084fc;" id="admin-stat-admins">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_admins">🔍 الأدمنز 👑</div>
+            </div>
+            <div onclick="openStatsDetailModal('teams')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;" id="admin-stat-teams">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_teams">🔍 التيمات 🏆</div>
+            </div>
+            <div onclick="openStatsDetailModal('certificates')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid var(--border-card); cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #22c55e;" id="admin-stat-certificates">0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;" data-i18n="stat_card_certificates">🔍 الشهادات 📜</div>
+            </div>
+            <div onclick="openStatsDetailModal('discussion')" style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #38bdf8; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;" id="admin-stat-discussion-present">0 / 0</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">🔍 حضور المناقشة 🎯</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Navigation Action Bar (Tabs / Modular Layout Buttons) -->
+    <div style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; align-items: center;">
+        <button class="btn admin-tab-btn active" data-tab-target="admin-panel-users" onclick="switchAdminTab('admin-panel-users')" style="background: linear-gradient(135deg, #0284c7, #0369a1); border-color: var(--accent-cyan); color: #ffffff; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);">
+            👥 إدارة المستخدمين والصلاحيات
+        </button>
+        <button class="btn admin-tab-btn" data-tab-target="admin-panel-reports" onclick="switchAdminTab('admin-panel-reports')" style="background: rgba(15, 23, 42, 0.6); border-color: var(--border-card);">
+            📊 تصدير التقارير ونموذج SFE
+        </button>
+        <button class="btn admin-tab-btn" data-tab-target="admin-panel-student-attendance" onclick="switchAdminTab('admin-panel-student-attendance')" style="background: rgba(15, 23, 42, 0.6); border-color: var(--border-card);">
+            🎯 حضور وغياب الطلاب
+        </button>
+        <button class="btn admin-tab-btn" data-tab-target="admin-panel-crew-attendance" onclick="switchAdminTab('admin-panel-crew-attendance')" style="background: rgba(15, 23, 42, 0.6); border-color: var(--border-card);">
+            📋 حضور فريق العمل (Crew)
+        </button>
+        <button class="btn admin-tab-btn" data-tab-target="admin-panel-sessions" onclick="switchAdminTab('admin-panel-sessions')" style="background: rgba(15, 23, 42, 0.6); border-color: var(--border-card);">
+            📅 إدارة السيشنات
+        </button>
+        <button class="btn admin-tab-btn" data-tab-target="admin-panel-submissions" onclick="switchAdminTab('admin-panel-submissions')" style="background: rgba(15, 23, 42, 0.6); border-color: var(--border-card);">
+            📝 تسليمات الطلاب
+        </button>
+        <button class="btn admin-tab-btn" data-tab-target="admin-panel-settings" onclick="switchAdminTab('admin-panel-settings')" style="background: rgba(15, 23, 42, 0.6); border-color: var(--border-card);">
+            ⚙️ إعدادات النظام ومكافحة الغش
+        </button>
+        <button class="btn admin-tab-btn" data-tab-target="admin-panel-charts" onclick="switchAdminTab('admin-panel-charts')" style="background: rgba(15, 23, 42, 0.6); border-color: var(--border-card);">
+            📈 مخطط توزيع الرولات
+        </button>
+    </div>
+
+    <!-- ==================== TAB 1: USERS & ROLES MANAGEMENT ==================== -->
+    <div id="admin-panel-users" class="admin-sub-panel active">
+        <div class="glass-card" style="border: 1px solid var(--accent-cyan);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <h3 style="color: var(--accent-cyan); margin: 0 0 6px 0;" data-i18n="title_user_mgmt">👥 إدارة حسابات المستخدمين والصلاحيات (Users & Roles)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">عرض وتعديل بيانات المستخدمين، تعيين الأدوار والصلاحيات، وإدارة النسخ الاحتياطية.</p>
                 </div>
-
-                <!-- Admin Chart Canvas Container -->
-                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-blue);">
-                    <h3 style="margin-bottom: 16px; color: var(--accent-blue);">📈 توزيع الأدوار والمسارات بالنظام (Roles Distribution)</h3>
-                    <div style="max-height: 320px; position: relative;">
-                        <canvas id="admin-roles-chart" style="width: 100%; max-height: 300px;"></canvas>
-                    </div>
-                </div>
-
-
-
-                <!-- Material Drive Link Settings (Admin) -->
-                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-cyan);">
-                    <h3 style="margin-bottom: 8px; color: var(--accent-cyan);" data-i18n="admin_drive_settings_title">🔗 رابط درايف الماتيريال (Course Material Drive)</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
-                        تحديث الرابط الذي يظهر للطلاب للوصول السريع لملف الدرايف.
-                    </p>
-                    <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
-                        <div class="form-group" style="flex: 1; margin: 0;">
-                            <label style="font-size: 0.85rem;">الرابط (URL):</label>
-                            <input type="url" id="admin-drive-url-input" placeholder="https://drive.google.com/..." style="width: 100%;">
-                        </div>
-                        <button class="btn btn-primary" onclick="handleSaveDriveUrl()">حفظ الرابط</button>
-                    </div>
-                </div>
-
-                <!-- Cheating System Settings (Admin) -->
-                <div class="glass-card" style="margin-bottom: 28px; border: 1px solid var(--accent-red);">
-                    <h3 style="margin-bottom: 8px; color: var(--accent-red);">🚨 نظام كشف الغش التلقائي (Anti-Cheat)</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
-                        تفعيل أو تعطيل الفحص التلقائي للغش عند تسليم الطلاب للتاسكات. يمكنك أيضًا مسح جميع التقارير الحالية.
-                    </p>
-                    <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                        <div style="display: flex; gap: 16px; align-items: center;">
-                            <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 24px;">
-                                <input type="checkbox" id="admin-cheating-toggle" onchange="handleToggleCheating()" style="opacity: 0; width: 0; height: 0;">
-                                <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px;"></span>
-                            </label>
-                            <span id="admin-cheating-status-text" style="font-weight: bold; color: var(--text-color);">مفعل</span>
-                        </div>
-                        <button class="btn btn-danger" onclick="handleDeleteAllCheatingReports()" style="margin-right: auto;">🗑️ مسح كل تقارير الغش</button>
-                    </div>
-                </div>
-                <style>
-                    #admin-cheating-toggle:checked + .slider { background-color: var(--accent-red); }
-                    #admin-cheating-toggle:checked + .slider:before { transform: translateX(26px); }
-                    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-                </style>
-
-                <!-- Admin Student Attendance Control -->
-                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-purple);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <h3 style="color: var(--accent-purple);">📊 إدارة حضور وغياب جميع الطلاب (Admin)</h3>
-                        <div style="display: flex; gap: 8px;">
-                            <span id="admin-students-count-badge" class="badge badge-hr">إجمالي الطلاب: --</span>
-                            <span id="admin-present-count-badge" class="badge" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">الحضور: 0</span>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">يمكنك رصد حضور وغياب الطلاب يدوياً لأي سيشن. هذه اللوحة لا تتأثر بإعدادات إغلاق التسجيل على الـ HR.</p>
-
-                    <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: var(--accent-cyan);">🎯 تسجيل الحضور يدوياً للطلاب</h4>
-
-                    <div class="form-group">
-                        <label>اختر السيشن المراد رصد غيابها:</label>
-                        <select id="admin-student-session-select" style="margin-bottom: 12px;">
-                            <option value="">-- اختر السيشن --</option>
-                        </select>
-                    </div>
-
-                    <!-- QUICK ID ATTENDANCE FORM FOR ADMIN -->
-                    <div style="margin-bottom: 24px; padding: 16px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 12px;">
-                        <h5 style="margin-bottom: 8px; color: var(--accent-blue);">⚡ تسجيل سريع للطلاب برقم ID</h5>
-                        <form onsubmit="handleAdminQuickIdAttendance(event, 'present')" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                            <input type="text" id="admin-quick-id-input" placeholder="امسح ID الطالب هنا واضغط Enter للرصد..." required style="flex: 1; min-width: 120px; font-size: 0.9rem; padding: 10px; border-radius: 8px; border: 1px solid var(--border-card); background: rgba(0,0,0,0.2); color: white;">
-                            <button type="submit" class="btn btn-primary" style="white-space: nowrap; min-height: 42px; padding: 0 20px;">حضور</button>
-                            <button type="button" class="btn btn-warning" onclick="handleAdminQuickIdAttendance(event, 'excused')" style="white-space: nowrap; min-height: 42px; padding: 0 20px; color: #fff; background: #f59e0b; border: none; border-radius: 8px;">مستأذن</button>
-                        </form>
-                    </div>
-
-                    <div style="margin-bottom: 12px;">
-                        <input type="text" id="admin-students-search-input" placeholder="🔍 ابحث عن طالب بالاسم، الكود، الإيميل الأكاديمي أو رقم الجلوس..." oninput="filterAdminStudentsTable()" style="width: 100%; font-size: 0.85rem;">
-                    </div>
-
-                    <div class="table-responsive" style="margin-bottom: 14px;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>اسم الطالب</th>
-                                    <th>رقم الجلوس</th>
-                                    <th>حالة الحضور</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-students-table">
-                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">اختر السيشن أولاً لعرض الطلاب</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Admin Student Grades Sheet Download -->
-                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-amber);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                        <div>
-                            <h3 style="margin-bottom: 6px; color: var(--accent-amber);">📊 تحميل شيت الدرجات الكامل للطلاب (Full Grades & Bonus Excel Export)</h3>
-                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
-                                يتضمن الشيت بيانات الطالب الكاملة، درجات كل تاسك بشكل مستقل، نقاط البونص، نسبة الحضور، وإجمالي السكور التراكمي.
-                            </p>
-                        </div>
-                        <button class="btn btn-warning" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white; padding: 10px 20px;" onclick="handleDownloadFullGradesExcel()">
-                            📥 تصدير شيت درجات الطلاب Excel
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Admin Student Attendance Download -->
-                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-emerald);">
-                    <h3 style="margin-bottom: 8px; color: var(--accent-emerald);">📥 تحميل شيت حضور الطلاب (Download Attendance Excel)</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
-                        اختر السيشن لتحميل شيت حضور وغياب جميع الطلاب بصيغة إكسيل.
-                    </p>
-                    <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
-                        <div class="form-group" style="flex: 1; margin: 0;">
-                            <label style="font-size: 0.85rem;">اختر السيشن:</label>
-                            <select id="admin-download-session-select" style="width: 100%;">
-                                <option value="">-- اختر السيشن --</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-primary" onclick="downloadAdminAttendanceSheet()">📥 تحميل الشيت</button>
-                    </div>
-                </div>
-
-                <!-- Admin Crew Attendance Control -->
-                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-indigo);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                        <h3 style="color: var(--accent-indigo);">📋 لوحة تسجيل حضور فريق العمل (Crew Attendance)</h3>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="badge" style="background: var(--accent-emerald); font-size: 0.9rem;" id="admin-crew-present-count-badge">الحضور: 0</span>
-                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="handleDownloadCrewAttendanceExcel()">📥 تحميل شيت إكسيل</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>اختر السيشن (لتسجيل ومراجعة حضور الـ Crew):</label>
-                        <select id="admin-crew-session-select" class="form-control" style="background: rgba(15,23,42,0.6); color: #fff;"></select>
-                    </div>
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>الكود (ID)</th>
-                                    <th>الاسم</th>
-                                    <th>الدور (Role)</th>
-                                    <th>تسجيل الحضور</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-crew-attendance-tbody">
-                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">يرجى اختيار السيشن أولاً</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Admin Sessions Control -->
-                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-cyan);">
-                    <h3 style="margin-bottom: 16px; color: var(--accent-cyan);">📅 إدارة السيشنات وتصاريح الحضور (Sessions Control)</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">يمكنك من هنا فتح أو إغلاق التسجيل لمسؤولي الـ HR لكل سيشن.</p>
-                    <div id="admin-sessions-list">جاري التحميل...</div>
-                </div>
-
-                <!-- Admin Student Submissions Management -->
-                <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-purple);">
-                    <h3 style="margin-bottom: 16px; color: var(--accent-purple);">📝 عرض ومسح تسليمات طالب (Admin)</h3>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">أدخل كود الطالب (ID) لعرض جميع تسليماته للمهام وإمكانية مسح أي منها.</p>
-                    <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px;">
-                        <div class="form-group" style="flex: 1; margin: 0;">
-                            <label style="font-size: 0.85rem;">كود الطالب (ID):</label>
-                            <input type="text" id="admin-student-id-input" placeholder="مثال: 2024001" style="width: 100%;">
-                        </div>
-                        <button class="btn btn-primary" onclick="fetchAdminStudentSubmissions()">🔍 عرض التسليمات</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>اسم المهمة</th>
-                                    <th>تاريخ التسليم</th>
-                                    <th>الدرجة المرصودة</th>
-                                    <th>إجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-student-submissions-tbody">
-                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">أدخل كود الطالب لعرض التسليمات</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- User Management Table -->
-                <div class="glass-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                        <h3 data-i18n="title_user_mgmt">إدارة حسابات المستخدمين والصلاحيات (Users & Roles)</h3>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="handleDownloadDBBackup()" data-i18n="btn_backup_db">📥 تحميل نسخة احتياطية (Backup DB)</button>
-                            <button class="btn btn-danger" onclick="handleClearAllUsers()" data-i18n="btn_clear_all">⚠️ حذف جميع الحسابات</button>
-                        </div>
-                    </div>
-                    <div style="margin-bottom: 14px;">
-                        <input type="text" id="admin-user-search-input" placeholder="🔍 ابحث بالاسم، الرقم التعريفي، رقم الجلوس، أو الإيميل..." oninput="filterAdminUsersTable()" style="width: 100%; font-size: 0.9rem;">
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th data-i18n="th_name">الاسم</th>
-                                    <th data-i18n="th_email">البريد</th>
-                                    <th data-i18n="th_role">الرول الحالي (Role)</th>
-                                    <th data-i18n="th_supporter">المساعد المسئول</th>
-                                    <th data-i18n="th_actions">إجراءات الإدارة</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-users-table">
-                                <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" style="background: var(--accent-emerald);" onclick="handleDownloadDBBackup()" data-i18n="btn_backup_db">📥 تحميل نسخة احتياطية (Backup DB)</button>
+                    <button class="btn btn-danger" onclick="handleClearAllUsers()" data-i18n="btn_clear_all">⚠️ حذف جميع الحسابات</button>
                 </div>
             </div>
+            <div style="margin-bottom: 14px;">
+                <input type="text" id="admin-user-search-input" placeholder="🔍 ابحث بالاسم، الرقم التعريفي، رقم الجلوس، أو الإيميل..." oninput="filterAdminUsersTable()" style="width: 100%; font-size: 0.9rem;">
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th data-i18n="th_name">الاسم</th>
+                            <th data-i18n="th_email">البريد</th>
+                            <th data-i18n="th_role">الرول الحالي (Role)</th>
+                            <th data-i18n="th_supporter">المساعد المسئول</th>
+                            <th data-i18n="th_actions">إجراءات الإدارة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-table">
+                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 2: REPORTS & SFE MODEL EXPORTS ==================== -->
+    <div id="admin-panel-reports" class="admin-sub-panel" style="display: none;">
+        <!-- OFFICIAL FINAL DELIVERY SUBMISSION SHEET EXPORT -->
+        <div class="glass-card" style="margin-bottom: 24px; border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(15, 23, 42, 0.9)); box-shadow: 0 6px 24px rgba(16, 185, 129, 0.25);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div style="flex: 1; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span class="badge" style="background: #10b981; color: #0f172a; font-weight: 800; font-size: 0.85rem;">🎓 OFFICIAL FINAL SUBMISSION SHEET</span>
+                        <h3 style="margin: 0; color: #34d399;">🏆 الفاينال شيت النهائي المعتمد للتسليم (Final Submission Sheet)</h3>
+                    </div>
+                    <p style="color: #cbd5e1; font-size: 0.9rem; margin: 0; line-height: 1.5;">
+                        يتضمن الشيت النهائي للتسليم جميع بيانات الطلاب مرتبة تسلسلياً (1 .. 192)، تفاصيل حضور جميع السيشنات الـ 6، درجات التاسكات، درجات مناقشة ومشاريع التخرج (المناقشة الفردية من 30 + الجماعي 80 + بونص 25 بإجمالي 135)، والتحديد المباشر لحالة النجاح والاجتياز (<strong style="color: #34d399;">ناجح</strong> / <strong style="color: #f43f5e;">لم ينجح</strong>) وفق شرط الحضور المعتمد (حضور ≥ 60%).
+                    </p>
+                </div>
+                <button class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: white; padding: 14px 28px; font-weight: 800; font-size: 1.05rem; box-shadow: 0 4px 18px rgba(16, 185, 129, 0.45); cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="handleDownloadFinalSubmissionExcel()">
+                    📥 تحميل الفاينال شيت للتسليم (Excel)
+                </button>
+            </div>
+        </div>
+
+        <!-- SFE Grades Calculation & Project Model Download -->
+        <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-cyan); background: linear-gradient(135deg, rgba(31, 78, 121, 0.25), rgba(15, 23, 42, 0.8)); box-shadow: 0 4px 20px rgba(0, 212, 255, 0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div style="flex: 1; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span class="badge" style="background: var(--accent-cyan); color: #0f172a; font-weight: bold;">⭐ SFE Official Model</span>
+                        <h3 style="margin: 0; color: var(--accent-cyan);" data-i18n="title_sfe_grades_model">📊 نموذج حساب وتوزيع درجات SFE وتقييم المشاريع</h3>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;" data-i18n="desc_sfe_grades_model">
+                        يتضمن الشيت بيانات الطلاب، درجات كل تاسك، الحضور لكل السيشنات، رصد درجات المشروع، توزيع التيمات والمشرفين على المناقشة، حساب المعدل النهائي الموزون، والـ Score Board.
+                    </p>
+                </div>
+                <button class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: none; color: white; padding: 12px 24px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4); cursor: pointer;" onclick="handleDownloadSfeGradesModelExcel()" data-i18n="btn_export_sfe_model">
+                    📥 تصدير نموذج حساب درجات SFE والمشاريع
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Student Grades Sheet Download -->
+        <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-amber);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <h3 style="margin-bottom: 6px; color: var(--accent-amber);">📊 تحميل شيت الدرجات الكامل للطلاب (Full Grades & Bonus Excel Export)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                        يتضمن الشيت بيانات الطالب الكاملة، درجات كل تاسك بشكل مستقل، نقاط البونص، نسبة الحضور، وإجمالي السكور التراكمي.
+                    </p>
+                </div>
+                <button class="btn btn-warning" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white; padding: 10px 20px;" onclick="handleDownloadFullGradesExcel()">
+                    📥 تصدير شيت درجات الطلاب Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Student Attendance Download -->
+        <div class="glass-card" style="border: 1px solid var(--accent-emerald);">
+            <h3 style="margin-bottom: 8px; color: var(--accent-emerald);">📥 تحميل شيت حضور وغياب السيشنات (Download Attendance Excel)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                اختر السيشن لتحميل شيت حضور وغياب جميع الطلاب بصيغة إكسيل مرتب تسلسلياً.
+            </p>
+            <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; margin: 0;">
+                    <label style="font-size: 0.85rem;">اختر السيشن:</label>
+                    <select id="admin-download-session-select" style="width: 100%;">
+                        <option value="">-- اختر السيشن --</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="downloadAdminAttendanceSheet()">📥 تحميل شيت السيشن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 3: STUDENT ATTENDANCE CONTROL ==================== -->
+    <div id="admin-panel-student-attendance" class="admin-sub-panel" style="display: none;">
+        <!-- PROJECT DISCUSSION ATTENDANCE OVERVIEW CARD -->
+        <div class="glass-card" style="margin-bottom: 20px; border: 1px solid var(--accent-cyan); background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(15, 23, 42, 0.6));">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h3 style="margin: 0 0 4px 0; color: var(--accent-cyan);">🎤 إحصائيات ورصد حضور مناقشة المشاريع (Session 6 Project Discussion)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">متابعة فورية لعدد ونسبة حضور الطلاب لمناقشة المشاريع وتوزيع الحضور على التيمات الـ 33.</p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="openProjectGradingModal()" style="background: linear-gradient(135deg, #0284c7, #0369a1);">⭐ 🏆 شاشة رصد درجات ومناقشة المشاريع</button>
+                    <button class="btn btn-outline" onclick="openStatsDetailModal('discussion')">📋 تفاصيل حضور الطلاب</button>
+                </div>
+            </div>
+
+            <!-- Stats Mini Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 16px;">
+                <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(52, 211, 153, 0.3);">
+                    <div style="font-size: 1.3rem; font-weight: 800; color: #34d399;" id="admin-disc-present-count">0</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">حاضرين المناقشة ✓</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(244, 63, 94, 0.3);">
+                    <div style="font-size: 1.3rem; font-weight: 800; color: #f43f5e;" id="admin-disc-absent-count">0</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">غائبين عن المناقشة ✗</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(56, 189, 248, 0.3);">
+                    <div style="font-size: 1.3rem; font-weight: 800; color: #38bdf8;" id="admin-disc-rate">0%</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">نسبة الحضور 📊</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid rgba(168, 85, 247, 0.3);">
+                    <div style="font-size: 1.3rem; font-weight: 800; color: #c084fc;" id="admin-disc-total-count">0</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">إجمالي طلاب الدفعة 🎓</div>
+                </div>
+            </div>
+
+            <!-- Teams Discussion Attendance Progress Table -->
+            <div style="margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                    <strong style="font-size: 0.9rem; color: #93c5fd;">📊 توزيع حضور ومناقشة الفرق (Teams Discussion Progress):</strong>
+                    <input type="text" id="admin-disc-team-search" placeholder="🔍 ابحث عن تيم أو مشرف..." oninput="filterAdminDiscTeamsTable()" style="font-size: 0.8rem; padding: 4px 10px; width: 220px; border-radius: 6px;">
+                </div>
+                <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>اسم الفريق</th>
+                                <th>مشرف المناقشة (Supporter)</th>
+                                <th style="text-align: center;">الحضور / الإجمالي</th>
+                                <th style="text-align: center;">نسبة الحضور</th>
+                                <th style="text-align: center;">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-disc-teams-tbody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">جاري تحميل إحصائيات الفرق...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card" style="border: 1px solid var(--accent-purple);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <h3 style="color: var(--accent-purple); margin: 0;">🎯 إدارة ورصد حضور وغياب جميع الطلاب (Admin)</h3>
+                <div style="display: flex; gap: 8px;">
+                    <span id="admin-students-count-badge" class="badge badge-hr">إجمالي الطلاب: --</span>
+                    <span id="admin-present-count-badge" class="badge" style="background: rgba(52, 211, 153, 0.2); color: #34d399;">الحضور: 0</span>
+                </div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">يمكنك رصد حضور وغياب الطلاب يدوياً لأي سيشن. هذه اللوحة لا تتأثر بإعدادات إغلاق التسجيل على الـ HR.</p>
+
+            <div class="form-group">
+                <label>اختر السيشن المراد رصد غيابها:</label>
+                <select id="admin-student-session-select" style="margin-bottom: 12px;">
+                    <option value="">-- اختر السيشن --</option>
+                </select>
+            </div>
+
+            <!-- QUICK ID ATTENDANCE FORM FOR ADMIN -->
+            <div style="margin-bottom: 24px; padding: 16px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 12px;">
+                <h5 style="margin-bottom: 8px; color: var(--accent-blue);">⚡ تسجيل سريع للطلاب برقم ID / الباركود</h5>
+                <form onsubmit="handleAdminQuickIdAttendance(event, 'present')" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="admin-quick-id-input" placeholder="امسح ID أو رقم جلوس الطالب واضغط Enter..." required style="flex: 1; min-width: 120px; font-size: 0.9rem; padding: 10px; border-radius: 8px; border: 1px solid var(--border-card); background: rgba(0,0,0,0.2); color: white;">
+                    <button type="submit" class="btn btn-primary" style="white-space: nowrap; min-height: 42px; padding: 0 20px;">حضور</button>
+                    <button type="button" class="btn btn-warning" onclick="handleAdminQuickIdAttendance(event, 'excused')" style="white-space: nowrap; min-height: 42px; padding: 0 20px; color: #fff; background: #f59e0b; border: none; border-radius: 8px;">مستأذن</button>
+                </form>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <input type="text" id="admin-students-search-input" placeholder="🔍 ابحث عن طالب بالاسم، الكود، الإيميل الأكاديمي أو رقم الجلوس..." oninput="filterAdminStudentsTable()" style="width: 100%; font-size: 0.85rem;">
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>اسم الطالب</th>
+                            <th>رقم الجلوس</th>
+                            <th>حالة الحضور</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-students-table">
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">اختر السيشن أولاً لعرض الطلاب</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 4: CREW ATTENDANCE ==================== -->
+    <div id="admin-panel-crew-attendance" class="admin-sub-panel" style="display: none;">
+        <div class="glass-card" style="border: 1px solid var(--accent-indigo);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                <h3 style="color: var(--accent-indigo); margin: 0;">📋 لوحة تسجيل حضور فريق العمل (Crew Attendance)</h3>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="badge" style="background: var(--accent-emerald); font-size: 0.9rem;" id="admin-crew-present-count-badge">الحضور: 0</span>
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="handleDownloadCrewAttendanceExcel()">📥 تحميل شيت إكسيل</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>اختر السيشن (لتسجيل ومراجعة حضور الـ Crew):</label>
+                <select id="admin-crew-session-select" class="form-control" style="background: rgba(15,23,42,0.6); color: #fff;"></select>
+            </div>
+            <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الكود (ID)</th>
+                            <th>الاسم</th>
+                            <th>الدور (Role)</th>
+                            <th>تسجيل الحضور</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-crew-attendance-tbody">
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">يرجى اختيار السيشن أولاً</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 5: SESSIONS CONTROL ==================== -->
+    <div id="admin-panel-sessions" class="admin-sub-panel" style="display: none;">
+        <div class="glass-card" style="border: 1px solid var(--accent-cyan);">
+            <h3 style="margin-bottom: 16px; color: var(--accent-cyan);">📅 إدارة السيشنات وتصاريح الحضور (Sessions Control)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">يمكنك من هنا فتح أو إغلاق التسجيل لمسؤولي الـ HR لكل سيشن بشكل منفصل.</p>
+            <div id="admin-sessions-list">جاري التحميل...</div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 6: STUDENT SUBMISSIONS ==================== -->
+    <div id="admin-panel-submissions" class="admin-sub-panel" style="display: none;">
+        <div class="glass-card" style="border: 1px solid var(--accent-purple);">
+            <h3 style="margin-bottom: 16px; color: var(--accent-purple);">📝 عرض ومسح تسليمات طالب (Admin)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">أدخل كود الطالب (ID) لعرض جميع تسليماته للمهام وإمكانية مسح أي منها.</p>
+            <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px;">
+                <div class="form-group" style="flex: 1; margin: 0;">
+                    <label style="font-size: 0.85rem;">كود الطالب (ID):</label>
+                    <input type="text" id="admin-student-id-input" placeholder="مثال: 20251700588" style="width: 100%;">
+                </div>
+                <button class="btn btn-primary" onclick="fetchAdminStudentSubmissions()">🔍 عرض التسليمات</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم المهمة</th>
+                            <th>تاريخ التسليم</th>
+                            <th>الدرجة المرصودة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-student-submissions-tbody">
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">أدخل كود الطالب لعرض التسليمات</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 7: SYSTEM SETTINGS & ANTI-CHEAT ==================== -->
+    <div id="admin-panel-settings" class="admin-sub-panel" style="display: none;">
+        <!-- Material Drive Link Settings -->
+        <div class="glass-card" style="margin-bottom: 24px; border: 1px solid var(--accent-cyan);">
+            <h3 style="margin-bottom: 8px; color: var(--accent-cyan);" data-i18n="admin_drive_settings_title">🔗 رابط درايف الماتيريال (Course Material Drive)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                تحديث الرابط الذي يظهر للطلاب للوصول السريع لملف الدرايف.
+            </p>
+            <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; margin: 0;">
+                    <label style="font-size: 0.85rem;">الرابط (URL):</label>
+                    <input type="url" id="admin-drive-url-input" placeholder="https://drive.google.com/..." style="width: 100%;">
+                </div>
+                <button class="btn btn-primary" onclick="handleSaveDriveUrl()">حفظ الرابط</button>
+            </div>
+        </div>
+
+        <!-- Cheating System Settings -->
+        <div class="glass-card" style="border: 1px solid var(--accent-red);">
+            <h3 style="margin-bottom: 8px; color: var(--accent-red);">🚨 نظام كشف الغش التلقائي (Anti-Cheat)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+                تفعيل أو تعطيل الفحص التلقائي للغش عند تسليم الطلاب للتاسكات. يمكنك أيضًا مسح جميع التقارير الحالية.
+            </p>
+            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 16px; align-items: center;">
+                    <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 24px;">
+                        <input type="checkbox" id="admin-cheating-toggle" onchange="handleToggleCheating()" style="opacity: 0; width: 0; height: 0;">
+                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px;"></span>
+                    </label>
+                    <span id="admin-cheating-status-text" style="font-weight: bold; color: var(--text-color);">مفعل</span>
+                </div>
+                <button class="btn btn-danger" onclick="handleDeleteAllCheatingReports()" style="margin-right: auto;">🗑️ مسح كل تقارير الغش</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TAB 8: ROLES CHART & VISUAL METRICS ==================== -->
+    <div id="admin-panel-charts" class="admin-sub-panel" style="display: none;">
+        <div class="glass-card" style="border: 1px solid var(--accent-blue);">
+            <h3 style="margin-bottom: 16px; color: var(--accent-blue);">📈 توزيع الأدوار والمسارات بالنظام (Roles Distribution)</h3>
+            <div style="max-height: 340px; position: relative;">
+                <canvas id="admin-roles-chart" style="width: 100%; max-height: 320px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-sub-panel {
+        animation: fadeInAdminTab 0.25s ease-in-out;
+    }
+    @keyframes fadeInAdminTab {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .admin-tab-btn {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: 1px solid var(--border-card);
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+    .admin-tab-btn:hover {
+        border-color: var(--accent-cyan);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+    #admin-cheating-toggle:checked + .slider { background-color: var(--accent-red); }
+    #admin-cheating-toggle:checked + .slider:before { transform: translateX(26px); }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+</style>
